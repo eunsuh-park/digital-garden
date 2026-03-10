@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
-import { SECTIONS, getTasksBySection, getSectionById } from '../data/mockData';
-import SectionDrawer from './SectionDrawer';
-import SectionPopover from './SectionPopover';
+import { SECTIONS, getTasksBySection, getSectionById } from '../../data/mockData';
+import Drawer from '../Drawer/Drawer';
+import Popover from '../Popover/Popover';
 import './GardenMap.css';
 
 /**
@@ -112,7 +112,7 @@ export default function GardenMap() {
       </div>
 
       {hoverSection && (
-        <SectionPopover
+        <Popover
           section={hoverSection}
           tasks={getTasksBySection(hoverSection.id)}
           position={popoverPos}
@@ -123,7 +123,7 @@ export default function GardenMap() {
         />
       )}
 
-      <SectionDrawer
+      <Drawer
         section={selectedSection}
         tasks={selectedSection ? getTasksBySection(selectedSection.id) : []}
         isOpen={drawerOpen}

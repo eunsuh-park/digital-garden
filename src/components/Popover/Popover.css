@@ -1,4 +1,4 @@
-.section-popover {
+.popover {
   position: fixed;
   transform: translate(12px, -50%);
   min-width: 180px;
@@ -10,31 +10,31 @@
   z-index: 200;
 }
 
-.section-popover__header {
+.popover__header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
 }
 
-.section-popover__color {
+.popover__color {
   width: 10px;
   height: 10px;
   border-radius: 50%;
 }
 
-.section-popover__list {
+.popover__list {
   list-style: none;
   font-size: 0.85rem;
   color: var(--color-text-muted);
   margin-bottom: 0.5rem;
 }
 
-.section-popover__list li {
+.popover__list li {
   padding: 0.15rem 0;
 }
 
-.section-popover__btn {
+.popover__btn {
   width: 100%;
   padding: 0.4rem 0.75rem;
   border: none;
@@ -46,6 +46,6 @@
   transition: background 0.2s;
 }
 
-.section-popover__btn:hover {
+.popover__btn:hover {
   background: var(--color-primary-light);
 }

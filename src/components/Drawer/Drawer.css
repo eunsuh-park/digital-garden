@@ -1,4 +1,4 @@
-.section-drawer__backdrop {
+.drawer__backdrop {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.3);
@@ -8,12 +8,12 @@
   z-index: 300;
 }
 
-.section-drawer__backdrop--open {
+.drawer__backdrop--open {
   opacity: 1;
   visibility: visible;
 }
 
-.section-drawer {
+.drawer {
   position: fixed;
   top: 0;
   right: 0;
@@ -28,11 +28,11 @@
   overflow-y: auto;
 }
 
-.section-drawer--open {
+.drawer--open {
   transform: translateX(0);
 }
 
-.section-drawer__header {
+.drawer__header {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -40,19 +40,19 @@
   border-bottom: 1px solid var(--color-border);
 }
 
-.section-drawer__color {
+.drawer__color {
   width: 16px;
   height: 16px;
   border-radius: 4px;
 }
 
-.section-drawer__title {
+.drawer__title {
   flex: 1;
   font-size: 1.25rem;
   font-weight: 600;
 }
 
-.section-drawer__close {
+.drawer__close {
   padding: 0.35rem;
   border: none;
   background: transparent;
@@ -62,36 +62,36 @@
   transition: color 0.2s;
 }
 
-.section-drawer__close:hover {
+.drawer__close:hover {
   color: var(--color-text);
 }
 
-.section-drawer__body {
+.drawer__body {
   padding: 1.5rem;
 }
 
-.section-drawer__block {
+.drawer__block {
   margin-bottom: 1.5rem;
 }
 
-.section-drawer__block h3 {
+.drawer__block h3 {
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--color-text-muted);
   margin-bottom: 0.5rem;
 }
 
-.section-drawer__empty,
-.section-drawer__meta {
+.drawer__empty,
+.drawer__meta {
   font-size: 0.9rem;
   color: var(--color-text-muted);
 }
 
-.section-drawer__task-list {
+.drawer__task-list {
   list-style: none;
 }
 
-.section-drawer__task-item {
+.drawer__task-item {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -99,19 +99,19 @@
   font-size: 0.95rem;
 }
 
-.section-drawer__task-status {
+.drawer__task-status {
   flex-shrink: 0;
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
   font-size: 0.75rem;
 }
 
-.section-drawer__task-status--progress {
+.drawer__task-status--progress {
   background: rgba(45, 90, 39, 0.15);
   color: var(--color-primary);
 }
 
-.section-drawer__task-status--pending {
+.drawer__task-status--pending {
   background: rgba(253, 174, 97, 0.3);
   color: #b85c00;
 }

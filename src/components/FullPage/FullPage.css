@@ -1,0 +1,153 @@
+/* FullPage 공통 레이아웃 */
+.full-page {
+  padding: 1.5rem;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.full-page__header {
+  margin-bottom: 1.5rem;
+}
+
+.full-page__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.full-page__sub {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  margin-top: 0.25rem;
+}
+
+.full-page__body {
+  display: flex;
+  flex-direction: column;
+}
+
+.full-page__empty {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: 3rem;
+}
+
+/* 그룹 (Tasks, Plants) */
+.full-page__list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.full-page__list--compact {
+  gap: 1rem;
+}
+
+.full-page__group {
+  background: var(--color-surface);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.full-page__group-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.full-page__group-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+}
+
+.full-page__group-color--large {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+}
+
+/* 카드 (Locations) */
+.full-page__card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--color-surface);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 0.2s;
+}
+
+.full-page__card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.full-page__card-body {
+  flex: 1;
+}
+
+.full-page__card-name {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.full-page__card-meta {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+/* 리스트 아이템 공통 */
+.full-page__item-list {
+  list-style: none;
+}
+
+.full-page__item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.95rem;
+}
+
+.full-page__item:last-child {
+  border-bottom: none;
+}
+
+.full-page__item--between {
+  justify-content: space-between;
+}
+
+.full-page__item-title {
+  flex: 1;
+}
+
+.full-page__item-meta {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+/* Tasks 전용: 상태 배지 */
+.full-page__status {
+  flex-shrink: 0;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.full-page__status--progress {
+  background: rgba(45, 90, 39, 0.15);
+  color: var(--color-primary);
+}
+
+.full-page__status--pending {
+  background: rgba(253, 174, 97, 0.3);
+  color: #b85c00;
+}

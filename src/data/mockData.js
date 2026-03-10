@@ -19,7 +19,19 @@ export const TASKS = [
   { id: 'task-6', title: '앞마당 비료 주기', status: 'pending', due_date: '2025-03-13', section_id: 'sec-1', priority: 'normal' },
 ];
 
+export const PLANTS = [
+  { id: 'pl-1', name: '장미', species: 'Rosa', category: '꽃', status: 'planted', bloom_season: '봄~가을', section_id: 'sec-2' },
+  { id: 'pl-2', name: '튤립', species: 'Tulipa', category: '꽃', status: 'planted', bloom_season: '봄', section_id: 'sec-2' },
+  { id: 'pl-3', name: '라벤더', species: 'Lavandula', category: '꽃', status: 'planted', bloom_season: '여름', section_id: 'sec-3' },
+  { id: 'pl-4', name: '상추', species: 'Lactuca', category: '채소', status: 'planted', bloom_season: '-', section_id: 'sec-4' },
+  { id: 'pl-5', name: '당근', species: 'Daucus', category: '채소', status: 'planted', bloom_season: '-', section_id: 'sec-4' },
+  { id: 'pl-6', name: '잔디', species: 'Zoysia', category: '잔디', status: 'planted', bloom_season: '-', section_id: 'sec-1' },
+];
+
 export const getTasksBySection = (sectionId) =>
   TASKS.filter((t) => t.section_id === sectionId && t.status !== 'completed');
 
 export const getSectionById = (id) => SECTIONS.find((s) => s.id === id);
+
+export const getPlantsBySection = (sectionId) =>
+  PLANTS.filter((p) => p.section_id === sectionId);
