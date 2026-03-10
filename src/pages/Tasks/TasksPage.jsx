@@ -1,29 +1,89 @@
-import { TASKS, SECTIONS } from '../../data/mockData';
+import { useEffect, useState } from 'react';
+import { fetchSections, fetchTasks } from '../../api/notionApi';
+import { parseSectionsResponse } from '../Locations/notionSchema';
+import { parseTasksResponse } from './notionSchema';
 import FullPage from '../../components/FullPage/FullPage';
+import './TasksPage.css';
 
 /**
  * PG-02, PG-08: 할 일 전체 페이지 - 금주 할 일 조회와 관리
  * FN-09: 기본 조회 (완료 제외, 예정일 임박순, 섹션 그룹)
  */
 export default function TasksPage() {
-  const pendingTasks = TASKS.filter((t) => t.status !== 'completed');
+  const [sections, setSections] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      try {
+        setLoading(true);
+        setError(null);
+        const [sectionsRes, tasksRes] = await Promise.all([
+          fetchSections(),
+          fetchTasks(),
+        ]);
+        if (cancelled) return;
+
+        const tasksList = parseTasksResponse(tasksRes);
+        const sectionsList = parseSectionsResponse(sectionsRes);
+        setTasks(tasksList);
+        setSections(sectionsList);
+      } catch (e) {
+        if (!cancelled) setError(e.message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    load();
+    return () => { cancelled = true; };
+  }, []);
+
+  const pendingTasks = tasks.filter((t) => t.status !== 'completed');
   const tasksBySection = {};
-  SECTIONS.forEach((s) => {
+  sections.forEach((s) => {
     tasksBySection[s.id] = pendingTasks
       .filter((t) => t.section_id === s.id)
-      .sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
+      .sort((a, b) => {
+        if (!a.due_date) return 1;
+        if (!b.due_date) return -1;
+        return new Date(a.due_date) - new Date(b.due_date);
+      });
   });
+
+  const sectionOrder = sections;
+  const hasContent = sectionOrder.some((s) => (tasksBySection[s.id] || []).length > 0);
+
+  if (loading) {
+    return (
+      <FullPage title="이번 주 할 일" subtitle="로딩 중...">
+        <p className="tasks-page__loading">데이터를 불러오는 중입니다.</p>
+      </FullPage>
+    );
+  }
+
+  if (error) {
+    return (
+      <FullPage title="이번 주 할 일">
+        <p className="tasks-page__error">{error}</p>
+      </FullPage>
+    );
+  }
 
   return (
     <FullPage
       title="이번 주 할 일"
       subtitle="완료 제외, 예정일 순"
-      emptyMessage={pendingTasks.length === 0 ? '이번 주 할 일이 없습니다.' : undefined}
+      emptyMessage={!hasContent ? '이번 주 할 일이 없습니다.' : undefined}
     >
       <div className="full-page__list">
-        {SECTIONS.map((section) => {
-          const tasks = tasksBySection[section.id] || [];
-          if (tasks.length === 0) return null;
+        {sectionOrder.map((section) => {
+          const sectionTasks = tasksBySection[section.id] || [];
+          if (sectionTasks.length === 0) return null;
 
           return (
             <section key={section.id} className="full-page__group">
@@ -35,7 +95,7 @@ export default function TasksPage() {
                 {section.name}
               </h2>
               <ul className="full-page__item-list">
-                {tasks.map((task) => (
+                {sectionTasks.map((task) => (
                   <li key={task.id} className="full-page__item">
                     <span
                       className={`full-page__status full-page__status--${task.status}`}
@@ -43,7 +103,7 @@ export default function TasksPage() {
                       {task.status === 'progress' ? '진행중' : '예정'}
                     </span>
                     <span className="full-page__item-title">{task.title}</span>
-                    <span className="full-page__item-meta">{task.due_date}</span>
+                    <span className="full-page__item-meta">{task.due_date || '-'}</span>
                   </li>
                 ))}
               </ul>

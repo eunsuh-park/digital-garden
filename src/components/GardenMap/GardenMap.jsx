@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react';
-import { SECTIONS, getTasksBySection, getSectionById } from '../../data/mockData';
 import Drawer from '../Drawer/Drawer';
 import Popover from '../Popover/Popover';
 import './GardenMap.css';
@@ -7,8 +6,11 @@ import './GardenMap.css';
 /**
  * SVG 간이 지도 - 실제 대지를 반영한 핵심 인터페이스
  * CP-04: Section 좌표/SVG id, hover/click → 팝오버·하이라이트·드로어 연결
+ * @param {Object[]} sections - 구역 목록
+ * @param {Function} getTasksBySection - (sectionId) => tasks
+ * @param {Function} getSectionById - (id) => section
  */
-export default function GardenMap() {
+export default function GardenMap({ sections = [], getTasksBySection, getSectionById }) {
   const [activeSectionId, setActiveSectionId] = useState(null);
   const [hoverSectionId, setHoverSectionId] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -31,8 +33,9 @@ export default function GardenMap() {
     setDrawerOpen(false);
   }, []);
 
-  const selectedSection = activeSectionId ? getSectionById(activeSectionId) : null;
-  const hoverSection = hoverSectionId ? getSectionById(hoverSectionId) : null;
+  const selectedSection = activeSectionId && getSectionById ? getSectionById(activeSectionId) : null;
+  const hoverSection = hoverSectionId && getSectionById ? getSectionById(hoverSectionId) : null;
+  const getTasks = getTasksBySection || (() => []);
 
   return (
     <div className="garden-map">
@@ -58,7 +61,7 @@ export default function GardenMap() {
               <feDropShadow dx="1" dy="1" stdDeviation="2" floodOpacity="0.2" />
             </filter>
           </defs>
-          {SECTIONS.map((section) => {
+          {sections.map((section) => {
             const isActive = activeSectionId === section.id;
             const isHover = hoverSectionId === section.id;
             const isHighlighted = isActive || isHover || !activeSectionId;
@@ -95,7 +98,7 @@ export default function GardenMap() {
       </div>
 
       <div className="garden-map__legend">
-        {SECTIONS.map((s) => (
+        {sections.map((s) => (
           <button
             key={s.id}
             type="button"
@@ -114,7 +117,7 @@ export default function GardenMap() {
       {hoverSection && (
         <Popover
           section={hoverSection}
-          tasks={getTasksBySection(hoverSection.id)}
+          tasks={getTasks(hoverSection.id)}
           position={popoverPos}
           onOpenDrawer={() => {
             setActiveSectionId(hoverSection.id);
@@ -125,7 +128,7 @@ export default function GardenMap() {
 
       <Drawer
         section={selectedSection}
-        tasks={selectedSection ? getTasksBySection(selectedSection.id) : []}
+        tasks={selectedSection ? getTasks(selectedSection.id) : []}
         isOpen={drawerOpen}
         onClose={handleCloseDrawer}
       />

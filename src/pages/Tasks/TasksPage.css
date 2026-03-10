@@ -1,0 +1,10 @@
+.tasks-page__loading,
+.tasks-page__error {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-muted);
+}
+
+.tasks-page__error {
+  color: #c0392b;
+}

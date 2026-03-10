@@ -1,0 +1,15 @@
+.landing-page {
+  min-height: calc(100vh - 60px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.landing-page--loading p,
+.landing-page--error p {
+  color: var(--color-text-muted);
+}
+
+.landing-page--error p {
+  color: #c0392b;
+}
