@@ -6,24 +6,24 @@ import './GardenMap.css';
 /**
  * SVG 간이 지도 - 실제 대지를 반영한 핵심 인터페이스
  * CP-04: Section 좌표/SVG id, hover/click → 팝오버·하이라이트·드로어 연결
- * @param {Object[]} sections - 구역 목록
- * @param {Function} getTasksBySection - (sectionId) => tasks
- * @param {Function} getSectionById - (id) => section
+ * @param {Object[]} locations - 구역(Locations) 목록
+ * @param {Function} getTasksByLocation - (locationId) => tasks
+ * @param {Function} getLocationById - (id) => location
  */
-export default function GardenMap({ sections = [], getTasksBySection, getSectionById }) {
-  const [activeSectionId, setActiveSectionId] = useState(null);
-  const [hoverSectionId, setHoverSectionId] = useState(null);
+export default function GardenMap({ locations = [], getTasksByLocation, getLocationById }) {
+  const [activeLocationId, setActiveLocationId] = useState(null);
+  const [hoverLocationId, setHoverLocationId] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [orientation, setOrientation] = useState('road'); // road | house
   const [popoverPos, setPopoverPos] = useState({ x: 0, y: 0 });
 
-  const handleSectionClick = useCallback((e, sectionId) => {
-    setActiveSectionId(sectionId);
+  const handleLocationClick = useCallback((e, locationId) => {
+    setActiveLocationId(locationId);
     setDrawerOpen(true);
   }, []);
 
-  const handleSectionHover = useCallback((e, sectionId, isEnter) => {
-    setHoverSectionId(isEnter ? sectionId : null);
+  const handleLocationHover = useCallback((e, locationId, isEnter) => {
+    setHoverLocationId(isEnter ? locationId : null);
     if (isEnter) {
       setPopoverPos({ x: e.clientX, y: e.clientY });
     }
@@ -33,9 +33,9 @@ export default function GardenMap({ sections = [], getTasksBySection, getSection
     setDrawerOpen(false);
   }, []);
 
-  const selectedSection = activeSectionId && getSectionById ? getSectionById(activeSectionId) : null;
-  const hoverSection = hoverSectionId && getSectionById ? getSectionById(hoverSectionId) : null;
-  const getTasks = getTasksBySection || (() => []);
+  const selectedLocation = activeLocationId && getLocationById ? getLocationById(activeLocationId) : null;
+  const hoverLocation = hoverLocationId && getLocationById ? getLocationById(hoverLocationId) : null;
+  const getTasks = getTasksByLocation || (() => []);
 
   return (
     <div className="garden-map">
@@ -61,33 +61,33 @@ export default function GardenMap({ sections = [], getTasksBySection, getSection
               <feDropShadow dx="1" dy="1" stdDeviation="2" floodOpacity="0.2" />
             </filter>
           </defs>
-          {sections.map((section) => {
-            const isActive = activeSectionId === section.id;
-            const isHover = hoverSectionId === section.id;
-            const isHighlighted = isActive || isHover || !activeSectionId;
+          {locations.map((location) => {
+            const isActive = activeLocationId === location.id;
+            const isHover = hoverLocationId === location.id;
+            const isHighlighted = isActive || isHover || !activeLocationId;
             const opacity = isHighlighted ? (isActive || isHover ? 1 : 0.7) : 0.25;
 
             return (
-              <g key={section.id}>
+              <g key={location.id}>
                 <path
-                  id={section.svg_id}
+                  id={location.svg_id}
                   className="garden-map__section"
-                  d={getSectionPath(section.svg_id)}
-                  fill={section.color_token}
+                  d={getLocationPath(location.svg_id)}
+                  fill={location.color_token}
                   fillOpacity={opacity}
                   stroke={isActive || isHover ? '#2d5a27' : 'rgba(0,0,0,0.15)'}
                   strokeWidth={isActive || isHover ? 2 : 1}
                   filter="url(#shadow)"
-                  onClick={(e) => handleSectionClick(e, section.id)}
-                  onMouseEnter={(e) => handleSectionHover(e, section.id, true)}
-                  onMouseLeave={(e) => handleSectionHover(e, section.id, false)}
+                  onClick={(e) => handleLocationClick(e, location.id)}
+                  onMouseEnter={(e) => handleLocationHover(e, location.id, true)}
+                  onMouseLeave={(e) => handleLocationHover(e, location.id, false)}
                   role="button"
                   tabIndex={0}
-                  aria-label={`${section.name} 섹션, 할 일 ${section.taskCount}건`}
+                  aria-label={`${location.name} 구역, 할 일 ${location.taskCount}건`}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
-                      handleSectionClick(e, section.id);
+                      handleLocationClick(e, location.id);
                     }
                   }}
                 />
@@ -98,37 +98,37 @@ export default function GardenMap({ sections = [], getTasksBySection, getSection
       </div>
 
       <div className="garden-map__legend">
-        {sections.map((s) => (
+        {locations.map((l) => (
           <button
-            key={s.id}
+            key={l.id}
             type="button"
-            className={`garden-map__legend-item ${activeSectionId === s.id ? 'garden-map__legend-item--active' : ''}`}
+            className={`garden-map__legend-item ${activeLocationId === l.id ? 'garden-map__legend-item--active' : ''}`}
             onClick={() => {
-              setActiveSectionId(s.id);
+              setActiveLocationId(l.id);
               setDrawerOpen(true);
             }}
           >
-            <span className="garden-map__legend-color" style={{ background: s.color_token }} />
-            {s.name}
+            <span className="garden-map__legend-color" style={{ background: l.color_token }} />
+            {l.name}
           </button>
         ))}
       </div>
 
-      {hoverSection && (
+      {hoverLocation && (
         <Popover
-          section={hoverSection}
-          tasks={getTasks(hoverSection.id)}
+          section={hoverLocation}
+          tasks={getTasks(hoverLocation.id)}
           position={popoverPos}
           onOpenDrawer={() => {
-            setActiveSectionId(hoverSection.id);
+            setActiveLocationId(hoverLocation.id);
             setDrawerOpen(true);
           }}
         />
       )}
 
       <Drawer
-        section={selectedSection}
-        tasks={selectedSection ? getTasks(selectedSection.id) : []}
+        section={selectedLocation}
+        tasks={selectedLocation ? getTasks(selectedLocation.id) : []}
         isOpen={drawerOpen}
         onClose={handleCloseDrawer}
       />
@@ -141,7 +141,7 @@ export default function GardenMap({ sections = [], getTasksBySection, getSection
  * 앞마당(하단), 화단A(좌), 화단B(우), 텃밭(중앙), 뒷마당(상단)
  * 실제 대지 구조에 맞게 DQ-06에 따라 좌표 수정 필요
  */
-function getSectionPath(svgId) {
+function getLocationPath(svgId) {
   const paths = {
     'section-front': 'M 120 220 L 280 220 L 280 280 L 120 280 Z',
     'section-flower-a': 'M 20 80 L 120 80 L 120 220 L 20 220 Z',

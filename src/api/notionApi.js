@@ -5,8 +5,17 @@
  */
 const LOG_PREFIX = '[Notion API]';
 
+function joinUrl(origin, path) {
+  const o = (origin || '').replace(/\/+$/, '');
+  const p = (path || '').startsWith('/') ? path : `/${path || ''}`;
+  return o ? `${o}${p}` : p;
+}
+
 async function fetchApi(path, label) {
-  const url = `/api${path}`;
+  // For GitHub Pages 등 정적 호스팅: VITE_API_ORIGIN을 Vercel 도메인으로 설정하면 됩니다.
+  // 예) VITE_API_ORIGIN=https://<project>.vercel.app
+  const apiOrigin = import.meta.env.VITE_API_ORIGIN;
+  const url = joinUrl(apiOrigin, `/api${path}`);
   console.log(`${LOG_PREFIX} 요청: ${label || path} → ${url}`);
   try {
     const res = await fetch(url);
@@ -25,7 +34,11 @@ async function fetchApi(path, label) {
 }
 
 export async function fetchSections() {
-  return fetchApi('/notion-sections', 'Sections(구역)');
+  return fetchLocations();
+}
+
+export async function fetchLocations() {
+  return fetchApi('/notion-locations', 'Locations(구역)');
 }
 
 export async function fetchTasks() {

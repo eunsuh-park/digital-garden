@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { fetchSections, fetchTasks } from '../../api/notionApi';
-import { parseSectionsResponse } from '../Locations/notionSchema';
+import { fetchLocations, fetchTasks } from '../../api/notionApi';
+import { parseLocationsResponse } from '../Locations/notionSchema';
 import { parseTasksResponse } from './notionSchema';
 import FullPage from '../../components/FullPage/FullPage';
 import ErrorState from '../../components/ErrorState/ErrorState';
@@ -11,7 +11,7 @@ import './TasksPage.css';
  * FN-09: 기본 조회 (완료 제외, 예정일 임박순, 섹션 그룹)
  */
 export default function TasksPage() {
-  const [sections, setSections] = useState([]);
+  const [locations, setLocations] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -23,16 +23,16 @@ export default function TasksPage() {
       try {
         setLoading(true);
         setError(null);
-        const [sectionsRes, tasksRes] = await Promise.all([
-          fetchSections(),
+        const [locationsRes, tasksRes] = await Promise.all([
+          fetchLocations(),
           fetchTasks(),
         ]);
         if (cancelled) return;
 
         const tasksList = parseTasksResponse(tasksRes);
-        const sectionsList = parseSectionsResponse(sectionsRes);
+        const locationsList = parseLocationsResponse(locationsRes);
         setTasks(tasksList);
-        setSections(sectionsList);
+        setLocations(locationsList);
       } catch (e) {
         if (!cancelled) setError(e.message);
       } finally {
@@ -46,7 +46,7 @@ export default function TasksPage() {
 
   const pendingTasks = tasks.filter((t) => t.status !== 'completed');
   const tasksBySection = {};
-  sections.forEach((s) => {
+  locations.forEach((s) => {
     tasksBySection[s.id] = pendingTasks
       .filter((t) => t.section_id === s.id)
       .sort((a, b) => {
@@ -56,7 +56,7 @@ export default function TasksPage() {
       });
   });
 
-  const sectionOrder = sections;
+  const sectionOrder = locations;
   const hasContent = sectionOrder.some((s) => (tasksBySection[s.id] || []).length > 0);
 
   if (loading) {
@@ -82,7 +82,7 @@ export default function TasksPage() {
       emptyMessage={!hasContent ? '이번 주 할 일이 없습니다.' : undefined}
     >
       <p className="notion-db-badge" aria-label="연동된 Notion DB">
-        Notion DB: 구역 · 할 일
+        Notion DB: Locations(구역) · 할 일
       </p>
       <div className="full-page__list">
         {sectionOrder.map((section) => {

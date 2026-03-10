@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { fetchSections, fetchTasks, fetchPlants } from '../../api/notionApi';
-import { parseSectionsResponse } from '../Locations/notionSchema';
+import { fetchLocations, fetchTasks, fetchPlants } from '../../api/notionApi';
+import { parseLocationsResponse } from '../Locations/notionSchema';
 import { parseTasksResponse } from '../Tasks/notionSchema';
 import { parsePlantsResponse } from '../Plants/notionSchema';
 import GardenMap from '../../components/GardenMap/GardenMap';
@@ -10,16 +10,16 @@ import './LandingPage.css';
 /**
  * PG-01: 랜딩 페이지(지도) - 실제 대지 간이 지도 중심 정원 탐색
  */
-function getTasksBySection(tasks, sectionId) {
-  return tasks.filter((t) => t.section_id === sectionId && t.status !== 'completed');
+function getTasksByLocation(tasks, locationId) {
+  return tasks.filter((t) => t.section_id === locationId && t.status !== 'completed');
 }
 
-function getSectionById(sections, id) {
-  return sections.find((s) => s.id === id);
+function getLocationById(locations, id) {
+  return locations.find((l) => l.id === id);
 }
 
 export default function LandingPage() {
-  const [sections, setSections] = useState([]);
+  const [locations, setLocations] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -31,8 +31,8 @@ export default function LandingPage() {
       try {
         setLoading(true);
         setError(null);
-        const [sectionsRes, tasksRes, plantsRes] = await Promise.all([
-          fetchSections(),
+        const [locationsRes, tasksRes, plantsRes] = await Promise.all([
+          fetchLocations(),
           fetchTasks(),
           fetchPlants(),
         ]);
@@ -49,12 +49,12 @@ export default function LandingPage() {
           if (p.section_id) plantCountMap[p.section_id] = (plantCountMap[p.section_id] || 0) + 1;
         });
 
-        const sectionsList = parseSectionsResponse(
-          sectionsRes,
+        const locationsList = parseLocationsResponse(
+          locationsRes,
           taskCountMap,
           plantCountMap
         );
-        setSections(sectionsList);
+        setLocations(locationsList);
         setTasks(tasksList);
       } catch (e) {
         if (!cancelled) setError(e.message);
@@ -86,12 +86,12 @@ export default function LandingPage() {
   return (
     <div className="landing-page__wrap">
       <p className="notion-db-badge notion-db-badge--landing" aria-label="연동된 Notion DB">
-        Notion DB: 구역 · 할 일 · 식물
+        Notion DB: Locations(구역) · 할 일 · 식물
       </p>
       <GardenMap
-        sections={sections}
-        getTasksBySection={(sectionId) => getTasksBySection(tasks, sectionId)}
-        getSectionById={(id) => getSectionById(sections, id)}
+        locations={locations}
+        getTasksByLocation={(locationId) => getTasksByLocation(tasks, locationId)}
+        getLocationById={(id) => getLocationById(locations, id)}
       />
     </div>
   );

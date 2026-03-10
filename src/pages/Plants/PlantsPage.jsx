@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { fetchSections, fetchPlants } from '../../api/notionApi';
-import { parseSectionsResponse } from '../Locations/notionSchema';
+import { fetchLocations, fetchPlants } from '../../api/notionApi';
+import { parseLocationsResponse } from '../Locations/notionSchema';
 import { parsePlantsResponse } from './notionSchema';
 import FullPage from '../../components/FullPage/FullPage';
 import ErrorState from '../../components/ErrorState/ErrorState';
@@ -10,7 +10,7 @@ import './PlantsPage.css';
  * PG-07: Plants 전체 페이지 - 식물 DB 전체 조회
  */
 export default function PlantsPage() {
-  const [sections, setSections] = useState([]);
+  const [locations, setLocations] = useState([]);
   const [plants, setPlants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,16 +22,16 @@ export default function PlantsPage() {
       try {
         setLoading(true);
         setError(null);
-        const [sectionsRes, plantsRes] = await Promise.all([
-          fetchSections(),
+        const [locationsRes, plantsRes] = await Promise.all([
+          fetchLocations(),
           fetchPlants(),
         ]);
         if (cancelled) return;
 
         const plantsList = parsePlantsResponse(plantsRes);
-        const sectionsList = parseSectionsResponse(sectionsRes);
+        const locationsList = parseLocationsResponse(locationsRes);
         setPlants(plantsList);
-        setSections(sectionsList);
+        setLocations(locationsList);
       } catch (e) {
         if (!cancelled) setError(e.message);
       } finally {
@@ -44,11 +44,11 @@ export default function PlantsPage() {
   }, []);
 
   const plantsBySection = {};
-  sections.forEach((s) => {
+  locations.forEach((s) => {
     plantsBySection[s.id] = plants.filter((p) => p.section_id === s.id);
   });
 
-  const hasContent = sections.some((s) => (plantsBySection[s.id] || []).length > 0);
+  const hasContent = locations.some((s) => (plantsBySection[s.id] || []).length > 0);
 
   if (loading) {
     return (
@@ -73,10 +73,10 @@ export default function PlantsPage() {
       emptyMessage={!hasContent ? '등록된 식물이 없습니다.' : undefined}
     >
       <p className="notion-db-badge" aria-label="연동된 Notion DB">
-        Notion DB: 구역 · 식물
+        Notion DB: Locations(구역) · 식물
       </p>
       <div className="full-page__list">
-        {sections.map((section) => {
+        {locations.map((section) => {
           const sectionPlants = plantsBySection[section.id] || [];
           if (sectionPlants.length === 0) return null;
 

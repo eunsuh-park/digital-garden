@@ -1,5 +1,5 @@
 /**
- * Vercel Serverless: Plants DB 조회
+ * Vercel Serverless: Locations DB 조회
  */
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -15,7 +15,7 @@ export default async function handler(req, res) {
   }
 
   const token = process.env.NOTION_API_KEY;
-  const databaseId = process.env.NOTION_DATABASE_ID_PLANTS;
+  const databaseId = process.env.NOTION_DATABASE_ID_SECTIONS;
 
   if (!token || !databaseId) {
     return res.status(500).json({ error: 'Notion config missing' });

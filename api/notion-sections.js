@@ -1,7 +1,15 @@
 /**
- * Vercel Serverless: Sections(Locations) DB 조회
+ * Vercel Serverless: Locations DB 조회 (구 경로 호환: /api/notion-sections)
  */
+function setCors(res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+}
+
 export default async function handler(req, res) {
+  setCors(res);
+  if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }

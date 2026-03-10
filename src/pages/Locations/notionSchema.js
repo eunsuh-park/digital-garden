@@ -1,5 +1,5 @@
 /**
- * Sections(Locations) DB 스키마 매핑
+ * Locations DB 스키마 매핑
  * Notion DB의 실제 property 이름에 맞게 수정하세요
  */
 import { getTitle, getRichText, getSelect } from '../../lib/parseNotionProps';
@@ -11,7 +11,7 @@ export const PROP_MAP = {
   svg_id: 'svg_id',
 };
 
-export function parseSectionPage(page) {
+export function parseLocationPage(page) {
   const props = page.properties || {};
   const name = getTitle(props[PROP_MAP.name]) || getTitle(props['Name']);
   const colorRaw = getRichText(props[PROP_MAP.color]) || getSelect(props[PROP_MAP.color]);
@@ -29,11 +29,15 @@ export function parseSectionPage(page) {
   };
 }
 
-export function parseSectionsResponse(data, taskCountMap = {}, plantCountMap = {}) {
+export function parseLocationsResponse(data, taskCountMap = {}, plantCountMap = {}) {
   return (data.results || []).map((p) => {
-    const section = parseSectionPage(p);
-    section.taskCount = taskCountMap[section.id] ?? 0;
-    section.plantCount = plantCountMap[section.id] ?? 0;
-    return section;
+    const location = parseLocationPage(p);
+    location.taskCount = taskCountMap[location.id] ?? 0;
+    location.plantCount = plantCountMap[location.id] ?? 0;
+    return location;
   });
 }
+
+// Backward-compatible aliases (기존 sections 명칭 호환)
+export const parseSectionPage = parseLocationPage;
+export const parseSectionsResponse = parseLocationsResponse;

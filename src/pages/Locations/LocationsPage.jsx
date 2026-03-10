@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { fetchSections, fetchTasks, fetchPlants } from '../../api/notionApi';
-import { parseSectionsResponse } from './notionSchema';
+import { fetchLocations, fetchTasks, fetchPlants } from '../../api/notionApi';
+import { parseLocationsResponse } from './notionSchema';
 import { parseTasksResponse } from '../Tasks/notionSchema';
 import { parsePlantsResponse } from '../Plants/notionSchema';
 import FullPage from '../../components/FullPage/FullPage';
@@ -12,7 +12,7 @@ import './LocationsPage.css';
  * PG-06: Locations 전체 페이지 - 공간 단위 전체 정보 탐색
  */
 export default function LocationsPage() {
-  const [sections, setSections] = useState([]);
+  const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -23,8 +23,8 @@ export default function LocationsPage() {
       try {
         setLoading(true);
         setError(null);
-        const [sectionsRes, tasksRes, plantsRes] = await Promise.all([
-          fetchSections(),
+        const [locationsRes, tasksRes, plantsRes] = await Promise.all([
+          fetchLocations(),
           fetchTasks(),
           fetchPlants(),
         ]);
@@ -43,12 +43,12 @@ export default function LocationsPage() {
           if (p.section_id) plantCountMap[p.section_id] = (plantCountMap[p.section_id] || 0) + 1;
         });
 
-        const sectionsList = parseSectionsResponse(
-          sectionsRes,
+        const locationsList = parseLocationsResponse(
+          locationsRes,
           taskCountMap,
           plantCountMap
         );
-        setSections(sectionsList);
+        setLocations(locationsList);
       } catch (e) {
         if (!cancelled) setError(e.message);
       } finally {
@@ -79,10 +79,10 @@ export default function LocationsPage() {
   return (
     <FullPage title="위치" subtitle="정원 구역별 요약">
       <p className="notion-db-badge" aria-label="연동된 Notion DB">
-        Notion DB: 구역 · 할 일 · 식물
+        Notion DB: Locations(구역) · 할 일 · 식물
       </p>
       <div className="full-page__list full-page__list--compact">
-        {sections.map((location) => (
+        {locations.map((location) => (
           <Link
             key={location.id}
             to={`/?location=${location.id}`}
