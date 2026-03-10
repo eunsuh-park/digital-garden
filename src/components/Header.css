@@ -1,0 +1,48 @@
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.page-header__logo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.page-header__logo:hover {
+  opacity: 0.85;
+}
+
+.page-header__tabs {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.page-header__tab {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: color 0.2s, background 0.2s;
+}
+
+.page-header__tab:hover {
+  color: var(--color-text);
+  background: rgba(45, 90, 39, 0.06);
+}
+
+.page-header__tab--active {
+  color: var(--color-primary);
+  background: rgba(45, 90, 39, 0.1);
+}

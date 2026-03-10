@@ -1,0 +1,91 @@
+.garden-map {
+  padding: 1rem;
+  min-height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
+}
+
+.garden-map__toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.garden-map__rotate-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.garden-map__rotate-btn:hover {
+  background: rgba(45, 90, 39, 0.06);
+  border-color: var(--color-primary);
+}
+
+.garden-map__svg-wrapper {
+  flex: 1;
+  min-height: 400px;
+  background: var(--color-surface);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.garden-map__svg-wrapper--house {
+  transform: rotate(0deg);
+}
+
+.garden-map__svg-wrapper--road {
+  transform: rotate(0deg);
+}
+
+.garden-map__svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.garden-map__section {
+  cursor: pointer;
+  transition: fill-opacity 0.2s, stroke 0.2s;
+}
+
+.garden-map__section:hover {
+  fill-opacity: 1 !important;
+}
+
+.garden-map__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.garden-map__legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  background: var(--color-surface);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.garden-map__legend-item:hover,
+.garden-map__legend-item--active {
+  border-color: var(--color-primary);
+  background: rgba(45, 90, 39, 0.08);
+}
+
+.garden-map__legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
