@@ -4,6 +4,7 @@ import { parseSectionsResponse } from '../Locations/notionSchema';
 import { parseTasksResponse } from '../Tasks/notionSchema';
 import { parsePlantsResponse } from '../Plants/notionSchema';
 import GardenMap from '../../components/GardenMap/GardenMap';
+import ErrorState from '../../components/ErrorState/ErrorState';
 import './LandingPage.css';
 
 /**
@@ -76,17 +77,22 @@ export default function LandingPage() {
 
   if (error) {
     return (
-      <div className="landing-page landing-page--error">
-        <p>{error}</p>
+      <div className="landing-page landing-page--centered">
+        <ErrorState variant="error" message={error} showHomeLink />
       </div>
     );
   }
 
   return (
-    <GardenMap
-      sections={sections}
-      getTasksBySection={(sectionId) => getTasksBySection(tasks, sectionId)}
-      getSectionById={(id) => getSectionById(sections, id)}
-    />
+    <div className="landing-page__wrap">
+      <p className="notion-db-badge notion-db-badge--landing" aria-label="연동된 Notion DB">
+        Notion DB: 구역 · 할 일 · 식물
+      </p>
+      <GardenMap
+        sections={sections}
+        getTasksBySection={(sectionId) => getTasksBySection(tasks, sectionId)}
+        getSectionById={(id) => getSectionById(sections, id)}
+      />
+    </div>
   );
 }

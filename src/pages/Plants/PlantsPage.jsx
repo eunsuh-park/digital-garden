@@ -3,6 +3,7 @@ import { fetchSections, fetchPlants } from '../../api/notionApi';
 import { parseSectionsResponse } from '../Locations/notionSchema';
 import { parsePlantsResponse } from './notionSchema';
 import FullPage from '../../components/FullPage/FullPage';
+import ErrorState from '../../components/ErrorState/ErrorState';
 import './PlantsPage.css';
 
 /**
@@ -60,7 +61,7 @@ export default function PlantsPage() {
   if (error) {
     return (
       <FullPage title="식물">
-        <p className="plants-page__error">{error}</p>
+        <ErrorState variant="error" message={error} showHomeLink />
       </FullPage>
     );
   }
@@ -71,6 +72,9 @@ export default function PlantsPage() {
       subtitle={`식재된 식물 ${plants.length}종`}
       emptyMessage={!hasContent ? '등록된 식물이 없습니다.' : undefined}
     >
+      <p className="notion-db-badge" aria-label="연동된 Notion DB">
+        Notion DB: 구역 · 식물
+      </p>
       <div className="full-page__list">
         {sections.map((section) => {
           const sectionPlants = plantsBySection[section.id] || [];

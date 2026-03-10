@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Header from './components/Header/Header';
+import ErrorState from './components/ErrorState/ErrorState';
 import LandingPage from './pages/Landing/LandingPage';
 import TasksPage from './pages/Tasks/TasksPage';
 import LocationsPage from './pages/Locations/LocationsPage';
@@ -17,6 +18,7 @@ function App() {
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/locations" element={<LocationsPage />} />
             <Route path="/plants" element={<PlantsPage />} />
+            <Route path="*" element={<ErrorState variant="404" />} />
           </Routes>
         </main>
       </div>

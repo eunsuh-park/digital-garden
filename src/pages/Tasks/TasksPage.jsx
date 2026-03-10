@@ -3,6 +3,7 @@ import { fetchSections, fetchTasks } from '../../api/notionApi';
 import { parseSectionsResponse } from '../Locations/notionSchema';
 import { parseTasksResponse } from './notionSchema';
 import FullPage from '../../components/FullPage/FullPage';
+import ErrorState from '../../components/ErrorState/ErrorState';
 import './TasksPage.css';
 
 /**
@@ -69,7 +70,7 @@ export default function TasksPage() {
   if (error) {
     return (
       <FullPage title="이번 주 할 일">
-        <p className="tasks-page__error">{error}</p>
+        <ErrorState variant="error" message={error} showHomeLink />
       </FullPage>
     );
   }
@@ -80,6 +81,9 @@ export default function TasksPage() {
       subtitle="완료 제외, 예정일 순"
       emptyMessage={!hasContent ? '이번 주 할 일이 없습니다.' : undefined}
     >
+      <p className="notion-db-badge" aria-label="연동된 Notion DB">
+        Notion DB: 구역 · 할 일
+      </p>
       <div className="full-page__list">
         {sectionOrder.map((section) => {
           const sectionTasks = tasksBySection[section.id] || [];

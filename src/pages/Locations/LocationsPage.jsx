@@ -5,6 +5,7 @@ import { parseSectionsResponse } from './notionSchema';
 import { parseTasksResponse } from '../Tasks/notionSchema';
 import { parsePlantsResponse } from '../Plants/notionSchema';
 import FullPage from '../../components/FullPage/FullPage';
+import ErrorState from '../../components/ErrorState/ErrorState';
 import './LocationsPage.css';
 
 /**
@@ -70,13 +71,16 @@ export default function LocationsPage() {
   if (error) {
     return (
       <FullPage title="위치">
-        <p className="locations-page__error">{error}</p>
+        <ErrorState variant="error" message={error} showHomeLink />
       </FullPage>
     );
   }
 
   return (
     <FullPage title="위치" subtitle="정원 구역별 요약">
+      <p className="notion-db-badge" aria-label="연동된 Notion DB">
+        Notion DB: 구역 · 할 일 · 식물
+      </p>
       <div className="full-page__list full-page__list--compact">
         {sections.map((location) => (
           <Link

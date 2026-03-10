@@ -1,10 +1,5 @@
-.locations-page__loading,
-.locations-page__error {
+.locations-page__loading {
   text-align: center;
   padding: 2rem;
   color: var(--color-text-muted);
-}
-
-.locations-page__error {
-  color: #c0392b;
 }

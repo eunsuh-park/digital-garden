@@ -5,11 +5,23 @@
   justify-content: center;
 }
 
-.landing-page--loading p,
-.landing-page--error p {
+.landing-page--loading p {
   color: var(--color-text-muted);
 }
 
-.landing-page--error p {
-  color: #c0392b;
+.landing-page__wrap {
+  position: relative;
+  min-height: calc(100vh - 60px);
+}
+
+.notion-db-badge--landing {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  margin: 0;
+  z-index: 10;
+  background: var(--color-surface);
+  padding: 0.35rem 0.6rem;
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
 }

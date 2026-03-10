@@ -1,10 +1,5 @@
-.plants-page__loading,
-.plants-page__error {
+.plants-page__loading {
   text-align: center;
   padding: 2rem;
   color: var(--color-text-muted);
-}
-
-.plants-page__error {
-  color: #c0392b;
 }

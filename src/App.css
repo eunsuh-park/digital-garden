@@ -7,3 +7,14 @@
 .app__main {
   flex: 1;
 }
+
+/* 페이지별 Notion 연동 DB 표시 (콘솔에서 [Notion API] 로그로 확인) */
+.notion-db-badge {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin: -0.5rem 0 0.75rem;
+  padding: 0.25rem 0;
+}
+.notion-db-badge::before {
+  content: '🔗 ';
+}
