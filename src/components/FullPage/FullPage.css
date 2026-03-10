@@ -90,6 +90,20 @@
 
 .full-page__card-body {
   flex: 1;
+  min-width: 0;
+}
+
+.full-page__card-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.full-page__card-row .full-page__card-name {
+  margin-bottom: 0;
+  flex: 1;
+  min-width: 0;
 }
 
 .full-page__card-name {
@@ -101,6 +115,10 @@
 .full-page__card-meta {
   font-size: 0.85rem;
   color: var(--color-text-muted);
+}
+
+.full-page__list--cards .full-page__card {
+  cursor: default;
 }
 
 /* 리스트 아이템 공통 */

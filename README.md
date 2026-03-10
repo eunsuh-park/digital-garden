@@ -20,13 +20,15 @@ npm run preview   # 빌드 결과 미리보기
 
 ## 배포 후 데이터가 안 뜰 때 (Vercel)
 
-1. **Vercel 대시보드** → 해당 프로젝트 → **Settings** → **Environment Variables**
-2. 아래 4개가 **Production(과 Preview)** 에 모두 있는지 확인. 없으면 추가 후 **Redeploy**.
+1. **Notion: 각 DB에 Integration 연결**  
+   Locations(구역), 할 일(Tasks), 식물(Plants) **세 DB 모두** Notion에서 열고 → **⋮** → **연결(Connections)** → API 키 만든 **Integration** 선택해 연결. 연결 안 하면 `Could not find database` 에러 난다.
+2. **Vercel 대시보드** → 해당 프로젝트 → **Settings** → **Environment Variables**
+3. 아래 4개가 **Production(과 Preview)** 에 모두 있는지 확인. 없으면 추가 후 **Redeploy**.
    - `NOTION_API_KEY` = Notion Integration 시크릿
    - `NOTION_DATABASE_ID_SECTIONS` = Locations(구역) DB ID
    - `NOTION_DATABASE_ID_TASKS` = 할 일 DB ID
    - `NOTION_DATABASE_ID_PLANTS` = 식물 DB ID
-3. 브라우저에서 **F12 → Console** 확인. `[Notion API] 실패` 또는 `Notion config missing` 이면 위 환경 변수/재배포 다시 확인.
+4. 브라우저에서 **F12 → Console** 확인. `[Notion API] 실패` 또는 `Notion config missing` 이면 위 환경 변수/재배포 다시 확인.
 
 (GitHub Pages 등 다른 도메인에서 Vercel API를 쓰려면, 빌드 시 `VITE_API_ORIGIN`을 Vercel 배포 URL로 설정해야 함.)
 

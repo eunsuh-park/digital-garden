@@ -43,12 +43,8 @@ export default function PlantsPage() {
     return () => { cancelled = true; };
   }, []);
 
-  const plantsBySection = {};
-  locations.forEach((s) => {
-    plantsBySection[s.id] = plants.filter((p) => p.section_id === s.id);
-  });
-
-  const hasContent = locations.some((s) => (plantsBySection[s.id] || []).length > 0);
+  const locationMap = Object.fromEntries(locations.map((l) => [l.id, l]));
+  const hasContent = plants.length > 0;
 
   if (loading) {
     return (
@@ -75,31 +71,24 @@ export default function PlantsPage() {
       <p className="notion-db-badge" aria-label="연동된 Notion DB">
         Notion DB: Locations(구역) · 식물
       </p>
-      <div className="full-page__list">
-        {locations.map((section) => {
-          const sectionPlants = plantsBySection[section.id] || [];
-          if (sectionPlants.length === 0) return null;
-
+      <div className="full-page__list full-page__list--compact full-page__list--cards">
+        {plants.map((plant) => {
+          const location = plant.section_id ? locationMap[plant.section_id] : null;
           return (
-            <section key={section.id} className="full-page__group">
-              <h2 className="full-page__group-title">
-                <span
-                  className="full-page__group-color"
-                  style={{ background: section.color_token }}
-                />
-                {section.name}
-              </h2>
-              <ul className="full-page__item-list">
-                {sectionPlants.map((plant) => (
-                  <li key={plant.id} className="full-page__item full-page__item--between">
-                    <span className="full-page__item-title">{plant.name}</span>
-                    <span className="full-page__item-meta">
-                      {plant.category} · {plant.species}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </section>
+            <article key={plant.id} className="full-page__card">
+              <span
+                className="full-page__group-color full-page__group-color--large"
+                style={{ background: location?.color_token || 'var(--color-border)' }}
+                aria-hidden
+              />
+              <div className="full-page__card-body">
+                <h2 className="full-page__card-name">{plant.name}</h2>
+                <p className="full-page__card-meta">
+                  {plant.category} · {plant.species}
+                  {location ? ` · ${location.name}` : ''}
+                </p>
+              </div>
+            </article>
           );
         })}
       </div>

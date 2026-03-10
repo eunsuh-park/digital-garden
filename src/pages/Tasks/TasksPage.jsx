@@ -44,20 +44,15 @@ export default function TasksPage() {
     return () => { cancelled = true; };
   }, []);
 
-  const pendingTasks = tasks.filter((t) => t.status !== 'completed');
-  const tasksBySection = {};
-  locations.forEach((s) => {
-    tasksBySection[s.id] = pendingTasks
-      .filter((t) => t.section_id === s.id)
-      .sort((a, b) => {
-        if (!a.due_date) return 1;
-        if (!b.due_date) return -1;
-        return new Date(a.due_date) - new Date(b.due_date);
-      });
-  });
-
-  const sectionOrder = locations;
-  const hasContent = sectionOrder.some((s) => (tasksBySection[s.id] || []).length > 0);
+  const pendingTasks = tasks
+    .filter((t) => t.status !== 'completed')
+    .sort((a, b) => {
+      if (!a.due_date) return 1;
+      if (!b.due_date) return -1;
+      return new Date(a.due_date) - new Date(b.due_date);
+    });
+  const locationMap = Object.fromEntries(locations.map((l) => [l.id, l]));
+  const hasContent = pendingTasks.length > 0;
 
   if (loading) {
     return (
@@ -84,34 +79,31 @@ export default function TasksPage() {
       <p className="notion-db-badge" aria-label="연동된 Notion DB">
         Notion DB: Locations(구역) · 할 일
       </p>
-      <div className="full-page__list">
-        {sectionOrder.map((section) => {
-          const sectionTasks = tasksBySection[section.id] || [];
-          if (sectionTasks.length === 0) return null;
-
+      <div className="full-page__list full-page__list--compact full-page__list--cards">
+        {pendingTasks.map((task) => {
+          const location = task.section_id ? locationMap[task.section_id] : null;
           return (
-            <section key={section.id} className="full-page__group">
-              <h2 className="full-page__group-title">
-                <span
-                  className="full-page__group-color"
-                  style={{ background: section.color_token }}
-                />
-                {section.name}
-              </h2>
-              <ul className="full-page__item-list">
-                {sectionTasks.map((task) => (
-                  <li key={task.id} className="full-page__item">
-                    <span
-                      className={`full-page__status full-page__status--${task.status}`}
-                    >
-                      {task.status === 'progress' ? '진행중' : '예정'}
-                    </span>
-                    <span className="full-page__item-title">{task.title}</span>
-                    <span className="full-page__item-meta">{task.due_date || '-'}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
+            <article key={task.id} className="full-page__card">
+              <span
+                className="full-page__group-color full-page__group-color--large"
+                style={{ background: location?.color_token || 'var(--color-border)' }}
+                aria-hidden
+              />
+              <div className="full-page__card-body">
+                <div className="full-page__card-row">
+                  <span
+                    className={`full-page__status full-page__status--${task.status}`}
+                  >
+                    {task.status === 'progress' ? '진행중' : '예정'}
+                  </span>
+                  <span className="full-page__card-name">{task.title}</span>
+                </div>
+                <p className="full-page__card-meta">
+                  {task.due_date || '날짜 없음'}
+                  {location ? ` · ${location.name}` : ''}
+                </p>
+              </div>
+            </article>
           );
         })}
       </div>
