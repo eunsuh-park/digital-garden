@@ -10,8 +10,7 @@ export default function MapZoomTool({ zoom = 1, onZoomIn, onZoomOut, onReset }) 
   const isMin = zoom <= 1.00001;
 
   return (
-    <div className="garden-map__toolbar-group" aria-label="지도 확대/축소">
-      <span className="garden-map__toolbar-label">확대</span>
+    <div className="garden-map__toolbar-group garden-map__zoom-ui__group" aria-label="지도 확대/축소">
       <button
         type="button"
         className="garden-map__toolbar-btn"

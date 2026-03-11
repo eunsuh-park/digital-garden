@@ -9,30 +9,36 @@
 
 .garden-map__controls {
   position: fixed;
-  left: 50%;
+  left: 0;
+  right: 0;
   bottom: 1rem;
-  transform: translateX(-50%);
+  width: 100%;
   z-index: 30;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
+  justify-content: center;
   gap: 10px;
+  padding: 0 1rem;
+  box-sizing: border-box;
 }
 
 .garden-map__toolbar {
   display: flex;
   justify-content: center;
+  flex: 1;
+  min-width: 0;
 }
 
 .garden-map__zoom-ui {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  border-radius: 999px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14);
+  gap: 6px;
+  padding: 8px 6px;
+}
+
+.garden-map__zoom-ui__group {
+  flex-direction: column;
 }
 
 .garden-map__toolbar-inner {

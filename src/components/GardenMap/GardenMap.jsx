@@ -3,7 +3,6 @@ import Drawer from '../Drawer/Drawer';
 import MapRotationTool from '../MapRotationTool/MapRotationTool';
 import MapZoomTool from '../MapZoomTool/MapZoomTool';
 import Popover from '../Popover/Popover';
-import Switch from '../Switch/Switch';
 import './GardenMap.css';
 import gardenMapSvg from '../../gardenMap.svg?raw';
 
@@ -20,7 +19,6 @@ export default function GardenMap({ locations = [], getTasksByLocation, getLocat
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mapBase, setMapBase] = useState('road'); // road | house
   const [mapDirection, setMapDirection] = useState('horizontal'); // vertical | horizontal
-  const [viewMode, setViewMode] = useState('default'); // default | satellite
   const [zoom, setZoom] = useState(1); // 1 = 100% (최소)
   const [popoverPos, setPopoverPos] = useState({ x: 0, y: 0 });
   const svgHostRef = useRef(null);
@@ -76,14 +74,15 @@ export default function GardenMap({ locations = [], getTasksByLocation, getLocat
   );
 
   const rotationDeg = useMemo(() => {
-    // base(도로/집) × direction(수평/수직) 조합
-    // road+horizontal = 0deg (기본)
-    // road+vertical   = 90deg
-    // house+horizontal= 180deg (집 도형이 아래로)
-    // house+vertical  = 270deg
-    const baseDeg = mapBase === 'house' ? 180 : 0;
-    const dirDeg = mapDirection === 'vertical' ? 90 : 0;
-    return (baseDeg + dirDeg) % 360;
+    // 기본: 도로 기준 + 수평 = 0°
+    // 수직 = 좌측 90° (-90°)
+    // 집 = SVG 내 rect.st2(집)가 rotate(45) 되어 있음 → 그 직사각형이 똑바르게 보이는 게 기준
+    //   집+수평: -45°  /  집+수직: -45° - 90° = -135°
+    if (mapBase === 'road') {
+      return mapDirection === 'vertical' ? 270 : 0; // 수직 = 좌측 90° → 270°
+    }
+    // house: 집 도형이 똑바르게 보이도록 -45°, 수직은 그에서 좌측 90°
+    return mapDirection === 'vertical' ? 225 : 315; // -45° → 315°, -135° → 225°
   }, [mapBase, mapDirection]);
 
   // SVG viewBox 기반 줌(스크롤바 없이 확대/축소) + 팬(드래그 이동)
@@ -320,17 +319,6 @@ export default function GardenMap({ locations = [], getTasksByLocation, getLocat
               onChangeBase={setMapBase}
               onChangeDirection={setMapDirection}
             />
-
-            <div className="garden-map__toolbar-divider" aria-hidden />
-
-            <div className="garden-map__toolbar-group">
-              <span className="garden-map__toolbar-label">위성 지도</span>
-              <Switch
-                checked={viewMode === 'satellite'}
-                onChange={(on) => setViewMode(on ? 'satellite' : 'default')}
-                ariaLabel={viewMode === 'satellite' ? '위성 지도 끄기' : '위성 지도 켜기'}
-              />
-            </div>
           </div>
         </div>
 
@@ -349,7 +337,7 @@ export default function GardenMap({ locations = [], getTasksByLocation, getLocat
         style={{ transform: `rotate(${rotationDeg}deg)` }}
       >
         <div
-          className={`garden-map__asset ${viewMode === 'satellite' ? 'garden-map__asset--satellite' : ''}`}
+          className="garden-map__asset"
           aria-label="정원 지도"
           // SVG 원본을 그대로 보여주기 (스케일 깨짐 방지)
           ref={svgHostRef}
