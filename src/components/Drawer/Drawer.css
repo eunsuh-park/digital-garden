@@ -1,7 +1,6 @@
 .drawer__backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.3);
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.25s, visibility 0.25s;
@@ -16,7 +15,7 @@
 .drawer {
   position: fixed;
   top: 0;
-  right: 0;
+  right: 16px;
   width: 100%;
   max-width: 360px;
   height: 100%;
@@ -26,6 +25,7 @@
   transition: transform 0.3s ease;
   z-index: 301;
   overflow-y: auto;
+  border-radius: 12px;
 }
 
 .drawer--open {

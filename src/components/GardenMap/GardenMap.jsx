@@ -18,11 +18,15 @@ export default function GardenMap({ locations = [], getTasksByLocation, getLocat
   const [activeLocationId, setActiveLocationId] = useState(null);
   const [hoverLocationId, setHoverLocationId] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [orientation, setOrientation] = useState('road'); // road | house | vertical | horizontal
+  const [mapBase, setMapBase] = useState('road'); // road | house
+  const [mapDirection, setMapDirection] = useState('horizontal'); // vertical | horizontal
   const [viewMode, setViewMode] = useState('default'); // default | satellite
   const [zoom, setZoom] = useState(1); // 1 = 100% (최소)
   const [popoverPos, setPopoverPos] = useState({ x: 0, y: 0 });
   const svgHostRef = useRef(null);
+  const svgViewBoxRef = useRef(null);
+  const svgOriginalViewBoxRef = useRef(null);
+  const panRef = useRef({ active: false, startX: 0, startY: 0, startVbX: 0, startVbY: 0 });
 
   const handleLocationClick = useCallback((e, locationId) => {
     setActiveLocationId(locationId);
@@ -70,6 +74,114 @@ export default function GardenMap({ locations = [], getTasksByLocation, getLocat
     },
     [clampZoom]
   );
+
+  const rotationDeg = useMemo(() => {
+    // base(도로/집) × direction(수평/수직) 조합
+    // road+horizontal = 0deg (기본)
+    // road+vertical   = 90deg
+    // house+horizontal= 180deg (집 도형이 아래로)
+    // house+vertical  = 270deg
+    const baseDeg = mapBase === 'house' ? 180 : 0;
+    const dirDeg = mapDirection === 'vertical' ? 90 : 0;
+    return (baseDeg + dirDeg) % 360;
+  }, [mapBase, mapDirection]);
+
+  // SVG viewBox 기반 줌(스크롤바 없이 확대/축소) + 팬(드래그 이동)
+  useEffect(() => {
+    const host = svgHostRef.current;
+    if (!host) return;
+    const svg = host.querySelector('svg');
+    if (!svg) return;
+
+    // 최초 viewBox 저장
+    if (!svgOriginalViewBoxRef.current) {
+      const vbAttr = svg.getAttribute('viewBox');
+      let x = 0;
+      let y = 0;
+      let w = 1920;
+      let h = 1080;
+      if (vbAttr) {
+        const parts = vbAttr.split(/[\s,]+/).map((n) => Number(n));
+        if (parts.length === 4 && parts.every((n) => Number.isFinite(n))) {
+          [x, y, w, h] = parts;
+        }
+      }
+      svgOriginalViewBoxRef.current = { x, y, w, h };
+      svgViewBoxRef.current = { x, y, w, h };
+    }
+
+    const orig = svgOriginalViewBoxRef.current;
+    const prev = svgViewBoxRef.current || orig;
+    const nextW = orig.w / zoom;
+    const nextH = orig.h / zoom;
+    const cx = prev.x + prev.w / 2;
+    const cy = prev.y + prev.h / 2;
+
+    let nextX = cx - nextW / 2;
+    let nextY = cy - nextH / 2;
+
+    // 원본 범위 안으로 클램프
+    nextX = Math.max(orig.x, Math.min(orig.x + orig.w - nextW, nextX));
+    nextY = Math.max(orig.y, Math.min(orig.y + orig.h - nextH, nextY));
+
+    const next = { x: nextX, y: nextY, w: nextW, h: nextH };
+    svgViewBoxRef.current = next;
+    svg.setAttribute('viewBox', `${next.x} ${next.y} ${next.w} ${next.h}`);
+  }, [zoom]);
+
+  const clampViewBox = useCallback((vb) => {
+    const orig = svgOriginalViewBoxRef.current;
+    if (!orig) return vb;
+    const x = Math.max(orig.x, Math.min(orig.x + orig.w - vb.w, vb.x));
+    const y = Math.max(orig.y, Math.min(orig.y + orig.h - vb.h, vb.y));
+    return { ...vb, x, y };
+  }, []);
+
+  const handlePanStart = useCallback(
+    (e) => {
+      if (zoom <= 1.00001) return;
+      const host = svgHostRef.current;
+      const svg = host?.querySelector?.('svg');
+      if (!svg || !svgViewBoxRef.current) return;
+      panRef.current.active = true;
+      panRef.current.startX = e.clientX;
+      panRef.current.startY = e.clientY;
+      panRef.current.startVbX = svgViewBoxRef.current.x;
+      panRef.current.startVbY = svgViewBoxRef.current.y;
+    },
+    [zoom]
+  );
+
+  const handlePanMove = useCallback(
+    (e) => {
+      if (!panRef.current.active) return;
+      e.preventDefault();
+      const wrapper = e.currentTarget;
+      const rect = wrapper.getBoundingClientRect();
+      const vb = svgViewBoxRef.current;
+      const svg = svgHostRef.current?.querySelector?.('svg');
+      if (!vb || !svg) return;
+
+      const dxPx = e.clientX - panRef.current.startX;
+      const dyPx = e.clientY - panRef.current.startY;
+      const dx = (dxPx * vb.w) / rect.width;
+      const dy = (dyPx * vb.h) / rect.height;
+
+      const next = clampViewBox({
+        x: panRef.current.startVbX - dx,
+        y: panRef.current.startVbY - dy,
+        w: vb.w,
+        h: vb.h,
+      });
+      svgViewBoxRef.current = next;
+      svg.setAttribute('viewBox', `${next.x} ${next.y} ${next.w} ${next.h}`);
+    },
+    [clampViewBox]
+  );
+
+  const handlePanEnd = useCallback(() => {
+    panRef.current.active = false;
+  }, []);
 
   const selectedLocation = activeLocationId && getLocationById ? getLocationById(activeLocationId) : null;
   const hoverLocation = hoverLocationId && getLocationById ? getLocationById(hoverLocationId) : null;
@@ -199,40 +311,48 @@ export default function GardenMap({ locations = [], getTasksByLocation, getLocat
 
   return (
     <div className="garden-map">
-      <div className="garden-map__toolbar" role="toolbar" aria-label="지도 도구">
-        <div className="garden-map__toolbar-inner">
-          <MapRotationTool value={orientation} onChange={setOrientation} />
-
-          <div className="garden-map__toolbar-divider" aria-hidden />
-
-          <div className="garden-map__toolbar-group">
-            <span className="garden-map__toolbar-label">위성 지도</span>
-            <Switch
-              checked={viewMode === 'satellite'}
-              onChange={(on) => setViewMode(on ? 'satellite' : 'default')}
-              ariaLabel={viewMode === 'satellite' ? '위성 지도 끄기' : '위성 지도 켜기'}
+      <div className="garden-map__controls" aria-label="지도 도구">
+        <div className="garden-map__toolbar" role="toolbar" aria-label="지도 도구">
+          <div className="garden-map__toolbar-inner">
+            <MapRotationTool
+              base={mapBase}
+              direction={mapDirection}
+              onChangeBase={setMapBase}
+              onChangeDirection={setMapDirection}
             />
+
+            <div className="garden-map__toolbar-divider" aria-hidden />
+
+            <div className="garden-map__toolbar-group">
+              <span className="garden-map__toolbar-label">위성 지도</span>
+              <Switch
+                checked={viewMode === 'satellite'}
+                onChange={(on) => setViewMode(on ? 'satellite' : 'default')}
+                ariaLabel={viewMode === 'satellite' ? '위성 지도 끄기' : '위성 지도 켜기'}
+              />
+            </div>
           </div>
+        </div>
 
-          <div className="garden-map__toolbar-divider" aria-hidden />
-
+        <div className="garden-map__zoom-ui">
           <MapZoomTool zoom={zoom} onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} onReset={handleZoomReset} />
         </div>
       </div>
 
       <div
-        className={`garden-map__svg-wrapper garden-map__svg-wrapper--${orientation}`}
+        className="garden-map__svg-wrapper"
         onWheel={handleWheelZoom}
+        onMouseDown={handlePanStart}
+        onMouseMove={handlePanMove}
+        onMouseUp={handlePanEnd}
+        onMouseLeave={handlePanEnd}
+        style={{ transform: `rotate(${rotationDeg}deg)` }}
       >
         <div
           className={`garden-map__asset ${viewMode === 'satellite' ? 'garden-map__asset--satellite' : ''}`}
           aria-label="정원 지도"
           // SVG 원본을 그대로 보여주기 (스케일 깨짐 방지)
           ref={svgHostRef}
-          style={{
-            transform: `scale(${zoom})`,
-            transformOrigin: 'center center',
-          }}
           dangerouslySetInnerHTML={{ __html: gardenMapSvg }}
         />
       </div>

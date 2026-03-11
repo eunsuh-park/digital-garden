@@ -7,14 +7,32 @@
   flex-direction: column;
 }
 
-.garden-map__toolbar {
+.garden-map__controls {
   position: fixed;
   left: 50%;
   bottom: 1rem;
   transform: translateX(-50%);
   z-index: 30;
   display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.garden-map__toolbar {
+  display: flex;
   justify-content: center;
+}
+
+.garden-map__zoom-ui {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14);
 }
 
 .garden-map__toolbar-inner {
@@ -78,29 +96,18 @@
 .garden-map__svg-wrapper {
   flex: 1;
   min-height: 0;
+  width: 100%;
+  height: 100%;
   background: unset;
   background-color: unset;
   border-radius: 12px;
   box-shadow: var(--shadow-sm);
   overflow: hidden;
   overscroll-behavior: contain;
+  touch-action: none;
 }
 
-.garden-map__svg-wrapper--road {
-  transform: rotate(0deg);
-}
-
-.garden-map__svg-wrapper--house {
-  transform: rotate(180deg);
-}
-
-.garden-map__svg-wrapper--vertical {
-  transform: rotate(90deg);
-}
-
-.garden-map__svg-wrapper--horizontal {
-  transform: rotate(270deg);
-}
+/* 회전은 컴포넌트에서 inline transform으로 적용 */
 
 .garden-map__asset {
   width: 100%;
@@ -108,7 +115,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.18s ease;
 }
 
 .garden-map__asset svg {
