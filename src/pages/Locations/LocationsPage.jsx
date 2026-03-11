@@ -81,20 +81,20 @@ export default function LocationsPage() {
       <p className="notion-db-badge" aria-label="연동된 Notion DB">
         Notion DB: Locations(구역) · 할 일 · 식물
       </p>
-      <div className="full-page__list full-page__list--compact">
+      <div className="locations-page__list">
         {locations.map((location) => (
           <Link
             key={location.id}
             to={`/?location=${location.id}`}
-            className="full-page__card"
+            className="locations-page__card"
           >
             <span
-              className="full-page__group-color full-page__group-color--large"
+              className="locations-page__card-color"
               style={{ background: location.color_token }}
             />
-            <div className="full-page__card-body">
-              <h2 className="full-page__card-name">{location.name}</h2>
-              <p className="full-page__card-meta">
+            <div className="locations-page__card-body">
+              <h2 className="locations-page__card-name">{location.name}</h2>
+              <p className="locations-page__card-meta">
                 할 일 {location.taskCount}건 · 식물 {location.plantCount}종
               </p>
             </div>

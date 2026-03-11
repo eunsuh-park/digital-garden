@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import Drawer from '../Drawer/Drawer';
+import MapRotationTool from '../MapRotationTool/MapRotationTool';
+import MapZoomTool from '../MapZoomTool/MapZoomTool';
 import Popover from '../Popover/Popover';
+import Switch from '../Switch/Switch';
 import './GardenMap.css';
 import gardenMapSvg from '../../gardenMap.svg?raw';
 
@@ -15,8 +18,9 @@ export default function GardenMap({ locations = [], getTasksByLocation, getLocat
   const [activeLocationId, setActiveLocationId] = useState(null);
   const [hoverLocationId, setHoverLocationId] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [orientation, setOrientation] = useState('road'); // road | house
+  const [orientation, setOrientation] = useState('road'); // road | house | vertical | horizontal
   const [viewMode, setViewMode] = useState('default'); // default | satellite
+  const [zoom, setZoom] = useState(1); // 1 = 100% (최소)
   const [popoverPos, setPopoverPos] = useState({ x: 0, y: 0 });
   const svgHostRef = useRef(null);
 
@@ -35,6 +39,37 @@ export default function GardenMap({ locations = [], getTasksByLocation, getLocat
   const handleCloseDrawer = useCallback(() => {
     setDrawerOpen(false);
   }, []);
+
+  const clampZoom = useCallback((v) => {
+    const min = 1;
+    const max = 3;
+    return Math.max(min, Math.min(max, v));
+  }, []);
+
+  const handleZoomIn = useCallback(() => {
+    setZoom((z) => clampZoom(Number((z + 0.1).toFixed(2))));
+  }, [clampZoom]);
+
+  const handleZoomOut = useCallback(() => {
+    setZoom((z) => clampZoom(Number((z - 0.1).toFixed(2))));
+  }, [clampZoom]);
+
+  const handleZoomReset = useCallback(() => {
+    setZoom(1);
+  }, []);
+
+  const handleWheelZoom = useCallback(
+    (e) => {
+      // 지도 위에서 휠 스크롤이 페이지 스크롤로 전파되지 않게 막고 줌만 수행
+      e.preventDefault();
+      const dir = e.deltaY < 0 ? 1 : -1; // up=zoom in, down=zoom out
+      setZoom((prev) => {
+        const next = dir > 0 ? prev + 0.1 : prev - 0.1;
+        return clampZoom(Number(next.toFixed(2)));
+      });
+    },
+    [clampZoom]
+  );
 
   const selectedLocation = activeLocationId && getLocationById ? getLocationById(activeLocationId) : null;
   const hoverLocation = hoverLocationId && getLocationById ? getLocationById(hoverLocationId) : null;
@@ -166,40 +201,38 @@ export default function GardenMap({ locations = [], getTasksByLocation, getLocat
     <div className="garden-map">
       <div className="garden-map__toolbar" role="toolbar" aria-label="지도 도구">
         <div className="garden-map__toolbar-inner">
-          <div className="garden-map__toolbar-group">
-            <span className="garden-map__toolbar-label">Orientation</span>
-            <button
-              type="button"
-              className="garden-map__toolbar-btn"
-              onClick={() => setOrientation((o) => (o === 'road' ? 'house' : 'road'))}
-              aria-label={orientation === 'road' ? '집 기준으로 보기' : '도로 기준으로 보기'}
-            >
-              {orientation === 'road' ? 'NE' : 'SW'}
-            </button>
-          </div>
+          <MapRotationTool value={orientation} onChange={setOrientation} />
 
           <div className="garden-map__toolbar-divider" aria-hidden />
 
           <div className="garden-map__toolbar-group">
-            <span className="garden-map__toolbar-label">Satellite</span>
-            <button
-              type="button"
-              className={`garden-map__toolbar-btn ${viewMode === 'satellite' ? 'garden-map__toolbar-btn--active' : ''}`}
-              onClick={() => setViewMode((m) => (m === 'default' ? 'satellite' : 'default'))}
-              aria-pressed={viewMode === 'satellite'}
-            >
-              {viewMode === 'satellite' ? 'On' : 'Off'}
-            </button>
+            <span className="garden-map__toolbar-label">위성 지도</span>
+            <Switch
+              checked={viewMode === 'satellite'}
+              onChange={(on) => setViewMode(on ? 'satellite' : 'default')}
+              ariaLabel={viewMode === 'satellite' ? '위성 지도 끄기' : '위성 지도 켜기'}
+            />
           </div>
+
+          <div className="garden-map__toolbar-divider" aria-hidden />
+
+          <MapZoomTool zoom={zoom} onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} onReset={handleZoomReset} />
         </div>
       </div>
 
-      <div className={`garden-map__svg-wrapper garden-map__svg-wrapper--${orientation}`}>
+      <div
+        className={`garden-map__svg-wrapper garden-map__svg-wrapper--${orientation}`}
+        onWheel={handleWheelZoom}
+      >
         <div
           className={`garden-map__asset ${viewMode === 'satellite' ? 'garden-map__asset--satellite' : ''}`}
           aria-label="정원 지도"
           // SVG 원본을 그대로 보여주기 (스케일 깨짐 방지)
           ref={svgHostRef}
+          style={{
+            transform: `scale(${zoom})`,
+            transformOrigin: 'center center',
+          }}
           dangerouslySetInnerHTML={{ __html: gardenMapSvg }}
         />
       </div>

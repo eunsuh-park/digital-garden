@@ -1,8 +1,9 @@
 /* FullPage 공통 레이아웃 */
 .full-page {
+  width: 100%;
   padding: 1.5rem;
-  max-width: 720px;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .full-page__header {

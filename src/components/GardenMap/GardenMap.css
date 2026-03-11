@@ -21,6 +21,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
+  row-gap: 8px;
   padding: 10px 14px;
   border-radius: 999px;
   border: 1px solid rgba(0, 0, 0, 0.08);
@@ -81,14 +83,23 @@
   border-radius: 12px;
   box-shadow: var(--shadow-sm);
   overflow: hidden;
-}
-
-.garden-map__svg-wrapper--house {
-  transform: rotate(0deg);
+  overscroll-behavior: contain;
 }
 
 .garden-map__svg-wrapper--road {
   transform: rotate(0deg);
+}
+
+.garden-map__svg-wrapper--house {
+  transform: rotate(180deg);
+}
+
+.garden-map__svg-wrapper--vertical {
+  transform: rotate(90deg);
+}
+
+.garden-map__svg-wrapper--horizontal {
+  transform: rotate(270deg);
 }
 
 .garden-map__asset {
@@ -97,6 +108,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.18s ease;
 }
 
 .garden-map__asset svg {
