@@ -99,6 +99,18 @@
   display: block;
 }
 
+.garden-map__asset svg * {
+  opacity: 1 !important;
+  fill-opacity: 1 !important;
+}
+
+.garden-map__asset svg polygon,
+.garden-map__asset svg path,
+.garden-map__asset svg rect {
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
 .garden-map__asset--satellite {
   filter: saturate(1.15) contrast(1.05);
 }

@@ -87,6 +87,14 @@ export default function GardenMap({ locations = [], getTasksByLocation, getLocat
       if (!el) return;
 
       el.style.cursor = 'pointer';
+      el.style.opacity = '1';
+      el.style.fillOpacity = '1';
+      el.style.strokeLinejoin = 'round';
+      el.style.strokeLinecap = 'round';
+      if (el.tagName?.toLowerCase() === 'rect') {
+        el.setAttribute('rx', '10');
+        el.setAttribute('ry', '10');
+      }
       el.setAttribute('role', 'button');
       el.setAttribute('tabindex', '0');
       el.setAttribute(
@@ -143,10 +151,8 @@ export default function GardenMap({ locations = [], getTasksByLocation, getLocat
 
       const isActive = activeLocationId === location.id;
       const isHover = hoverLocationId === location.id;
-      const isHighlighted = isActive || isHover || !activeLocationId;
-      const opacity = isHighlighted ? (isActive || isHover ? 1 : 0.7) : 0.25;
-
-      el.style.opacity = String(opacity);
+      el.style.opacity = '1';
+      el.style.fillOpacity = '1';
       // 원본 fill을 덮어쓰기 (Notion의 color_token 사용)
       if (location.color_token) {
         el.style.fill = location.color_token;
