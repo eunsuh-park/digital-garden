@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchLocations, fetchTasks, fetchPlants } from '../../api/notionApi';
 import { parseLocationsResponse } from './notionSchema';
@@ -6,6 +6,7 @@ import { parseTasksResponse } from '../Tasks/notionSchema';
 import { parsePlantsResponse } from '../Plants/notionSchema';
 import FullPage from '../../components/FullPage/FullPage';
 import ErrorState from '../../components/ErrorState/ErrorState';
+import LocationMapThumb from './LocationMapThumb';
 import './LocationsPage.css';
 
 /**
@@ -76,29 +77,59 @@ export default function LocationsPage() {
     );
   }
 
+  const grouped = useMemo(() => {
+    const map = new Map();
+    locations.forEach((loc) => {
+      const key = (loc.color_token || '').trim() || '#a8d5a2';
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(loc);
+    });
+
+    return Array.from(map.entries())
+      .map(([color, items]) => ({
+        color,
+        items: items.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ko-KR')),
+      }))
+      .sort((a, b) => a.color.localeCompare(b.color));
+  }, [locations]);
+
   return (
     <FullPage title="위치" subtitle="정원 구역별 요약">
       <p className="notion-db-badge" aria-label="연동된 Notion DB">
         Notion DB: Locations(구역) · 할 일 · 식물
       </p>
-      <div className="locations-page__list">
-        {locations.map((location) => (
-          <Link
-            key={location.id}
-            to={`/?location=${location.id}`}
-            className="locations-page__card"
-          >
-            <span
-              className="locations-page__card-color"
-              style={{ background: location.color_token }}
-            />
-            <div className="locations-page__card-body">
-              <h2 className="locations-page__card-name">{location.name}</h2>
-              <p className="locations-page__card-meta">
-                할 일 {location.taskCount}건 · 식물 {location.plantCount}종
-              </p>
+      <div className="locations-page__groups">
+        {grouped.map((group) => (
+          <section key={group.color} className="locations-page__group" aria-label={`색상 그룹 ${group.color}`}>
+            <div className="locations-page__group-header">
+              <span className="locations-page__group-swatch" style={{ background: group.color }} aria-hidden />
+              <span className="locations-page__group-title">{group.color}</span>
+              <span className="locations-page__group-count">{group.items.length}개</span>
             </div>
-          </Link>
+
+            <div className="locations-page__list">
+              {group.items.map((location) => (
+                <Link
+                  key={location.id}
+                  to={`/?location=${location.id}`}
+                  className="locations-page__card"
+                >
+                  <LocationMapThumb svgId={location.svg_id} colorToken={location.color_token} />
+                  <span
+                    className="locations-page__card-color"
+                    style={{ background: location.color_token }}
+                    aria-hidden
+                  />
+                  <div className="locations-page__card-body">
+                    <h2 className="locations-page__card-name">{location.name}</h2>
+                    <p className="locations-page__card-meta">
+                      할 일 {location.taskCount}건 · 식물 {location.plantCount}종
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
         ))}
       </div>
     </FullPage>

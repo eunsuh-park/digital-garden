@@ -4,6 +4,50 @@
   color: var(--color-text-muted);
 }
 
+/* color_token 기준 그룹 */
+.locations-page__groups {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.locations-page__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.locations-page__group-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 6px rgba(90, 65, 40, 0.06);
+}
+
+.locations-page__group-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 5px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.locations-page__group-title {
+  font-size: 12px;
+  font-family: 'DM Mono', ui-monospace, monospace;
+  color: #5c4a32;
+}
+
+.locations-page__group-count {
+  margin-left: auto;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.5);
+  font-family: 'DM Mono', ui-monospace, monospace;
+}
+
 /* 카드 디자인 시스템 (TaskCard / PlantCard와 동일) */
 .locations-page__list {
   display: grid;
@@ -30,6 +74,22 @@
   border-color: #c8b090;
   box-shadow: 0 8px 24px rgba(90, 65, 40, 0.12);
   transform: translateY(-3px);
+}
+
+.locations-page__thumb {
+  width: 92px;
+  height: 58px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.locations-page__thumb svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .locations-page__card-color {
