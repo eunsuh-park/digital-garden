@@ -74,7 +74,8 @@
 .garden-map__svg-wrapper {
   flex: 1;
   min-height: 400px;
-  background: var(--color-surface);
+  background: unset;
+  background-color: unset;
   border-radius: 12px;
   box-shadow: var(--shadow-sm);
   overflow: hidden;
@@ -136,10 +137,10 @@
   gap: 0.5rem;
   max-height: calc(100vh - 140px);
   overflow: auto;
-  padding: 0.5rem;
+  padding: 16px;
   border-radius: 12px;
   background: color-mix(in srgb, var(--color-surface) 92%, transparent);
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
 }
 
 .garden-map__legend-item {
