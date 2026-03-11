@@ -1,11 +1,15 @@
 .app {
+  height: 100vh;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .app__main {
   flex: 1;
+  min-height: 0;
+  overflow: auto;
 }
 
 /* 페이지별 Notion 연동 DB 표시 (콘솔에서 [Notion API] 로그로 확인) */
