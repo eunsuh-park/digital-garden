@@ -4,6 +4,7 @@ import { parseLocationsResponse } from '../Locations/notionSchema';
 import { parseTasksResponse } from './notionSchema';
 import FullPage from '../../components/FullPage/FullPage';
 import ErrorState from '../../components/ErrorState/ErrorState';
+import TaskCard from '../../components/TaskCard';
 import './TasksPage.css';
 
 /**
@@ -54,6 +55,12 @@ export default function TasksPage() {
   const locationMap = Object.fromEntries(locations.map((l) => [l.id, l]));
   const hasContent = pendingTasks.length > 0;
 
+  function toCardStatus(status) {
+    if (status === 'completed') return '완료';
+    if (status === 'progress') return '진행 중';
+    return '시작 전';
+  }
+
   if (loading) {
     return (
       <FullPage title="이번 주 할 일" subtitle="로딩 중...">
@@ -79,32 +86,21 @@ export default function TasksPage() {
       <p className="notion-db-badge" aria-label="연동된 Notion DB">
         Notion DB: Locations(구역) · 할 일
       </p>
-      <div className="full-page__list full-page__list--compact full-page__list--cards">
-        {pendingTasks.map((task) => {
-          const location = task.section_id ? locationMap[task.section_id] : null;
-          return (
-            <article key={task.id} className="full-page__card">
-              <span
-                className="full-page__group-color full-page__group-color--large"
-                style={{ background: location?.color_token || 'var(--color-border)' }}
-                aria-hidden
-              />
-              <div className="full-page__card-body">
-                <div className="full-page__card-row">
-                  <span
-                    className={`full-page__status full-page__status--${task.status}`}
-                  >
-                    {task.status === 'progress' ? '진행중' : '예정'}
-                  </span>
-                  <span className="full-page__card-name">{task.title}</span>
-                </div>
-                <p className="full-page__card-meta">
-                  {task.due_date || '날짜 없음'}
-                  {location ? ` · ${location.name}` : ''}
-                </p>
-              </div>
-            </article>
-          );
+      <div className="tasks-page__cards">
+        {pendingTasks.map((t) => {
+          const location = t.section_id ? locationMap[t.section_id] : null;
+          const cardTask = {
+            Title: t.title,
+            Task_Type: 'Observation',
+            Status: toCardStatus(t.status),
+            Difficulty: 'Easy',
+            Scheduled_Date: t.due_date,
+            Estimated_Duration: '–',
+            Target_Plant: [],
+            Notes: location ? `구역: ${location.name}` : '',
+          };
+
+          return <TaskCard key={t.id} task={cardTask} />;
         })}
       </div>
     </FullPage>

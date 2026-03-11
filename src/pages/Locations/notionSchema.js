@@ -18,12 +18,26 @@ export function parseLocationPage(page) {
   const zoneType = getSelect(props[PROP_MAP.zone_type]) || getRichText(props[PROP_MAP.zone_type]);
   const svgId = getRichText(props[PROP_MAP.svg_id]) || '';
 
+  // gardenMap.svg 도형 id와의 간단한 이름 기반 fallback (Notion에 svg_id가 비어있을 때만 사용)
+  const nameBasedSvgId = (() => {
+    const n = (name || '').toLowerCase();
+    if (!n) return '';
+    if (/(텃밭|채소|vegetable)/.test(n)) return 'vegetable_patch';
+    if (/(앞뜰|front)/.test(n)) return 'front_yard';
+    if (/(뒷뜰|뒷마당|back)/.test(n)) return 'back_yard';
+    if (/(온실|greenhouse)/.test(n)) return 'greenhouse';
+    if (/(비닐|vinyl)/.test(n)) return 'vinylhouse';
+    if (/(우체통|mailbox)/.test(n)) return 'mailbox_area';
+    if (/(차고|garage)/.test(n)) return 'garage';
+    return '';
+  })();
+
   return {
     id: page.id,
     name: name || '(이름 없음)',
     zone_type: zoneType || 'yard',
     color_token: colorRaw && /^#[0-9a-fA-F]{6}$/.test(colorRaw) ? colorRaw : '#a8d5a2',
-    svg_id: svgId || `section-${page.id.replace(/-/g, '')}`,
+    svg_id: svgId || nameBasedSvgId || '',
     taskCount: 0,
     plantCount: 0,
   };

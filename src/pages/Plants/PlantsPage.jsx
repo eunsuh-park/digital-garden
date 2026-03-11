@@ -4,6 +4,7 @@ import { parseLocationsResponse } from '../Locations/notionSchema';
 import { parsePlantsResponse } from './notionSchema';
 import FullPage from '../../components/FullPage/FullPage';
 import ErrorState from '../../components/ErrorState/ErrorState';
+import PlantCard from '../../components/PlantCard';
 import './PlantsPage.css';
 
 /**
@@ -46,6 +47,20 @@ export default function PlantsPage() {
   const locationMap = Object.fromEntries(locations.map((l) => [l.id, l]));
   const hasContent = plants.length > 0;
 
+  function toCardStatus(status) {
+    if (status === 'needs_care') return '관리 필요';
+    if (status === 'planned') return '식재 예정';
+    if (status === 'planted') return '확인됨';
+    return '미확인';
+  }
+
+  function toCardSpecies(plant) {
+    const raw = plant.category || plant.species || '';
+    if (/(나무|목|교목|관목)/.test(raw)) return '나무';
+    if (/(꽃|화|개화)/.test(raw)) return '꽃';
+    return '풀';
+  }
+
   if (loading) {
     return (
       <FullPage title="식물" subtitle="로딩 중...">
@@ -71,25 +86,25 @@ export default function PlantsPage() {
       <p className="notion-db-badge" aria-label="연동된 Notion DB">
         Notion DB: Locations(구역) · 식물
       </p>
-      <div className="full-page__list full-page__list--compact full-page__list--cards">
-        {plants.map((plant) => {
-          const location = plant.section_id ? locationMap[plant.section_id] : null;
-          return (
-            <article key={plant.id} className="full-page__card">
-              <span
-                className="full-page__group-color full-page__group-color--large"
-                style={{ background: location?.color_token || 'var(--color-border)' }}
-                aria-hidden
-              />
-              <div className="full-page__card-body">
-                <h2 className="full-page__card-name">{plant.name}</h2>
-                <p className="full-page__card-meta">
-                  {plant.category} · {plant.species}
-                  {location ? ` · ${location.name}` : ''}
-                </p>
-              </div>
-            </article>
-          );
+      <div className="plants-page__cards">
+        {plants.map((p) => {
+          const location = p.section_id ? locationMap[p.section_id] : null;
+          const cardPlant = {
+            Name: p.name,
+            Species: toCardSpecies(p),
+            Status: toCardStatus(p.status),
+            Location: location ? [location.name] : [],
+            Color: undefined,
+            'Bloom Season': p.bloom_season && p.bloom_season !== '-' ? p.bloom_season : undefined,
+            'Pruning Season': undefined,
+            'Fertilizing Season': undefined,
+            Quantity: undefined,
+            Notes: [p.category && p.category !== '-' ? `카테고리: ${p.category}` : null, p.species && p.species !== '-' ? `종: ${p.species}` : null]
+              .filter(Boolean)
+              .join(' · '),
+          };
+
+          return <PlantCard key={p.id} plant={cardPlant} />;
         })}
       </div>
     </FullPage>

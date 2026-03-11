@@ -11,6 +11,14 @@ npm run dev
 
 브라우저에서 http://localhost:5173 접속
 
+로컬 개발 시 `npm run dev`는 **Vite(프론트)** 와 **로컬 API 서버( /api 프록시 )** 를 함께 실행합니다.  
+Notion 데이터가 안 뜨면 `.env`에 아래 4개가 있는지 먼저 확인하세요.
+
+- `NOTION_API_KEY`
+- `NOTION_DATABASE_ID_SECTIONS`
+- `NOTION_DATABASE_ID_TASKS`
+- `NOTION_DATABASE_ID_PLANTS`
+
 ## 빌드
 
 ```bash

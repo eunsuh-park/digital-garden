@@ -19,7 +19,17 @@ async function fetchApi(path, label) {
   console.log(`${LOG_PREFIX} 요청: ${label || path} → ${url}`);
   try {
     const res = await fetch(url);
-    const data = await res.json().catch(() => ({}));
+    const contentType = res.headers.get('content-type') || '';
+    const isJson = contentType.includes('application/json');
+    const data = isJson ? await res.json().catch(() => null) : null;
+
+    // 정적 호스팅에서 /api 요청이 index.html(200)로 떨어지는 케이스를 조기에 감지
+    if (!isJson || data == null) {
+      const hint = apiOrigin
+        ? 'API 응답 형식이 올바르지 않습니다.'
+        : '정적 호스팅에서는 /api가 동작하지 않습니다. `VITE_API_ORIGIN`을 Vercel 도메인으로 설정하세요.';
+      throw new Error(`${hint} (${label || path})`);
+    }
     if (!res.ok) {
       console.warn(`${LOG_PREFIX} 실패: ${label || path}`, res.status, data);
       throw new Error(data.error || `API error: ${res.status}`);

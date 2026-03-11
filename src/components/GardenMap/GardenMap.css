@@ -6,24 +6,69 @@
 }
 
 .garden-map__toolbar {
+  position: fixed;
+  left: 50%;
+  bottom: 1rem;
+  transform: translateX(-50%);
+  z-index: 30;
   display: flex;
-  justify-content: flex-end;
-  margin-bottom: 1rem;
+  justify-content: center;
 }
 
-.garden-map__rotate-btn {
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background: var(--color-surface);
-  font-size: 0.9rem;
+.garden-map__toolbar-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14);
+}
+
+.garden-map__toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.garden-map__toolbar-label {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.55);
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+
+.garden-map__toolbar-btn {
+  height: 28px;
+  min-width: 44px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.9);
+  color: rgba(0, 0, 0, 0.82);
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
+  transition: transform 0.12s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
-.garden-map__rotate-btn:hover {
-  background: rgba(45, 90, 39, 0.06);
-  border-color: var(--color-primary);
+.garden-map__toolbar-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(0, 0, 0, 0.22);
+}
+
+.garden-map__toolbar-btn--active {
+  background: rgba(0, 0, 0, 0.86);
+  border-color: rgba(0, 0, 0, 0.86);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.garden-map__toolbar-divider {
+  width: 1px;
+  height: 22px;
+  background: rgba(0, 0, 0, 0.12);
 }
 
 .garden-map__svg-wrapper {
@@ -43,10 +88,19 @@
   transform: rotate(0deg);
 }
 
-.garden-map__svg {
+.garden-map__asset {
+  width: 100%;
+  height: 100%;
+}
+
+.garden-map__asset svg {
   width: 100%;
   height: 100%;
   display: block;
+}
+
+.garden-map__asset--satellite {
+  filter: saturate(1.15) contrast(1.05);
 }
 
 .garden-map__section {
@@ -59,10 +113,21 @@
 }
 
 .garden-map__legend {
+  position: fixed;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 30;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: stretch;
   gap: 0.5rem;
-  margin-top: 1rem;
+  max-height: calc(100vh - 140px);
+  overflow: auto;
+  padding: 0.5rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+  box-shadow: var(--shadow-sm);
 }
 
 .garden-map__legend-item {
