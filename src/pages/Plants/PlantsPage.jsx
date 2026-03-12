@@ -140,6 +140,8 @@ export default function PlantsPage() {
           const cardPlant = {
             Name: p.name,
             Species: toCardSpecies(p),
+            SpeciesRaw: p.species && p.species !== '-' ? p.species : undefined,
+            Category: p.category && p.category !== '-' ? p.category : undefined,
             Status: toCardStatus(p.status),
             Location: location ? [location.name] : [],
             Color: undefined,

@@ -160,6 +160,25 @@ export function PlantCard({ plant }) {
               >
                 {plant.Species}
               </span>
+              {plant.Category && (
+                <span
+                  style={{
+                    fontSize: 11,
+                    color: "#5C4A32",
+                    background: "#EDE8DE",
+                    padding: "2px 8px",
+                    borderRadius: 10,
+                    fontFamily: "'DM Mono', monospace",
+                  }}
+                >
+                  {plant.Category}
+                </span>
+              )}
+              {plant.SpeciesRaw && (
+                <span style={{ fontSize: 11, color: "#8A7260", fontFamily: "'DM Mono', monospace" }}>
+                  종: {plant.SpeciesRaw}
+                </span>
+              )}
               {dot && (
                 <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "#8A7260" }}>
                   <span
@@ -176,6 +195,19 @@ export function PlantCard({ plant }) {
                 </span>
               )}
             </div>
+            {plant["Bloom Season"] && (
+              <div style={{ marginTop: 6 }}>
+                <span
+                  style={{
+                    fontSize: 11,
+                    color: "#8A7260",
+                    fontFamily: "'DM Mono', monospace",
+                  }}
+                >
+                  개화시기 {plant["Bloom Season"]}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Location */}
@@ -241,12 +273,28 @@ export function PlantCard({ plant }) {
                 color: "#C8A870",
                 fontFamily: "'Noto Serif KR', serif",
                 fontWeight: 600,
-                marginBottom: 18,
+                marginBottom: 12,
                 letterSpacing: "0.04em",
               }}
             >
               {plant.Name} — 시즌 정보
             </div>
+            {(plant.Category || plant.SpeciesRaw) && (
+              <div
+                style={{
+                  display: "flex",
+                  gap: 10,
+                  flexWrap: "wrap",
+                  marginBottom: 14,
+                  fontSize: 11,
+                  color: "#8A7260",
+                  fontFamily: "'DM Mono', monospace",
+                }}
+              >
+                {plant.Category && <span>카테고리: {plant.Category}</span>}
+                {plant.SpeciesRaw && <span>종: {plant.SpeciesRaw}</span>}
+              </div>
+            )}
             <div
               style={{
                 display: "grid",
@@ -254,7 +302,7 @@ export function PlantCard({ plant }) {
                 gap: "16px 24px",
               }}
             >
-              <SeasonBadge label="개화" value={plant["Bloom Season"]} />
+              <SeasonBadge label="개화시기" value={plant["Bloom Season"]} />
               <SeasonBadge label="전정" value={plant["Pruning Season"]} />
               <SeasonBadge label="비료" value={plant["Fertilizing Season"]} />
             </div>
