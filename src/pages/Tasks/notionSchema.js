@@ -13,6 +13,7 @@ export const PROP_MAP = {
   target_plant: 'Target_Plant', // relation → Plants (N:1, Plants.Name과 연결)
   notes: 'Notes',          // rich_text (설명/메모)
   difficulty: 'Difficulty', // select: Easy | Medium | Hard (또는 한글 난이도)
+  task_type: 'Task_Type',  // select: Pruning, Fertilizing, Propagation, Watering, Transplanting, Observation, Cleaning, Decorating, Construction
 };
 
 export function parseTaskPage(page) {
@@ -25,6 +26,7 @@ export function parseTaskPage(page) {
   const targetPlantIds = getRelation(props[PROP_MAP.target_plant]);
   const notes = getRichText(props[PROP_MAP.notes]) || getRichText(props['Notes']) || '';
   const difficultyRaw = getSelect(props[PROP_MAP.difficulty]) || getSelect(props['Difficulty']) || '';
+  const taskTypeRaw = getSelect(props[PROP_MAP.task_type]) || getSelect(props['Task_Type']) || '';
 
   // status: Notion 선택값 → progress | pending | completed
   const statusMap = {
@@ -47,6 +49,16 @@ export function parseTaskPage(page) {
   };
   const difficulty = difficultyMap[difficultyRaw] || difficultyMap[difficultyRaw?.trim()] || 'Easy';
 
+  // Task_Type: Notion 값 → 영문 키 (TaskCard taskTypeConfig에서 한글 라벨로 표시)
+  const TASK_TYPE_KEYS = [
+    'Pruning', 'Fertilizing', 'Propagation', 'Watering', 'Transplanting',
+    'Observation', 'Cleaning', 'Decorating', 'Construction',
+  ];
+  const taskTypeNorm = (taskTypeRaw || '').trim();
+  const task_type = TASK_TYPE_KEYS.includes(taskTypeNorm)
+    ? taskTypeNorm
+    : (TASK_TYPE_KEYS.find((k) => k.toLowerCase() === taskTypeNorm.toLowerCase()) || 'Observation');
+
   return {
     id: page.id,
     title: title || '(제목 없음)',
@@ -56,6 +68,7 @@ export function parseTaskPage(page) {
     target_plant_ids: targetPlantIds || [],
     notes: notes.trim() || '',
     difficulty,
+    task_type,
   };
 }
 

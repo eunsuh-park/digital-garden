@@ -91,7 +91,7 @@ export default function TasksPage() {
           const location = t.section_id ? locationMap[t.section_id] : null;
           const cardTask = {
             Title: t.title,
-            Task_Type: 'Observation',
+            Task_Type: t.task_type ?? 'Observation',
             Status: toCardStatus(t.status),
             Difficulty: t.difficulty ?? 'Easy',
             Scheduled_Date: t.due_date,

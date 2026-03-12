@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+/** Tasks 테이블 Task_Type 값 → 프론트 한글 라벨 + 아이콘/색상 */
 const taskTypeConfig = {
   Pruning:      { icon: "✂", label: "전정",   color: "#4A90C4", bg: "#E8F2FA" },
   Fertilizing:  { icon: "⬡", label: "비료",   color: "#B8860B", bg: "#FDF6DC" },
