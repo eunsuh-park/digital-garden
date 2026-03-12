@@ -18,6 +18,8 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
   const [activeLocationId, setActiveLocationId] = useState(null);
   const [hoverLocationId, setHoverLocationId] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  /** Locations Color 기반 필터: 선택된 color_token Set. 비어 있으면 전체 표시 */
+  const [selectedLegendColors, setSelectedLegendColors] = useState(() => new Set());
   const [mapBase, setMapBase] = useState('road'); // road | house
   const [mapDirection, setMapDirection] = useState('horizontal'); // vertical | horizontal
   const [zoom, setZoom] = useState(1); // 1 = 100% (최소)
@@ -205,6 +207,37 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
     }));
   }, [locations]);
 
+  /** Color별로 그룹 (legend = Color 기반 필터 UI) */
+  const legendByColor = useMemo(() => {
+    const byColor = new Map();
+    locations.forEach((l) => {
+      const c = (l.color_token || '').trim() || '#a8d5a2';
+      if (!byColor.has(c)) byColor.set(c, []);
+      byColor.get(c).push(l);
+    });
+    return Array.from(byColor.entries()).map(([color, items]) => ({ color, items }));
+  }, [locations]);
+
+  const toggleLegendColor = useCallback((color) => {
+    setSelectedLegendColors((prev) => {
+      const next = new Set(prev);
+      if (next.has(color)) next.delete(color);
+      else next.add(color);
+      return next;
+    });
+  }, []);
+
+  /** 필터 적용: 선택된 색이 없으면 전체, 있으면 해당 색만 강조(나머지 흐리게) */
+  const colorFilterActive = selectedLegendColors.size > 0;
+  const locationVisibleByColor = useCallback(
+    (colorToken) => {
+      if (!colorFilterActive) return true;
+      const c = (colorToken || '').trim() || '#a8d5a2';
+      return selectedLegendColors.has(c);
+    },
+    [colorFilterActive, selectedLegendColors]
+  );
+
   useEffect(() => {
     const host = svgHostRef.current;
     if (!host) return;
@@ -299,8 +332,11 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
 
       const isActive = activeLocationId === location.id;
       const isHover = hoverLocationId === location.id;
-      el.style.opacity = '1';
-      el.style.fillOpacity = '1';
+      const visible = locationVisibleByColor(location.color_token);
+      // Color 필터: 선택된 색이 있으면 해당 색만 강조, 나머지는 흐리게
+      el.style.opacity = visible ? '1' : '0.35';
+      el.style.fillOpacity = visible ? '1' : '0.5';
+      el.style.pointerEvents = visible ? 'auto' : 'none';
       // 원본 fill을 덮어쓰기 (Notion의 color_token 사용)
       if (location.color_token) {
         el.style.fill = location.color_token;
@@ -308,7 +344,7 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
       el.style.stroke = isActive || isHover ? '#2d5a27' : 'rgba(0,0,0,0.15)';
       el.style.strokeWidth = isActive || isHover ? '2' : '1';
     });
-  }, [resolvedLocations, activeLocationId, hoverLocationId, svgIdFallbackMap]);
+  }, [resolvedLocations, activeLocationId, hoverLocationId, svgIdFallbackMap, locationVisibleByColor]);
 
   return (
     <div className="garden-map">
@@ -347,21 +383,34 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
         />
       </div>
 
-      <div className="garden-map__legend">
-        {locations.map((l) => (
+      <div className="garden-map__legend" role="group" aria-label="색상별 필터">
+        {colorFilterActive && (
           <button
-            key={l.id}
             type="button"
-            className={`garden-map__legend-item ${activeLocationId === l.id ? 'garden-map__legend-item--active' : ''}`}
-            onClick={() => {
-              setActiveLocationId(l.id);
-              setDrawerOpen(true);
-            }}
+            className="garden-map__legend-item garden-map__legend-item--reset"
+            onClick={() => setSelectedLegendColors(new Set())}
+            aria-label="필터 해제, 전체 보기"
           >
-            <span className="garden-map__legend-color" style={{ background: l.color_token }} />
-            {l.name}
+            전체 보기
           </button>
-        ))}
+        )}
+        {legendByColor.map(({ color, items }) => {
+          const isSelected = selectedLegendColors.has(color);
+          const label = items.length > 1 ? `${items[0].name} 외 ${items.length - 1}개` : items[0]?.name || '구역';
+          return (
+            <button
+              key={color}
+              type="button"
+              className={`garden-map__legend-item ${isSelected ? 'garden-map__legend-item--active' : ''}`}
+              onClick={() => toggleLegendColor(color)}
+              aria-pressed={isSelected}
+              aria-label={`${label}, ${isSelected ? '필터 해제' : '필터 적용'}`}
+            >
+              <span className="garden-map__legend-color" style={{ background: color }} />
+              <span className="garden-map__legend-label">{label}</span>
+            </button>
+          );
+        })}
       </div>
 
       {hoverLocation && (

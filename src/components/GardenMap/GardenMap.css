@@ -191,8 +191,25 @@
   background: rgba(45, 90, 39, 0.08);
 }
 
+.garden-map__legend-item--reset {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.garden-map__legend-item--reset:hover {
+  color: var(--color-primary);
+}
+
 .garden-map__legend-color {
   width: 12px;
   height: 12px;
   border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.garden-map__legend-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
