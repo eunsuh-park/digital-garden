@@ -12,6 +12,7 @@ export const PROP_MAP = {
   section: 'Target_Location', // relation → Locations (N:1)
   target_plant: 'Target_Plant', // relation → Plants (N:1, Plants.Name과 연결)
   notes: 'Notes',          // rich_text (설명/메모)
+  difficulty: 'Difficulty', // select: Easy | Medium | Hard (또는 한글 난이도)
 };
 
 export function parseTaskPage(page) {
@@ -23,6 +24,7 @@ export function parseTaskPage(page) {
   const sectionIds = getRelation(props[PROP_MAP.section]);
   const targetPlantIds = getRelation(props[PROP_MAP.target_plant]);
   const notes = getRichText(props[PROP_MAP.notes]) || getRichText(props['Notes']) || '';
+  const difficultyRaw = getSelect(props[PROP_MAP.difficulty]) || getSelect(props['Difficulty']) || '';
 
   // status: Notion 선택값 → progress | pending | completed
   const statusMap = {
@@ -32,6 +34,19 @@ export function parseTaskPage(page) {
   };
   const status = statusMap[statusRaw] ?? (statusRaw ? 'pending' : 'pending');
 
+  // Difficulty: Notion 값 → Easy | Medium | Hard (TaskCard difficultyConfig)
+  const difficultyMap = {
+    Easy: 'Easy',
+    Medium: 'Medium',
+    Hard: 'Hard',
+    쉬움: 'Easy',
+    쉬운: 'Easy',
+    보통: 'Medium',
+    어려움: 'Hard',
+    어려운: 'Hard',
+  };
+  const difficulty = difficultyMap[difficultyRaw] || difficultyMap[difficultyRaw?.trim()] || 'Easy';
+
   return {
     id: page.id,
     title: title || '(제목 없음)',
@@ -40,6 +55,7 @@ export function parseTaskPage(page) {
     section_id: sectionIds[0] || null,
     target_plant_ids: targetPlantIds || [],
     notes: notes.trim() || '',
+    difficulty,
   };
 }
 

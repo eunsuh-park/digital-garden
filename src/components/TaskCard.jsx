@@ -22,11 +22,17 @@ const statusConfig = {
   "완료":     { color: "#27AE60", bg: "#EAF7EF", dot: "#2ECC71" },
 };
 
+/** Difficulty: Easy | Medium | Hard (Tasks 테이블 Difficulty 필드와 동일) */
 const difficultyConfig = {
   Easy:   { label: "Easy",   bars: 1, color: "#3E7B27" },
   Medium: { label: "Medium", bars: 2, color: "#C47E1A" },
   Hard:   { label: "Hard",   bars: 3, color: "#C0392B" },
 };
+
+function normalizeDifficulty(value) {
+  if (value === "Easy" || value === "Medium" || value === "Hard") return value;
+  return "Easy";
+}
 
 const SAMPLE_TASKS = [
   {
@@ -254,7 +260,7 @@ export function TaskCard({ task }) {
           paddingLeft: 8,
         }}
       >
-        <DifficultyBar difficulty={task.Difficulty} />
+        <DifficultyBar difficulty={normalizeDifficulty(task.Difficulty)} />
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {task.Estimated_Duration && task.Estimated_Duration !== "–" && (
             <span style={{ fontSize: 11, color: "#A89880", fontFamily: "'DM Mono', monospace" }}>

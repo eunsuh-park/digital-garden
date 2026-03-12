@@ -93,7 +93,7 @@ export default function TasksPage() {
             Title: t.title,
             Task_Type: 'Observation',
             Status: toCardStatus(t.status),
-            Difficulty: 'Easy',
+            Difficulty: t.difficulty ?? 'Easy',
             Scheduled_Date: t.due_date,
             Estimated_Duration: '–',
             Target_Plant: [],
