@@ -47,18 +47,27 @@ export default function LandingPage() {
         const plantsList = parsePlantsResponse(plantsRes);
         const taskCountMap = {};
         const plantCountMap = {};
+        const normId = (id) => (id == null ? '' : String(id).trim());
         tasksList.filter((t) => t.status !== 'completed').forEach((t) => {
-          if (t.section_id) taskCountMap[t.section_id] = (taskCountMap[t.section_id] || 0) + 1;
+          const sid = normId(t.section_id);
+          if (sid) taskCountMap[sid] = (taskCountMap[sid] || 0) + 1;
         });
         plantsList.forEach((p) => {
-          if (p.section_id) plantCountMap[p.section_id] = (plantCountMap[p.section_id] || 0) + 1;
+          const sid = normId(p.section_id);
+          if (sid) plantCountMap[sid] = (plantCountMap[sid] || 0) + 1;
         });
 
-        const locationsList = parseLocationsResponse(
+        let locationsList = parseLocationsResponse(
           locationsRes,
           taskCountMap,
           plantCountMap
         );
+        // 맵 키 정규화와 맞추기: location.id로 조회 시 동일 형식 사용
+        locationsList = locationsList.map((loc) => ({
+          ...loc,
+          taskCount: taskCountMap[normId(loc.id)] ?? loc.taskCount ?? 0,
+          plantCount: plantCountMap[normId(loc.id)] ?? loc.plantCount ?? 0,
+        }));
         setLocations(locationsList);
         setTasks(tasksList);
         setPlants(plantsList);

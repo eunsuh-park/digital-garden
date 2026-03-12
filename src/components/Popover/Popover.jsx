@@ -45,15 +45,15 @@ export default function Popover({ section, tasks = [], plants = [], position, on
         </div>
       </div>
 
-      {/* 호버한 SVG_id → Location 테이블 해당 행 → 그 위치에 매칭되는 Tasks / Plants 테이블 전체 건수 */}
+      {/* 호버한 SVG_id → Location 해당 행 → 그 위치에 매칭되는 Tasks/Plants 전체 건수 (section 집계값 우선, 없으면 전달된 배열 길이 사용) */}
       <div className="popover__stats">
         <span className="popover__stat">
           <span className="popover__stat-icon">📋</span>
-          할 일 {section.taskCount ?? 0}건
+          할 일 {(section.taskCount != null ? section.taskCount : tasks.length)}건
         </span>
         <span className="popover__stat">
           <span className="popover__stat-icon">🌱</span>
-          식물 {section.plantCount ?? 0}종
+          식물 {(section.plantCount != null ? section.plantCount : plants.length)}종
         </span>
       </div>
 
