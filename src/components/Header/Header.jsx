@@ -1,12 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Icon } from '@iconify/react';
-import map2Fill from '@iconify-icons/mingcute/map-2-fill';
-import task2Fill from '@iconify-icons/mingcute/task-2-fill';
+import mapLine from '@iconify-icons/mingcute/map-line';
+import task2Line from '@iconify-icons/mingcute/task-2-line';
 import leaf3Fill from '@iconify-icons/mingcute/leaf-3-fill';
 import './Header.css';
 
 /**
- * 공통 헤더 - 로고, 탭(지도/할 일), 향후 공유 버튼
+ * 공통 ?�더 - 로고, ??지??????, ?�후 공유 버튼
  * PG-09, CP-01, CP-02
  */
 export default function Header() {
@@ -15,8 +15,8 @@ export default function Header() {
 
   return (
     <header className="page-header">
-      <Link to="/" className="page-header__logo" aria-label="홈으로 이동">
-        🌿 양주 정원
+      <Link to="/" className="page-header__logo" aria-label="?�으�??�동">
+        ?�� ?�주 ?�원
       </Link>
       <nav className="page-header__tabs" role="tablist">
         <Link
@@ -25,8 +25,8 @@ export default function Header() {
           aria-selected={path === '/' || path === '/map'}
           className={`page-header__tab ${path === '/' || path === '/map' ? 'page-header__tab--active' : ''}`}
         >
-          <Icon icon={map2Fill} width={18} height={18} />
-          지도
+          <Icon icon={mapLine} width={18} height={18} />
+          지??
         </Link>
         <Link
           to="/tasks"
@@ -34,8 +34,8 @@ export default function Header() {
           aria-selected={path === '/tasks'}
           className={`page-header__tab ${path === '/tasks' ? 'page-header__tab--active' : ''}`}
         >
-          <Icon icon={task2Fill} width={18} height={18} />
-          할 일
+          <Icon icon={task2Line} width={18} height={18} />
+          ????
         </Link>
         <Link
           to="/plants"
@@ -44,7 +44,7 @@ export default function Header() {
           className={`page-header__tab ${path === '/plants' ? 'page-header__tab--active' : ''}`}
         >
           <Icon icon={leaf3Fill} width={18} height={18} />
-          식물
+          ?�물
         </Link>
       </nav>
     </header>

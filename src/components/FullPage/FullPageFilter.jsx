@@ -1,19 +1,21 @@
+import { Icon } from '@iconify/react';
+import refresh2Line from '@iconify-icons/mingcute/refresh-2-line';
 import './FullPageFilter.css';
 
 /**
- * FullPage 필터 UI
+ * FullPage ?�터 UI
  * @param {Object} props
- * @param {{ key: string, label: string, options: { value: string, label: string }[] }[]} props.filters - 필터 설정 (DB 스키마 필드 기준)
- * @param {{ [key: string]: string }} props.values - 현재 선택값 { filterKey: optionValue }
+ * @param {{ key: string, label: string, options: { value: string, label: string }[] }[]} props.filters - ?�터 ?�정 (DB ?�키�??�드 기�?)
+ * @param {{ [key: string]: string }} props.values - ?�재 ?�택�?{ filterKey: optionValue }
  * @param {(key: string, value: string) => void} props.onChange
- * @param {() => void} [props.onReset] - 전체 필터 초기화
+ * @param {() => void} [props.onReset] - ?�체 ?�터 초기??
  */
 export default function FullPageFilter({ filters = [], values = {}, onChange, onReset }) {
   if (filters.length === 0) return null;
   const hasActive = filters.some((f) => !!values[f.key]);
 
   return (
-    <div className="full-page-filter" role="group" aria-label="필터">
+    <div className="full-page-filter" role="group" aria-label="?�터">
       {filters.map((f) => {
         const active = !!values[f.key];
         return (
@@ -29,9 +31,9 @@ export default function FullPageFilter({ filters = [], values = {}, onChange, on
               className="full-page-filter__select"
               value={values[f.key] ?? ''}
               onChange={(e) => onChange(f.key, e.target.value)}
-              aria-label={`${f.label} 필터`}
+              aria-label={`${f.label} ?�터`}
             >
-              <option value="">전체</option>
+              <option value="">?�체</option>
               {f.options.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
@@ -48,7 +50,8 @@ export default function FullPageFilter({ filters = [], values = {}, onChange, on
           onClick={onReset}
           disabled={!hasActive}
         >
-          초기화
+          <Icon icon={refresh2Fill} width={14} height={14} />
+          초기??
         </button>
       )}
     </div>
