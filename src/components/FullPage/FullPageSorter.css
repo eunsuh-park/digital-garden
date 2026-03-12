@@ -47,3 +47,11 @@
   border-color: var(--color-primary);
   color: var(--color-primary);
 }
+
+.full-page-sorter--active .full-page-sorter__label {
+  color: var(--color-primary);
+}
+
+.full-page-sorter--active .full-page-sorter__select {
+  border-color: var(--color-primary);
+}

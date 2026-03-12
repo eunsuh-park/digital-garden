@@ -24,7 +24,8 @@ export default function PlantsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filterValues, setFilterValues] = useState({});
-  const [sortValue, setSortValue] = useState({ field: 'name', dir: 'asc' });
+  const defaultSort = { field: 'name', dir: 'asc' };
+  const [sortValue, setSortValue] = useState(defaultSort);
 
   useEffect(() => {
     let cancelled = false;
@@ -56,18 +57,20 @@ export default function PlantsPage() {
 
   const locationMap = useMemo(() => Object.fromEntries(locations.map((l) => [l.id, l])), [locations]);
   const plantsFilters = useMemo(() => {
-    const categories = [...new Set(plants.map((p) => p.category).filter(Boolean))].sort().map((c) => ({ value: c, label: c }));
+    const speciesKinds = [...new Set(plants.map((p) => toCardSpecies(p)).filter(Boolean))]
+      .sort()
+      .map((s) => ({ value: s, label: s }));
     const locationOptions = locations.map((l) => ({ value: l.id, label: l.name }));
     return [
       { key: 'status', label: '상태', options: [{ value: 'planted', label: '확인됨' }, { value: 'planned', label: '식재 예정' }, { value: 'needs_care', label: '관리 필요' }] },
-      { key: 'category', label: '카테고리', options: categories },
+      { key: 'species_kind', label: '종류', options: speciesKinds },
       { key: 'section_id', label: '위치', options: locationOptions },
     ].filter((f) => f.options.length > 0 || f.key === 'status');
   }, [plants, locations]);
   const filteredAndSortedPlants = useMemo(() => {
     let list = plants;
     if (filterValues.status) list = list.filter((p) => (p.status || '') === filterValues.status);
-    if (filterValues.category) list = list.filter((p) => (p.category || '') === filterValues.category);
+    if (filterValues.species_kind) list = list.filter((p) => toCardSpecies(p) === filterValues.species_kind);
     if (filterValues.section_id) list = list.filter((p) => (p.section_id || '') === filterValues.section_id);
     const field = sortValue.field || 'name';
     const dir = sortValue.dir === 'desc' ? -1 : 1;
@@ -116,24 +119,27 @@ export default function PlantsPage() {
       title="식물"
       subtitle={`식재된 식물 ${plants.length}종`}
       emptyMessage={!hasContent ? '등록된 식물이 없습니다.' : undefined}
-      headerRight={
-        <>
-          <FullPageFilter
-            filters={plantsFilters}
-            values={filterValues}
-            onChange={(key, value) => setFilterValues((prev) => ({ ...prev, [key]: value || undefined }))}
-          />
-          <FullPageSorter
-            options={PLANTS_SORT_OPTIONS}
-            value={sortValue}
-            onChange={(field, dir) => setSortValue({ field, dir })}
-          />
-        </>
-      }
     >
       <p className="notion-db-badge" aria-label="연동된 Notion DB">
         Notion DB: Locations(구역) · 식물
       </p>
+      <div className="plants-page__controls">
+        <FullPageFilter
+          filters={plantsFilters}
+          values={filterValues}
+          onChange={(key, value) => setFilterValues((prev) => ({ ...prev, [key]: value || undefined }))}
+          onReset={() => {
+            setFilterValues({});
+            setSortValue(defaultSort);
+          }}
+        />
+        <FullPageSorter
+          options={PLANTS_SORT_OPTIONS}
+          value={sortValue}
+          active={sortValue.field !== defaultSort.field || sortValue.dir !== defaultSort.dir}
+          onChange={(field, dir) => setSortValue({ field, dir })}
+        />
+      </div>
       <div className="plants-page__cards">
         {filteredAndSortedPlants.map((p) => {
           const location = p.section_id ? locationMap[p.section_id] : null;
