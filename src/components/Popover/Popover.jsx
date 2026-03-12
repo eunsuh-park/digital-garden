@@ -45,14 +45,15 @@ export default function Popover({ section, tasks = [], plants = [], position, on
         </div>
       </div>
 
+      {/* 호버한 SVG_id → Location 테이블 해당 행 → 그 위치에 매칭되는 Tasks / Plants 테이블 전체 건수 */}
       <div className="popover__stats">
         <span className="popover__stat">
           <span className="popover__stat-icon">📋</span>
-          할 일 {tasks.length}건
+          할 일 {section.taskCount ?? 0}건
         </span>
         <span className="popover__stat">
           <span className="popover__stat-icon">🌱</span>
-          식물 {plants.length}종
+          식물 {section.plantCount ?? 0}종
         </span>
       </div>
 
