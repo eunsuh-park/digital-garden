@@ -1,14 +1,16 @@
 /**
  * Tasks DB 스키마 매핑
- * Notion DB의 실제 property 이름에 맞게 수정하세요
+ * - Target_Location → Locations (N:1)
+ * - Target_Plant → Plants (N:1, Plants.Name과 연결)
  */
 import { getTitle, getSelect, getDate, getRelation } from '../../lib/parseNotionProps';
 
 export const PROP_MAP = {
-  title: '제목',      // title
-  status: '상태',     // select
-  due_date: '마감일', // date
-  section: '위치',    // relation → Section DB
+  title: '제목',           // title
+  status: '상태',          // select
+  due_date: '마감일',      // date
+  section: 'Target_Location', // relation → Locations (N:1)
+  target_plant: 'Target_Plant', // relation → Plants (N:1, Plants.Name과 연결)
 };
 
 export function parseTaskPage(page) {
@@ -17,6 +19,7 @@ export function parseTaskPage(page) {
   const statusRaw = getSelect(props[PROP_MAP.status]);
   const due = getDate(props[PROP_MAP.due_date]);
   const sectionIds = getRelation(props[PROP_MAP.section]);
+  const targetPlantIds = getRelation(props[PROP_MAP.target_plant]);
 
   // status: Notion 선택값 → progress | pending | completed
   const statusMap = {
@@ -32,6 +35,7 @@ export function parseTaskPage(page) {
     status,
     due_date: due,
     section_id: sectionIds[0] || null,
+    target_plant_ids: targetPlantIds || [],
   };
 }
 

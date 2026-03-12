@@ -1,6 +1,6 @@
 /**
  * Plants DB 스키마 매핑
- * Notion DB의 실제 property 이름에 맞게 수정하세요
+ * - Location → Locations (1:1, Locations.Name과 연결)
  */
 import { getTitle, getRichText, getSelect, getRelation } from '../../lib/parseNotionProps';
 
@@ -10,7 +10,7 @@ export const PROP_MAP = {
   category: '카테고리',
   status: '상태',
   bloom_season: '개화시기',
-  section: '위치',    // relation → Section DB
+  section: 'Location', // relation → Locations (1:1, Locations.Name과 연결)
 };
 
 export function parsePlantPage(page) {
