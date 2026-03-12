@@ -6,7 +6,7 @@ import { getTitle, getRichText, getSelect } from '../../lib/parseNotionProps';
 
 export const PROP_MAP = {
   name: '이름',       // title
-  color: '색상',      // rich_text or select
+  color: 'Color',     // Notion Color 필드 (색상 값 그대로) — '색상' 한글 폴백
   zone_type: '구역타입',
   svg_id: 'svg_id',
 };
@@ -14,7 +14,8 @@ export const PROP_MAP = {
 export function parseLocationPage(page) {
   const props = page.properties || {};
   const name = getTitle(props[PROP_MAP.name]) || getTitle(props['Name']);
-  const colorRaw = getRichText(props[PROP_MAP.color]) || getSelect(props[PROP_MAP.color]);
+  const colorRaw = getRichText(props[PROP_MAP.color]) || getSelect(props[PROP_MAP.color])
+    || getRichText(props['Color']) || getSelect(props['Color']) || getRichText(props['색상']) || getSelect(props['색상']);
   const zoneType = getSelect(props[PROP_MAP.zone_type]) || getRichText(props[PROP_MAP.zone_type]);
   const svgId = getRichText(props[PROP_MAP.svg_id]) || '';
 
