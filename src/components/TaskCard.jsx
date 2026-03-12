@@ -209,21 +209,37 @@ export function TaskCard({ task }) {
         </div>
       )}
 
-      {/* Notes */}
+      {/* Notes: Tasks 테이블 Notes 필드 — 설명/메모 */}
       {task.Notes ? (
-        <div
-          style={{
-            paddingLeft: 8,
-            fontSize: 12,
-            color: "#8A7260",
-            lineHeight: 1.6,
-            fontFamily: "'Noto Serif KR', serif",
-            borderLeft: "2px solid #E8E0D0",
-            paddingTop: 2,
-            paddingBottom: 2,
-          }}
-        >
-          {task.Notes}
+        <div style={{ paddingLeft: 8 }}>
+          <div
+            style={{
+              fontSize: 10,
+              color: "#A89880",
+              fontFamily: "'DM Mono', monospace",
+              letterSpacing: "0.04em",
+              marginBottom: 4,
+              textTransform: "uppercase",
+            }}
+          >
+            설명
+          </div>
+          <div
+            style={{
+              fontSize: 13,
+              color: "#5C4A32",
+              lineHeight: 1.55,
+              fontFamily: "'Noto Serif KR', serif",
+              borderLeft: "3px solid #E8E0D0",
+              paddingLeft: 10,
+              paddingTop: 6,
+              paddingBottom: 6,
+              background: "rgba(232, 224, 208, 0.2)",
+              borderRadius: "0 8px 8px 0",
+            }}
+          >
+            {task.Notes}
+          </div>
         </div>
       ) : null}
 

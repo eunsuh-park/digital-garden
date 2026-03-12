@@ -97,7 +97,7 @@ export default function TasksPage() {
             Scheduled_Date: t.due_date,
             Estimated_Duration: '–',
             Target_Plant: [],
-            Notes: location ? `구역: ${location.name}` : '',
+            Notes: t.notes || (location ? `구역: ${location.name}` : ''),
           };
 
           return <TaskCard key={t.id} task={cardTask} />;

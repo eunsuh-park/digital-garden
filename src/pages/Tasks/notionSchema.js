@@ -3,7 +3,7 @@
  * - Target_Location → Locations (N:1)
  * - Target_Plant → Plants (N:1, Plants.Name과 연결)
  */
-import { getTitle, getSelect, getDate, getRelation } from '../../lib/parseNotionProps';
+import { getTitle, getRichText, getSelect, getDate, getRelation } from '../../lib/parseNotionProps';
 
 export const PROP_MAP = {
   title: '제목',           // title
@@ -11,6 +11,7 @@ export const PROP_MAP = {
   due_date: '마감일',      // date
   section: 'Target_Location', // relation → Locations (N:1)
   target_plant: 'Target_Plant', // relation → Plants (N:1, Plants.Name과 연결)
+  notes: 'Notes',          // rich_text (설명/메모)
 };
 
 export function parseTaskPage(page) {
@@ -21,6 +22,7 @@ export function parseTaskPage(page) {
   const due = getDate(props[PROP_MAP.due_date]);
   const sectionIds = getRelation(props[PROP_MAP.section]);
   const targetPlantIds = getRelation(props[PROP_MAP.target_plant]);
+  const notes = getRichText(props[PROP_MAP.notes]) || getRichText(props['Notes']) || '';
 
   // status: Notion 선택값 → progress | pending | completed
   const statusMap = {
@@ -37,6 +39,7 @@ export function parseTaskPage(page) {
     due_date: due,
     section_id: sectionIds[0] || null,
     target_plant_ids: targetPlantIds || [],
+    notes: notes.trim() || '',
   };
 }
 
