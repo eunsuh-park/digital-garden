@@ -6,7 +6,7 @@ import leaf3Fill from '@iconify-icons/mingcute/leaf-3-fill';
 import './Header.css';
 
 /**
- * ê³µí†µ ?¤ë” - ë¡œê³ , ??ì§€??????, ?¥í›„ ê³µìœ  ë²„íŠ¼
+ * ?? ?? - ??, ?(??/? ?/??), ?? ?? ??
  * PG-09, CP-01, CP-02
  */
 export default function Header() {
@@ -15,8 +15,8 @@ export default function Header() {
 
   return (
     <header className="page-header">
-      <Link to="/" className="page-header__logo" aria-label="?ˆìœ¼ë¡??´ë™">
-        ?Œ¿ ?‘ì£¼ ?•ì›
+      <Link to="/" className="page-header__logo" aria-label="??? ??">
+        ?? ?? ??
       </Link>
       <nav className="page-header__tabs" role="tablist">
         <Link
@@ -26,7 +26,7 @@ export default function Header() {
           className={`page-header__tab ${path === '/' || path === '/map' ? 'page-header__tab--active' : ''}`}
         >
           <Icon icon={mapLine} width={18} height={18} />
-          ì§€??
+          ??
         </Link>
         <Link
           to="/tasks"
@@ -35,7 +35,7 @@ export default function Header() {
           className={`page-header__tab ${path === '/tasks' ? 'page-header__tab--active' : ''}`}
         >
           <Icon icon={task2Line} width={18} height={18} />
-          ????
+          ? ?
         </Link>
         <Link
           to="/plants"
@@ -44,7 +44,7 @@ export default function Header() {
           className={`page-header__tab ${path === '/plants' ? 'page-header__tab--active' : ''}`}
         >
           <Icon icon={leaf3Fill} width={18} height={18} />
-          ?ë¬¼
+          ??
         </Link>
       </nav>
     </header>
