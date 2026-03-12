@@ -8,6 +8,8 @@
   z-index: 100;
   gap: 0.5rem;
   flex-wrap: wrap;
+  border: none;
+  border-bottom: 1px solid rgb(148, 148, 148);
 }
 
 .page-header__logo {
@@ -31,6 +33,9 @@
 }
 
 .page-header__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
   padding: 0.4rem 0.65rem;
   border-radius: 8px;
   font-size: 0.85rem;
@@ -48,6 +53,7 @@
     font-size: 1.25rem;
   }
   .page-header__tab {
+    gap: 0.3rem;
     padding: 0.5rem 1rem;
     font-size: 0.95rem;
   }

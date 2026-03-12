@@ -1,4 +1,7 @@
 import './FullPageSorter.css';
+import { Icon } from '@iconify/react';
+import arrowUpFill from '@iconify-icons/mingcute/arrow-up-fill';
+import arrowDownFill from '@iconify-icons/mingcute/arrow-down-fill';
 
 /**
  * FullPage 정렬 UI
@@ -43,7 +46,11 @@ export default function FullPageSorter({ options = [], value = {}, onChange, act
         aria-label={currentDir === 'asc' ? '오름차순 (내림차순으로 변경)' : '내림차순 (오름차순으로 변경)'}
         title={currentDir === 'asc' ? '내림차순' : '오름차순'}
       >
-        {currentDir === 'asc' ? '↑' : '↓'}
+        <Icon
+          icon={currentDir === 'asc' ? arrowUpFill : arrowDownFill}
+          width={16}
+          height={16}
+        />
       </button>
     </div>
   );

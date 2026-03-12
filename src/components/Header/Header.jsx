@@ -1,4 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
+import { Icon } from '@iconify/react';
+import map2Fill from '@iconify-icons/mingcute/map-2-fill';
+import task2Fill from '@iconify-icons/mingcute/task-2-fill';
+import leaf3Fill from '@iconify-icons/mingcute/leaf-3-fill';
 import './Header.css';
 
 /**
@@ -21,6 +25,7 @@ export default function Header() {
           aria-selected={path === '/' || path === '/map'}
           className={`page-header__tab ${path === '/' || path === '/map' ? 'page-header__tab--active' : ''}`}
         >
+          <Icon icon={map2Fill} width={18} height={18} />
           지도
         </Link>
         <Link
@@ -29,6 +34,7 @@ export default function Header() {
           aria-selected={path === '/tasks'}
           className={`page-header__tab ${path === '/tasks' ? 'page-header__tab--active' : ''}`}
         >
+          <Icon icon={task2Fill} width={18} height={18} />
           할 일
         </Link>
         <Link
@@ -37,6 +43,7 @@ export default function Header() {
           aria-selected={path === '/plants'}
           className={`page-header__tab ${path === '/plants' ? 'page-header__tab--active' : ''}`}
         >
+          <Icon icon={leaf3Fill} width={18} height={18} />
           식물
         </Link>
       </nav>
