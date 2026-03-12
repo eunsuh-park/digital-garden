@@ -94,6 +94,40 @@ function DifficultyBar({ difficulty }) {
   );
 }
 
+function MetaItem({ icon, label, value }) {
+  if (!value || value === "–") return null;
+  return (
+    <span style={{ fontSize: 11, color: "#A89880", fontFamily: "'DM Mono', monospace", display: "inline-flex", alignItems: "center", gap: 6 }}>
+      <span aria-hidden>{icon}</span>
+      <span style={{ color: "#5C4A32" }}>{label}</span>
+      <span style={{ color: "#A89880" }}>{value}</span>
+    </span>
+  );
+}
+
+function ListChips({ items, prefix }) {
+  if (!items || items.length === 0) return null;
+  return (
+    <div style={{ display: "flex", gap: 6, flexWrap: "wrap", paddingLeft: 8 }}>
+      {items.map((t) => (
+        <span
+          key={`${prefix}-${t}`}
+          style={{
+            fontSize: 11,
+            padding: "2px 8px",
+            borderRadius: 999,
+            background: "#F0EBE0",
+            color: "#5C4A32",
+            fontFamily: "'DM Mono', monospace",
+          }}
+        >
+          {t}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 export function TaskCard({ task }) {
   const [hovered, setHovered] = useState(false);
   const type = taskTypeConfig[task.Task_Type] || { icon: "○", label: task.Task_Type, color: "#999", bg: "#F5F4F0" };
@@ -195,6 +229,12 @@ export function TaskCard({ task }) {
         {task.Title}
       </div>
 
+      {/* Meta row: 일정/소요시간 */}
+      <div style={{ display: "flex", gap: 12, flexWrap: "wrap", paddingLeft: 8 }}>
+        <MetaItem icon="🗓" label="예정" value={dateStr} />
+        <MetaItem icon="⏱" label="소요" value={task.Estimated_Duration} />
+      </div>
+
       {/* Target plants */}
       {task.Target_Plant && task.Target_Plant.length > 0 && (
         <div style={{ display: "flex", gap: 5, flexWrap: "wrap", paddingLeft: 8 }}>
@@ -216,21 +256,23 @@ export function TaskCard({ task }) {
         </div>
       )}
 
+      {/* 선행/후속 작업 */}
+      {task.Prerequisites && task.Prerequisites.length > 0 && (
+        <>
+          <div style={{ paddingLeft: 8, fontSize: 11, color: "#A89880", fontFamily: "'DM Mono', monospace" }}>선행 작업</div>
+          <ListChips prefix="pre" items={task.Prerequisites} />
+        </>
+      )}
+      {task.Followups && task.Followups.length > 0 && (
+        <>
+          <div style={{ paddingLeft: 8, fontSize: 11, color: "#A89880", fontFamily: "'DM Mono', monospace" }}>후속 작업</div>
+          <ListChips prefix="post" items={task.Followups} />
+        </>
+      )}
+
       {/* Notes: Tasks 테이블 Notes 필드 — 설명/메모 */}
       {task.Notes ? (
         <div style={{ paddingLeft: 8 }}>
-          <div
-            style={{
-              fontSize: 10,
-              color: "#A89880",
-              fontFamily: "'DM Mono', monospace",
-              letterSpacing: "0.04em",
-              marginBottom: 4,
-              textTransform: "uppercase",
-            }}
-          >
-            설명
-          </div>
           <div
             style={{
               fontSize: 13,
@@ -263,23 +305,7 @@ export function TaskCard({ task }) {
       >
         <DifficultyBar difficulty={normalizeDifficulty(task.Difficulty)} />
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          {task.Estimated_Duration && task.Estimated_Duration !== "–" && (
-            <span style={{ fontSize: 11, color: "#A89880", fontFamily: "'DM Mono', monospace" }}>
-              ⏱ {task.Estimated_Duration}
-            </span>
-          )}
-          <span
-            style={{
-              fontSize: 11,
-              color: "#5C4A32",
-              fontFamily: "'DM Mono', monospace",
-              background: "#F0EBE0",
-              padding: "2px 8px",
-              borderRadius: 8,
-            }}
-          >
-            {dateStr}
-          </span>
+          {/* 상단 메타로 이동 */}
         </div>
       </div>
     </div>

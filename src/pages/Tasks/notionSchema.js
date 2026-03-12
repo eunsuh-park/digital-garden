@@ -14,6 +14,10 @@ export const PROP_MAP = {
   notes: 'Notes',          // rich_text (설명/메모)
   difficulty: 'Difficulty', // select: Easy | Medium | Hard (또는 한글 난이도)
   task_type: 'Task_Type',  // select: Pruning, Fertilizing, Propagation, Watering, Transplanting, Observation, Cleaning, Decorating, Construction
+  estimated_duration: 'Estimated_Duration', // rich_text (예상 소요시간)
+  scheduled_date: 'Scheduled_Date', // date (작업 예정일) — 없으면 마감일(due_date)을 사용
+  prereq_tasks: '선행 작업', // relation → Tasks (선행 작업)
+  followup_tasks: '후속 작업', // relation → Tasks (후속 작업)
 };
 
 export function parseTaskPage(page) {
@@ -27,6 +31,10 @@ export function parseTaskPage(page) {
   const notes = getRichText(props[PROP_MAP.notes]) || getRichText(props['Notes']) || '';
   const difficultyRaw = getSelect(props[PROP_MAP.difficulty]) || getSelect(props['Difficulty']) || '';
   const taskTypeRaw = getSelect(props[PROP_MAP.task_type]) || getSelect(props['Task_Type']) || '';
+  const estimatedDuration = getRichText(props[PROP_MAP.estimated_duration]) || getRichText(props['Estimated_Duration']) || '';
+  const scheduledDate = getDate(props[PROP_MAP.scheduled_date]) || getDate(props['Scheduled_Date']) || '';
+  const prereqTaskIds = getRelation(props[PROP_MAP.prereq_tasks]) || getRelation(props['선행 작업']);
+  const followupTaskIds = getRelation(props[PROP_MAP.followup_tasks]) || getRelation(props['후속 작업']);
 
   // status: Notion 선택값 → progress | pending | completed
   const statusMap = {
@@ -69,6 +77,10 @@ export function parseTaskPage(page) {
     notes: notes.trim() || '',
     difficulty,
     task_type,
+    estimated_duration: estimatedDuration.trim() || '',
+    scheduled_date: scheduledDate || '',
+    prereq_task_ids: prereqTaskIds || [],
+    followup_task_ids: followupTaskIds || [],
   };
 }
 
