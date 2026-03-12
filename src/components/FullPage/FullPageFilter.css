@@ -1,0 +1,35 @@
+.full-page-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.full-page-filter__item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.full-page-filter__label {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.full-page-filter__select {
+  font-size: 0.85rem;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  min-width: 6rem;
+  cursor: pointer;
+}
+
+.full-page-filter__select:hover,
+.full-page-filter__select:focus {
+  border-color: var(--color-primary);
+  outline: none;
+}

@@ -4,9 +4,27 @@ import { parseLocationsResponse } from '../Locations/notionSchema';
 import { parseTasksResponse } from './notionSchema';
 import { parsePlantsResponse } from '../Plants/notionSchema';
 import FullPage from '../../components/FullPage/FullPage';
+import FullPageFilter from '../../components/FullPage/FullPageFilter';
+import FullPageSorter from '../../components/FullPage/FullPageSorter';
 import ErrorState from '../../components/ErrorState/ErrorState';
 import TaskCard from '../../components/TaskCard';
 import './TasksPage.css';
+
+const TASKS_FILTERS = [
+  { key: 'status', label: '상태', options: [{ value: 'progress', label: '진행 중' }, { value: 'pending', label: '예정' }] },
+  { key: 'task_type', label: '작업 유형', options: [
+    { value: 'Pruning', label: '전정' }, { value: 'Fertilizing', label: '비료' }, { value: 'Propagation', label: '번식' },
+    { value: 'Watering', label: '물주기' }, { value: 'Transplanting', label: '이식' }, { value: 'Observation', label: '관찰' },
+    { value: 'Cleaning', label: '청소' }, { value: 'Decorating', label: '꾸미기' }, { value: 'Construction', label: '시공' },
+  ]},
+  { key: 'difficulty', label: '난이도', options: [{ value: 'Easy', label: 'Easy' }, { value: 'Medium', label: 'Medium' }, { value: 'Hard', label: 'Hard' }] },
+];
+
+const TASKS_SORT_OPTIONS = [
+  { value: 'due_date', label: '예정일' },
+  { value: 'title', label: '제목' },
+  { value: 'task_type', label: '작업 유형' },
+];
 
 /**
  * PG-02, PG-08: 할 일 전체 페이지 - 금주 할 일 조회와 관리
@@ -18,6 +36,8 @@ export default function TasksPage() {
   const [plants, setPlants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [filterValues, setFilterValues] = useState({});
+  const [sortValue, setSortValue] = useState({ field: 'due_date', dir: 'asc' });
 
   useEffect(() => {
     let cancelled = false;
@@ -50,13 +70,33 @@ export default function TasksPage() {
     return () => { cancelled = true; };
   }, []);
 
-  const pendingTasks = tasks
-    .filter((t) => t.status !== 'completed')
-    .sort((a, b) => {
-      if (!a.due_date) return 1;
-      if (!b.due_date) return -1;
-      return new Date(a.due_date) - new Date(b.due_date);
+  const pendingTasks = useMemo(() => {
+    let list = tasks.filter((t) => t.status !== 'completed');
+    if (filterValues.status) list = list.filter((t) => t.status === filterValues.status);
+    if (filterValues.task_type) list = list.filter((t) => (t.task_type ?? '') === filterValues.task_type);
+    if (filterValues.difficulty) list = list.filter((t) => (t.difficulty ?? '') === filterValues.difficulty);
+    const field = sortValue.field || 'due_date';
+    const dir = sortValue.dir === 'desc' ? -1 : 1;
+    list = [...list].sort((a, b) => {
+      if (field === 'due_date') {
+        const da = a.scheduled_date || a.due_date ? new Date(a.scheduled_date || a.due_date) : null;
+        const db = b.scheduled_date || b.due_date ? new Date(b.scheduled_date || b.due_date) : null;
+        if (!da) return 1;
+        if (!db) return -1;
+        return (da - db) * dir;
+      }
+      if (field === 'title') {
+        const va = (a.title || '').localeCompare(b.title || '', 'ko');
+        return va * dir;
+      }
+      if (field === 'task_type') {
+        const va = (a.task_type || '').localeCompare(b.task_type || '', 'ko');
+        return va * dir;
+      }
+      return 0;
     });
+    return list;
+  }, [tasks, filterValues, sortValue]);
   const locationMap = useMemo(() => Object.fromEntries(locations.map((l) => [l.id, l])), [locations]);
   const plantMap = useMemo(() => Object.fromEntries(plants.map((p) => [p.id, p])), [plants]);
   const taskTitleMap = useMemo(() => Object.fromEntries(tasks.map((t) => [t.id, t.title])), [tasks]);
@@ -89,6 +129,20 @@ export default function TasksPage() {
       title="이번 주 할 일"
       subtitle="완료 제외, 예정일 순"
       emptyMessage={!hasContent ? '이번 주 할 일이 없습니다.' : undefined}
+      headerRight={
+        <>
+          <FullPageFilter
+            filters={TASKS_FILTERS}
+            values={filterValues}
+            onChange={(key, value) => setFilterValues((prev) => ({ ...prev, [key]: value || undefined }))}
+          />
+          <FullPageSorter
+            options={TASKS_SORT_OPTIONS}
+            value={sortValue}
+            onChange={(field, dir) => setSortValue({ field, dir })}
+          />
+        </>
+      }
     >
       <p className="notion-db-badge" aria-label="연동된 Notion DB">
         Notion DB: Locations(구역) · 할 일 · 식물

@@ -7,7 +7,23 @@
 }
 
 .full-page__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
   margin-bottom: 1.5rem;
+}
+
+.full-page__header-left {
+  min-width: 0;
+}
+
+.full-page__header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .full-page__title {
