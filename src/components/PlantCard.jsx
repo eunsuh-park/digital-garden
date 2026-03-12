@@ -71,7 +71,8 @@ export function PlantCard({ plant }) {
     <div
       onClick={() => setFlipped((f) => !f)}
       style={{
-        width: 280,
+        width: '100%',
+        maxWidth: 280,
         height: 320,
         cursor: "pointer",
         perspective: 1000,

@@ -143,7 +143,8 @@ export function TaskCard({ task }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        width: 280,
+        width: '100%',
+        maxWidth: 280,
         borderRadius: 16,
         background: isComplete ? "#F8F7F2" : "#FDFAF5",
         border: `1px solid ${hovered ? "#C8B090" : "#E8E0D0"}`,

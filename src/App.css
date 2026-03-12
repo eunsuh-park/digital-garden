@@ -10,6 +10,19 @@
   flex: 1;
   min-height: 0;
   overflow: auto;
+  padding: 0 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .app__main {
+    padding: 0 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .app__main {
+    padding: 0 1.5rem;
+  }
 }
 
 /* 페이지별 Notion 연동 DB 표시 (콘솔에서 [Notion API] 로그로 확인) */

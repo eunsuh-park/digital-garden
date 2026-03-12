@@ -14,12 +14,14 @@
 
 .drawer {
   position: fixed;
-  top: 64px;
-  bottom: 16px;
-  right: 16px;
-  width: 100%;
+  top: 52px;
+  bottom: 8px;
+  right: 8px;
+  left: 8px;
+  width: auto;
   max-width: 360px;
-  height: 90%;
+  height: auto;
+  margin-left: auto;
   background: var(--color-surface);
   box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
   transform: translateX(calc(100% + 24px));
@@ -30,6 +32,17 @@
   z-index: 301;
   overflow-y: auto;
   border-radius: 12px;
+}
+
+@media (min-width: 480px) {
+  .drawer {
+    left: auto;
+    right: 16px;
+    bottom: 16px;
+    top: 64px;
+    width: 100%;
+    height: 90%;
+  }
 }
 
 .drawer--open {
@@ -43,8 +56,24 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 1.25rem 1.5rem;
+  padding: 1rem 1.25rem;
   border-bottom: 1px solid var(--color-border);
+}
+
+@media (min-width: 640px) {
+  .drawer__header {
+    padding: 1.25rem 1.5rem;
+  }
+}
+
+.drawer__body {
+  padding: 1rem 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .drawer__body {
+    padding: 1.5rem;
+  }
 }
 
 .drawer__color {
@@ -71,10 +100,6 @@
 
 .drawer__close:hover {
   color: var(--color-text);
-}
-
-.drawer__body {
-  padding: 1.5rem;
 }
 
 .drawer__block {

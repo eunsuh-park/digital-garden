@@ -6,7 +6,13 @@
 
 .plants-page__cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+  gap: 0.75rem;
   align-items: start;
+}
+
+@media (min-width: 640px) {
+  .plants-page__cards {
+    gap: 1rem;
+  }
 }

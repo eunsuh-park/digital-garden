@@ -30,3 +30,9 @@ body {
 #root {
   min-height: 100vh;
 }
+
+/* 반응형 브레이크포인트 (참고용)
+ * 640px: small (모바일)
+ * 768px: medium (태블릿)
+ * 1024px: large (데스크톱)
+ */

@@ -33,3 +33,13 @@
   border-color: var(--color-primary);
   outline: none;
 }
+
+@media (max-width: 639px) {
+  .full-page-filter {
+    gap: 0.5rem;
+  }
+  .full-page-filter__select {
+    min-width: 4.5rem;
+    font-size: 0.8rem;
+  }
+}
