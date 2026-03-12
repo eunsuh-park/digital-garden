@@ -1,0 +1,37 @@
+/* TaskCard: 공통 브레이크포인트(sm 640 / md 768 / lg 1024) 반응형 */
+
+.task-card {
+  width: 100%;
+  max-width: 280px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-radius: 14px;
+  box-sizing: border-box;
+}
+
+@media (min-width: 640px) {
+  .task-card {
+    padding: 18px 20px;
+    gap: 13px;
+    border-radius: 15px;
+  }
+}
+
+@media (min-width: 768px) {
+  .task-card {
+    padding: 20px 22px;
+    gap: 14px;
+    border-radius: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .task-card {
+    max-width: 300px;
+    padding: 22px 24px;
+    gap: 16px;
+    border-radius: 16px;
+  }
+}

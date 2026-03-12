@@ -66,10 +66,11 @@
 | **Drawer** | 위치·크기 480px, 헤더/본문 패딩 md |
 | **Popover** | min/max 너비, 패딩 sm |
 | **ErrorState** | 패딩·min-height sm |
-| **TaskCard / PlantCard** | width 100% + maxWidth 280 (그리드와 연동) |
+| **TaskCard** | 전용 CSS: 패딩·gap·border-radius·max-width를 sm/md/lg별 적용 (lg에서 max-width 300px) |
+| **PlantCard** | 전용 CSS: 카드 크기·앞/뒤 면 패딩을 sm/md/lg별 적용 (lg에서 max-width 300px, 높이 330px) |
 | **Switch** | 고정 크기 UI, 터치 영역만 유지 (선택적 sm) |
 
-페이지 레이아웃(Tasks, Plants, Locations, Landing)은 카드 그리드 `minmax(min(280px, 100%), 1fr)` 및 컨트롤 바 반응형이 동일 브레이크포인트를 따릅니다.
+페이지 레이아웃(Tasks, Plants)의 카드 그리드(`.tasks-page__cards`, `.plants-page__cards`)는 **gap**을 브레이크포인트별로 적용합니다. 모바일 0.75rem → sm 1rem → md 1.25rem → **lg 1.5rem**(PC에서 카드 간격 확대). 그리드 열은 `minmax(min(280px, 100%), 1fr)`로 동일 브레이크포인트를 따릅니다.
 
 ## 참고
 

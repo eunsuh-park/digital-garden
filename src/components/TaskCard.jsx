@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "./TaskCard.css";
 
 /** Tasks 테이블 Task_Type 값 → 프론트 한글 라벨 + 아이콘/색상 */
 const taskTypeConfig = {
@@ -140,18 +141,12 @@ export function TaskCard({ task }) {
 
   return (
     <div
+      className="task-card"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        width: '100%',
-        maxWidth: 280,
-        borderRadius: 16,
         background: isComplete ? "#F8F7F2" : "#FDFAF5",
         border: `1px solid ${hovered ? "#C8B090" : "#E8E0D0"}`,
-        padding: "20px 22px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 14,
         boxShadow: hovered
           ? "0 8px 24px rgba(90,65,40,0.12)"
           : "0 2px 12px rgba(90,65,40,0.06)",

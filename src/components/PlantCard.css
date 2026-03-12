@@ -1,0 +1,46 @@
+/* PlantCard: 공통 브레이크포인트(sm 640 / md 768 / lg 1024) 반응형 */
+
+.plant-card {
+  width: 100%;
+  max-width: 280px;
+  height: 300px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.plant-card__face {
+  padding: 16px 18px;
+}
+
+@media (min-width: 640px) {
+  .plant-card {
+    max-width: 280px;
+    height: 310px;
+  }
+
+  .plant-card__face {
+    padding: 18px 20px;
+  }
+}
+
+@media (min-width: 768px) {
+  .plant-card {
+    max-width: 290px;
+    height: 320px;
+  }
+
+  .plant-card__face {
+    padding: 20px 22px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .plant-card {
+    max-width: 300px;
+    height: 330px;
+  }
+
+  .plant-card__face {
+    padding: 22px 24px;
+  }
+}

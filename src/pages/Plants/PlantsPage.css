@@ -25,3 +25,15 @@
     gap: 1rem;
   }
 }
+
+@media (min-width: 768px) {
+  .plants-page__cards {
+    gap: 1.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .plants-page__cards {
+    gap: 1.5rem;
+  }
+}

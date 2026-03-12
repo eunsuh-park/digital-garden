@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "./PlantCard.css";
 
 const speciesIcon = { 꽃: "✿", 나무: "⌇", 풀: "∿" };
 const colorDot = {
@@ -69,14 +70,11 @@ export function PlantCard({ plant }) {
 
   return (
     <div
+      className="plant-card"
       onClick={() => setFlipped((f) => !f)}
       style={{
-        width: '100%',
-        maxWidth: 280,
-        height: 320,
         cursor: "pointer",
         perspective: 1000,
-        flexShrink: 0,
       }}
     >
       <div
@@ -91,6 +89,7 @@ export function PlantCard({ plant }) {
       >
         {/* FRONT */}
         <div
+          className="plant-card__face"
           style={{
             position: "absolute",
             inset: 0,
@@ -99,7 +98,6 @@ export function PlantCard({ plant }) {
             borderRadius: 16,
             background: "#FDFAF5",
             border: "1px solid #E8E0D0",
-            padding: "20px 22px",
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
@@ -251,6 +249,7 @@ export function PlantCard({ plant }) {
 
         {/* BACK */}
         <div
+          className="plant-card__face"
           style={{
             position: "absolute",
             inset: 0,
@@ -260,7 +259,6 @@ export function PlantCard({ plant }) {
             borderRadius: 16,
             background: "#2C1F0E",
             border: "1px solid #3D2D18",
-            padding: "22px",
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
