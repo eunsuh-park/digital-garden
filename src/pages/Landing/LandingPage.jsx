@@ -14,6 +14,10 @@ function getTasksByLocation(tasks, locationId) {
   return tasks.filter((t) => t.section_id === locationId && t.status !== 'completed');
 }
 
+function getPlantsByLocation(plants, locationId) {
+  return plants.filter((p) => p.section_id === locationId);
+}
+
 function getLocationById(locations, id) {
   return locations.find((l) => l.id === id);
 }
@@ -21,6 +25,7 @@ function getLocationById(locations, id) {
 export default function LandingPage() {
   const [locations, setLocations] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const [plants, setPlants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -56,6 +61,7 @@ export default function LandingPage() {
         );
         setLocations(locationsList);
         setTasks(tasksList);
+        setPlants(plantsList);
       } catch (e) {
         if (!cancelled) setError(e.message);
       } finally {
@@ -91,6 +97,7 @@ export default function LandingPage() {
       <GardenMap
         locations={locations}
         getTasksByLocation={(locationId) => getTasksByLocation(tasks, locationId)}
+        getPlantsByLocation={(locationId) => getPlantsByLocation(plants, locationId)}
         getLocationById={(id) => getLocationById(locations, id)}
       />
     </div>

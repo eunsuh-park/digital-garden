@@ -11,9 +11,10 @@ import gardenMapSvg from '../../gardenMap.svg?raw';
  * CP-04: Section 좌표/SVG id, hover/click → 팝오버·하이라이트·드로어 연결
  * @param {Object[]} locations - 구역(Locations) 목록
  * @param {Function} getTasksByLocation - (locationId) => tasks
+ * @param {Function} getPlantsByLocation - (locationId) => plants
  * @param {Function} getLocationById - (id) => location
  */
-export default function GardenMap({ locations = [], getTasksByLocation, getLocationById }) {
+export default function GardenMap({ locations = [], getTasksByLocation, getPlantsByLocation, getLocationById }) {
   const [activeLocationId, setActiveLocationId] = useState(null);
   const [hoverLocationId, setHoverLocationId] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -185,6 +186,7 @@ export default function GardenMap({ locations = [], getTasksByLocation, getLocat
   const selectedLocation = activeLocationId && getLocationById ? getLocationById(activeLocationId) : null;
   const hoverLocation = hoverLocationId && getLocationById ? getLocationById(hoverLocationId) : null;
   const getTasks = getTasksByLocation || (() => []);
+  const getPlants = getPlantsByLocation || (() => []);
 
   const svgIdFallbackMap = useMemo(
     () => ({
@@ -366,6 +368,7 @@ export default function GardenMap({ locations = [], getTasksByLocation, getLocat
         <Popover
           section={hoverLocation}
           tasks={getTasks(hoverLocation.id)}
+          plants={getPlants(hoverLocation.id)}
           position={popoverPos}
           onOpenDrawer={() => {
             setActiveLocationId(hoverLocation.id);

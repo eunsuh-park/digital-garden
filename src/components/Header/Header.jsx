@@ -32,14 +32,6 @@ export default function Header() {
           할 일
         </Link>
         <Link
-          to="/locations"
-          role="tab"
-          aria-selected={path === '/locations'}
-          className={`page-header__tab ${path === '/locations' ? 'page-header__tab--active' : ''}`}
-        >
-          위치
-        </Link>
-        <Link
           to="/plants"
           role="tab"
           aria-selected={path === '/plants'}
