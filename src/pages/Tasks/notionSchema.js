@@ -15,7 +15,8 @@ export const PROP_MAP = {
 
 export function parseTaskPage(page) {
   const props = page.properties || {};
-  const title = getTitle(props[PROP_MAP.title]);
+  // Notion DB 속성명이 "Title"(영문) 또는 "제목"(한글)일 수 있음
+  const title = getTitle(props['Title']) || getTitle(props[PROP_MAP.title]);
   const statusRaw = getSelect(props[PROP_MAP.status]);
   const due = getDate(props[PROP_MAP.due_date]);
   const sectionIds = getRelation(props[PROP_MAP.section]);
