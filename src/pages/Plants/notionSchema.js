@@ -2,15 +2,17 @@
  * Plants DB 스키마 매핑
  * - Location → Locations (1:1, Locations.Name과 연결)
  */
-import { getTitle, getRichText, getSelect, getRelation } from '../../lib/parseNotionProps';
+import { getTitle, getRichText, getSelect, getRelation, getNumber } from '../../lib/parseNotionProps';
 
 export const PROP_MAP = {
-  name: '이름',       // title
+  name: '이름',             // title
   species: '종',
   category: '카테고리',
   status: '상태',
   bloom_season: '개화시기',
-  section: 'Location', // relation → Locations (1:1, Locations.Name과 연결)
+  section: 'Location',      // relation → Locations (1:1, Locations.Name과 연결)
+  notes: 'Notes',           // rich_text (설명/메모)
+  quantity: '개체 수',           // number or rich_text (Notion property: 개체 수)
 };
 
 export function parsePlantPage(page) {
@@ -21,6 +23,9 @@ export function parsePlantPage(page) {
   const statusRaw = getSelect(props[PROP_MAP.status]);
   const bloomSeason = getRichText(props[PROP_MAP.bloom_season]) || getSelect(props[PROP_MAP.bloom_season]);
   const sectionIds = getRelation(props[PROP_MAP.section]);
+  const notes = getRichText(props[PROP_MAP.notes]) || getRichText(props['Notes']) || '';
+  const quantityNumber = getNumber(props[PROP_MAP.quantity]);
+  const quantityText = getRichText(props[PROP_MAP.quantity]) || '';
 
   return {
     id: page.id,
@@ -30,6 +35,8 @@ export function parsePlantPage(page) {
     status: statusRaw || 'planted',
     bloom_season: bloomSeason || '-',
     section_id: sectionIds[0] || null,
+    notes: notes.trim() || '',
+    quantity: quantityNumber != null ? quantityNumber : (quantityText || '').trim() || null,
   };
 }
 

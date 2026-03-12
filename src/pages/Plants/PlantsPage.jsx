@@ -154,10 +154,12 @@ export default function PlantsPage() {
             'Bloom Season': p.bloom_season && p.bloom_season !== '-' ? p.bloom_season : undefined,
             'Pruning Season': undefined,
             'Fertilizing Season': undefined,
-            Quantity: undefined,
-            Notes: [p.category && p.category !== '-' ? `카테고리: ${p.category}` : null, p.species && p.species !== '-' ? `종: ${p.species}` : null]
-              .filter(Boolean)
-              .join(' · '),
+            Quantity: p.quantity ?? undefined,
+            Notes:
+              (p.notes && p.notes.trim()) ||
+              [p.category && p.category !== '-' ? `카테고리: ${p.category}` : null, p.species && p.species !== '-' ? `종: ${p.species}` : null]
+                .filter(Boolean)
+                .join(' · '),
           };
 
           return <PlantCard key={p.id} plant={cardPlant} />;
