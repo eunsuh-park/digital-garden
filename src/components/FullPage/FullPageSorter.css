@@ -55,3 +55,31 @@
 .full-page-sorter--active .full-page-sorter__select {
   border-color: var(--color-primary);
 }
+
+@media (min-width: 640px) {
+  .full-page-sorter {
+    gap: 0.5rem;
+  }
+
+  .full-page-sorter__label {
+    font-size: 0.85rem;
+  }
+
+  .full-page-sorter__select {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.65rem;
+    min-width: 6rem;
+  }
+
+  .full-page-sorter__dir {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+@media (min-width: 768px) {
+  .full-page-sorter__select {
+    padding: 0.45rem 0.7rem;
+    min-width: 6.5rem;
+  }
+}

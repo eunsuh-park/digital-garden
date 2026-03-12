@@ -32,6 +32,8 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
   const handleLocationClick = useCallback((e, locationId) => {
     setActiveLocationId(locationId);
     setDrawerOpen(true);
+    // 섹션 클릭 시 hover 상태 팝오버는 닫기
+    setHoverLocationId(null);
   }, []);
 
   const handleLocationHover = useCallback((e, locationId, isEnter) => {
@@ -422,6 +424,7 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
           onOpenDrawer={() => {
             setActiveLocationId(hoverLocation.id);
             setDrawerOpen(true);
+            setHoverLocationId(null);
           }}
         />
       )}

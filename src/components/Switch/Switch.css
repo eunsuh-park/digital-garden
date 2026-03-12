@@ -50,3 +50,19 @@
 .switch[aria-checked="true"] .switch__thumb {
   transform: translateX(16px);
 }
+
+@media (min-width: 640px) {
+  .switch__track {
+    width: 44px;
+    height: 26px;
+  }
+
+  .switch__thumb {
+    width: 22px;
+    height: 22px;
+  }
+
+  .switch[aria-checked="true"] .switch__thumb {
+    transform: translateX(18px);
+  }
+}
