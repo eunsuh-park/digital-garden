@@ -15,7 +15,7 @@ export default function Header() {
 
   return (
     <header className="page-header">
-      <Link to="/" className="page-header__logo" aria-label="??? ??">
+      <Link to="/" className="page-header__logo" aria-label="디지털 가든">
         ?? ?? ??
       </Link>
       <nav className="page-header__tabs" role="tablist">
@@ -26,7 +26,7 @@ export default function Header() {
           className={`page-header__tab ${path === '/' || path === '/map' ? 'page-header__tab--active' : ''}`}
         >
           <Icon icon={mapLine} width={18} height={18} />
-          ??
+          지도
         </Link>
         <Link
           to="/tasks"
@@ -35,7 +35,7 @@ export default function Header() {
           className={`page-header__tab ${path === '/tasks' ? 'page-header__tab--active' : ''}`}
         >
           <Icon icon={task2Line} width={18} height={18} />
-          ? ?
+          할 일
         </Link>
         <Link
           to="/plants"
@@ -44,7 +44,7 @@ export default function Header() {
           className={`page-header__tab ${path === '/plants' ? 'page-header__tab--active' : ''}`}
         >
           <Icon icon={leaf3Fill} width={18} height={18} />
-          ??
+          식물
         </Link>
       </nav>
     </header>
