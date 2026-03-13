@@ -16,7 +16,7 @@ export default function Header() {
   return (
     <header className="page-header">
       <Link to="/" className="page-header__logo" aria-label="디지털 가든">
-        ?? ?? ??
+        디지털 가든
       </Link>
       <nav className="page-header__tabs" role="tablist">
         <Link
