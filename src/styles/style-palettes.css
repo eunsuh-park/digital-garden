@@ -1,0 +1,75 @@
+/**
+ * 스타일별 색상 팔레트 (식상 코드 분류용)
+ * 부모에 data-style="tree" 등 적용 시 해당 팔레트 변수 사용
+ * 사용: <div data-style="tree"> ... </div>
+ */
+
+/* ========== Tree (숲/나무) ========== */
+[data-style="tree"] {
+  --palette-bg: #f4f6f2;
+  --palette-surface: #fafbf8;
+  --palette-primary: #2d5a27;
+  --palette-primary-light: #4a7c43;
+  --palette-accent: #8fbc8f;
+  --palette-accent-soft: #c8e6c4;
+  --palette-text: #2c3e28;
+  --palette-text-muted: #5d6b59;
+  --palette-border: #d4e0d0;
+  --palette-tag: #6b8e6b;
+}
+
+/* ========== Desert (사막) ========== */
+[data-style="desert"] {
+  --palette-bg: #faf6f0;
+  --palette-surface: #fefcf8;
+  --palette-primary: #c17f59;
+  --palette-primary-light: #d4a574;
+  --palette-accent: #e8c9a8;
+  --palette-accent-soft: #f0ddd0;
+  --palette-text: #3d3229;
+  --palette-text-muted: #7a6b5e;
+  --palette-border: #e5d9cc;
+  --palette-tag: #b8956f;
+}
+
+/* ========== Ocean (바다) ========== */
+[data-style="ocean"] {
+  --palette-bg: #f0f5f8;
+  --palette-surface: #f8fbfd;
+  --palette-primary: #2c5f7a;
+  --palette-primary-light: #4a7d96;
+  --palette-accent: #7eb8d4;
+  --palette-accent-soft: #b8d8e8;
+  --palette-text: #1e3a4a;
+  --palette-text-muted: #5c7a8a;
+  --palette-border: #c8dce6;
+  --palette-tag: #5a8fa8;
+}
+
+/* ========== Minimal (미니멀) ========== */
+[data-style="minimal"] {
+  --palette-bg: #fafafa;
+  --palette-surface: #ffffff;
+  --palette-primary: #333333;
+  --palette-primary-light: #555555;
+  --palette-accent: #999999;
+  --palette-accent-soft: #e0e0e0;
+  --palette-text: #212121;
+  --palette-text-muted: #757575;
+  --palette-border: #eeeeee;
+  --palette-tag: #616161;
+}
+
+/* ========== Sunset (석양) ========== */
+[data-style="sunset"] {
+  --palette-bg: #fdf5f2;
+  --palette-surface: #fff9f7;
+  --palette-primary: #c45c3e;
+  --palette-primary-light: #d97a5f;
+  --palette-accent: #e8a88a;
+  --palette-accent-soft: #f5d4c4;
+  --palette-text: #3d2c28;
+  --palette-text-muted: #8a726c;
+  --palette-border: #ecd9d2;
+  --palette-tag: #b85c42;
+}
