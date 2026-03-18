@@ -1,5 +1,14 @@
 import { Link, useLocation } from 'react-router-dom';
-import './SideNavigation.css';
+import {
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from '@/components/ui/sidebar';
 
 // TODO: loadProjects()로 교체
 const MOCK_PROJECTS = [
@@ -12,28 +21,37 @@ export default function SideNavigation() {
   const path = location.pathname;
 
   return (
-    <aside className="side-nav" aria-label="프로젝트 메뉴">
-      <Link to="/map" className="side-nav__logo" aria-label="홈">
-        디지털 가든
-      </Link>
-      <nav className="side-nav__projects">
-        <span className="side-nav__label">프로젝트</span>
-        <ul className="side-nav__list">
-          {MOCK_PROJECTS.map((project, index) => (
-            <li key={project.id}>
-              <Link
-                to="/map"
-                className={`side-nav__link ${path === '/map' && index === 0 ? 'side-nav__link--active' : ''}`}
-              >
-                {project.name}
-              </Link>
-            </li>
-          ))}
-        </ul>
-        <Link to="/project" className="side-nav__new">
-          + 새 프로젝트
-        </Link>
-      </nav>
-    </aside>
+    <>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild size="lg" isActive={path === '/map'}>
+              <Link to="/map">디지털 가든</Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>프로젝트</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {MOCK_PROJECTS.map((project, index) => (
+                <SidebarMenuItem key={project.id}>
+                  <SidebarMenuButton asChild isActive={path === '/map' && index === 0}>
+                    <Link to="/map">{project.name}</Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/project">+ 새 프로젝트</Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </>
   );
 }

@@ -3,6 +3,7 @@ import { Icon } from '@iconify/react';
 import mapLine from '@iconify-icons/mingcute/map-line';
 import task2Line from '@iconify-icons/mingcute/task-2-line';
 import leaf3Fill from '@iconify-icons/mingcute/leaf-3-fill';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import './Header.css';
 
 /**
@@ -15,6 +16,7 @@ export default function Header() {
 
   return (
     <header className="page-header">
+      <SidebarTrigger className="md:hidden" />
       <nav className="page-header__tabs" role="tablist">
         <Link
           to="/map"
