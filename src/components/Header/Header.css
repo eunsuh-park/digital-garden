@@ -1,7 +1,7 @@
 .page-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   padding: 0.5rem 0.75rem;
   position: sticky;
   top: 0;
@@ -29,7 +29,6 @@
   display: flex;
   gap: 0.2rem;
   flex-wrap: wrap;
-  justify-content: flex-end;
 }
 
 .page-header__tab {

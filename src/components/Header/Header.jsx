@@ -15,15 +15,12 @@ export default function Header() {
 
   return (
     <header className="page-header">
-      <Link to="/" className="page-header__logo" aria-label="??? ??">
-        ?? ?? ??
-      </Link>
       <nav className="page-header__tabs" role="tablist">
         <Link
-          to="/"
+          to="/map"
           role="tab"
-          aria-selected={path === '/' || path === '/map'}
-          className={`page-header__tab ${path === '/' || path === '/map' ? 'page-header__tab--active' : ''}`}
+          aria-selected={path === '/map'}
+          className={`page-header__tab ${path === '/map' ? 'page-header__tab--active' : ''}`}
         >
           <Icon icon={mapLine} width={18} height={18} />
           ??

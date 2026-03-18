@@ -1,13 +1,15 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './LoginPage.css';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   function handleSubmit(e) {
     e.preventDefault();
-    // TODO: Supabase 로그인 연동
+    navigate('/map', { replace: true });
   }
 
   return (

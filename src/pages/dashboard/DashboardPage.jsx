@@ -55,7 +55,7 @@ export default function DashboardPage() {
           <ul className="dashboard-page__list">
             {projects.map((project) => (
               <li key={project.id}>
-                <Link to={`/project/${project.id}`} className="dashboard-page__card">
+                <Link to="/map" className="dashboard-page__card">
                   <div className="dashboard-page__card-accent" aria-hidden />
                   <div className="dashboard-page__card-body">
                     <h3 className="dashboard-page__card-title">{project.name}</h3>
