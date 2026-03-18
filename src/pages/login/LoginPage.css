@@ -1,0 +1,176 @@
+/* 카드 컴포넌트(TaskCard, PlantCard)와 동일한 톤: 배경·테두리·그림자·타이포 */
+.login-page {
+  min-height: calc(100vh - 60px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: #F5F0E8;
+}
+
+.login-page__card {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  padding: 24px 28px 28px;
+  background: #FDFAF5;
+  border: 1px solid #E8E0D0;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(90, 65, 40, 0.06);
+  overflow: hidden;
+  transition: box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.25s ease;
+}
+
+.login-page__card:hover {
+  border-color: #C8B090;
+  box-shadow: 0 8px 24px rgba(90, 65, 40, 0.12);
+}
+
+.login-page__accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: #3E7B27;
+  border-radius: 16px 0 0 16px;
+  opacity: 0.7;
+}
+
+.login-page__header {
+  padding-left: 8px;
+  margin-bottom: 24px;
+}
+
+.login-page__label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: #A89880;
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.login-page__title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #2C1F0E;
+  font-family: 'Noto Serif KR', Georgia, serif;
+  line-height: 1.2;
+}
+
+.login-page__form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-left: 8px;
+}
+
+.login-page__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.login-page__field-label {
+  font-size: 11px;
+  color: #A89880;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.04em;
+}
+
+.login-page__input {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 15px;
+  color: #2C1F0E;
+  background: #FFF;
+  border: 1px solid #E8E0D0;
+  border-radius: 10px;
+  font-family: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login-page__input::placeholder {
+  color: #C8B090;
+}
+
+.login-page__input:hover {
+  border-color: #C8B090;
+}
+
+.login-page__input:focus {
+  outline: none;
+  border-color: #3E7B27;
+  box-shadow: 0 0 0 2px rgba(62, 123, 39, 0.15);
+}
+
+.login-page__btn {
+  margin-top: 8px;
+  padding: 14px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #FFF;
+  background: #3E7B27;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: 'Noto Serif KR', Georgia, serif;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.login-page__btn:hover {
+  background: #2D5016;
+}
+
+.login-page__btn:active {
+  transform: scale(0.98);
+}
+
+.login-page__footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #EDE8DE;
+  padding-left: 8px;
+}
+
+.login-page__meta {
+  font-size: 12px;
+  color: #8A7260;
+  font-family: 'DM Mono', monospace;
+}
+
+.login-page__link {
+  font-size: 12px;
+  font-weight: 500;
+  color: #3E7B27;
+  font-family: 'DM Mono', monospace;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.login-page__link:hover {
+  color: #2D5016;
+  text-decoration: underline;
+}
+
+@media (min-width: 640px) {
+  .login-page__card {
+    padding: 28px 32px 32px;
+    border-radius: 16px;
+  }
+
+  .login-page__title {
+    font-size: 28px;
+  }
+
+  .login-page__form {
+    gap: 20px;
+  }
+}

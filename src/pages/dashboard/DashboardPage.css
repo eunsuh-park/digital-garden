@@ -1,0 +1,255 @@
+/* LoginPage·ProjectPage·카드 컴포넌트와 동일한 톤 */
+.dashboard-page {
+  min-height: calc(100vh - 60px);
+  padding: 1.5rem;
+  background: #F5F0E8;
+}
+
+.dashboard-page__header {
+  margin-bottom: 28px;
+}
+
+.dashboard-page__label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: #A89880;
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.dashboard-page__title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #2C1F0E;
+  font-family: 'Noto Serif KR', Georgia, serif;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.dashboard-page__desc {
+  font-size: 14px;
+  color: #8A7260;
+  font-family: 'DM Mono', monospace;
+}
+
+/* 요약 카드 */
+.dashboard-page__summary {
+  margin-bottom: 28px;
+}
+
+.dashboard-page__stat-card {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;
+  padding: 20px 28px;
+  background: #FDFAF5;
+  border: 1px solid #E8E0D0;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(90, 65, 40, 0.06);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-page__stat-card:hover {
+  border-color: #C8B090;
+  box-shadow: 0 4px 16px rgba(90, 65, 40, 0.08);
+}
+
+.dashboard-page__stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #3E7B27;
+  font-family: 'Noto Serif KR', Georgia, serif;
+  line-height: 1.2;
+}
+
+.dashboard-page__stat-label {
+  font-size: 12px;
+  color: #8A7260;
+  font-family: 'DM Mono', monospace;
+  margin-top: 4px;
+}
+
+/* 섹션 */
+.dashboard-page__section {
+  max-width: 560px;
+}
+
+.dashboard-page__section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.dashboard-page__section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2C1F0E;
+  font-family: 'Noto Serif KR', Georgia, serif;
+}
+
+.dashboard-page__link {
+  font-size: 13px;
+  color: #3E7B27;
+  font-family: 'DM Mono', monospace;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.dashboard-page__link:hover {
+  color: #2D5016;
+  text-decoration: underline;
+}
+
+/* 빈 상태 */
+.dashboard-page__empty {
+  padding: 40px 24px;
+  background: #FDFAF5;
+  border: 1px solid #E8E0D0;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(90, 65, 40, 0.06);
+}
+
+.dashboard-page__empty-text {
+  font-size: 15px;
+  color: #8A7260;
+  font-family: 'Noto Serif KR', Georgia, serif;
+  margin-bottom: 20px;
+}
+
+/* 프로젝트 카드 리스트 */
+.dashboard-page__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dashboard-page__card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  background: #FDFAF5;
+  border: 1px solid #E8E0D0;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(90, 65, 40, 0.06);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  overflow: hidden;
+}
+
+.dashboard-page__card:hover {
+  border-color: #C8B090;
+  box-shadow: 0 6px 20px rgba(90, 65, 40, 0.1);
+  transform: translateY(-2px);
+}
+
+.dashboard-page__card-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: #3E7B27;
+  border-radius: 14px 0 0 14px;
+  opacity: 0.7;
+}
+
+.dashboard-page__card-body {
+  flex: 1;
+  min-width: 0;
+  padding-left: 8px;
+}
+
+.dashboard-page__card-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #2C1F0E;
+  font-family: 'Noto Serif KR', Georgia, serif;
+  line-height: 1.3;
+  margin-bottom: 8px;
+}
+
+.dashboard-page__card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dashboard-page__card-badge {
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 8px;
+  background: #F0EBE0;
+  color: #5C4A32;
+  font-family: 'DM Mono', monospace;
+}
+
+.dashboard-page__card-badge--purpose {
+  background: #EDE8DE;
+  color: #8A7260;
+}
+
+.dashboard-page__card-arrow {
+  font-size: 18px;
+  color: #C8B090;
+  font-family: 'DM Mono', monospace;
+  flex-shrink: 0;
+}
+
+/* 버튼 */
+.dashboard-page__btn {
+  display: inline-block;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 12px;
+  font-family: 'Noto Serif KR', Georgia, serif;
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.dashboard-page__btn--primary {
+  color: #FFF;
+  background: #3E7B27;
+}
+
+.dashboard-page__btn--primary:hover {
+  background: #2D5016;
+  transform: scale(1.02);
+}
+
+@media (min-width: 640px) {
+  .dashboard-page {
+    padding: 2rem;
+  }
+
+  .dashboard-page__title {
+    font-size: 28px;
+  }
+
+  .dashboard-page__stat-card {
+    min-width: 120px;
+    padding: 24px 32px;
+  }
+
+  .dashboard-page__stat-value {
+    font-size: 32px;
+  }
+
+  .dashboard-page__card {
+    padding: 20px 24px;
+  }
+
+  .dashboard-page__card-title {
+    font-size: 18px;
+  }
+}
