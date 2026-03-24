@@ -13,12 +13,25 @@
 }
 
 .page-header__logo {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--color-primary);
+  display: inline-flex;
+  align-items: center;
   text-decoration: none;
   transition: opacity 0.2s;
   flex-shrink: 0;
+}
+
+.page-header__logo-image {
+  display: block;
+  height: 26px;
+  width: auto;
+}
+
+.page-header__logo-image--full {
+  display: none;
+}
+
+.page-header__logo-image--symbol {
+  display: block;
 }
 
 .page-header__logo:hover {
@@ -49,8 +62,14 @@
   .page-header {
     padding: 0.75rem 1rem;
   }
-  .page-header__logo {
-    font-size: 1.25rem;
+  .page-header__logo-image {
+    height: 30px;
+  }
+  .page-header__logo-image--full {
+    display: block;
+  }
+  .page-header__logo-image--symbol {
+    display: none;
   }
   .page-header__tab {
     gap: 0.3rem;

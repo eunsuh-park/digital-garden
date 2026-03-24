@@ -3,6 +3,8 @@ import { Icon } from '@iconify/react';
 import mapLine from '@iconify-icons/mingcute/map-line';
 import task2Line from '@iconify-icons/mingcute/task-2-line';
 import leaf3Fill from '@iconify-icons/mingcute/leaf-3-fill';
+import logoImage from '../../asset/logo/logo.svg';
+import logoSymbol from '../../asset/logo/symbol.svg';
 import './Header.css';
 
 /**
@@ -16,7 +18,8 @@ export default function Header() {
   return (
     <header className="page-header">
       <Link to="/" className="page-header__logo" aria-label="디지털 가든">
-        디지털 가든
+        <img src={logoImage} alt="디지털 가든" className="page-header__logo-image page-header__logo-image--full" />
+        <img src={logoSymbol} alt="" aria-hidden="true" className="page-header__logo-image page-header__logo-image--symbol" />
       </Link>
       <nav className="page-header__tabs" role="tablist">
         <Link
