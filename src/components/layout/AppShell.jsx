@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import NavigationRail from './NavigationRail';
-import SectionNavRail from './SectionNavRail';
+import MapSidePanel from './MapSidePanel';
 import AppBar from './AppBar';
 import NavDrawer from './NavDrawer';
 import './AppShell.css';
@@ -23,7 +23,7 @@ export default function AppShell() {
           <Outlet />
         </main>
       </div>
-      <SectionNavRail
+      <MapSidePanel
         collapsed={sectionNavCollapsed}
         onToggleCollapsed={() => setSectionNavCollapsed((c) => !c)}
       />
