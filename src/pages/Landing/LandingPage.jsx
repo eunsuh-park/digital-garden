@@ -39,9 +39,6 @@ export default function LandingPage() {
 
   return (
     <div className="landing-page__wrap">
-      <p className="notion-db-badge notion-db-badge--landing" aria-label="연동된 Notion DB">
-        Notion DB: Locations(구역) · 할 일 · 식물
-      </p>
       <GardenMap
         locations={locations}
         getTasksByLocation={(locationId) => getTasksByLocation(tasks, locationId)}

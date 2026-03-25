@@ -97,11 +97,11 @@ function LocationTabContent() {
 export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
   const { pathname } = useLocation();
   const { locations, tasks, plants, loading } = useLocations();
-  const { detail, closeDetail } = useMapPanelDetail();
+  const { detail, closeDetail, closeAllDetail } = useMapPanelDetail();
 
   useEffect(() => {
-    closeDetail();
-  }, [pathname, closeDetail]);
+    closeAllDetail();
+  }, [pathname, closeAllDetail]);
 
   const locationMap = useMemo(() => Object.fromEntries(locations.map((l) => [l.id, l])), [locations]);
   const plantMap = useMemo(() => Object.fromEntries(plants.map((p) => [p.id, p])), [plants]);

@@ -9,9 +9,9 @@ function plantStatusLabel(status) {
 
 /**
  * 패널 식물 상세 — 카드(flip) 없이 문서형 레이아웃 + 이미지 플레이스홀더
- * @param {{ plant: object, locationName?: string | null, imageUrl?: string | null }} props
+ * @param {{ plant: object, locationName?: string | null, imageUrl?: string | null, onLocationNavigate?: () => void }} props
  */
-export default function PlantDetailLayout({ plant, locationName, imageUrl = null }) {
+export default function PlantDetailLayout({ plant, locationName, imageUrl = null, onLocationNavigate }) {
   const status = plantStatusLabel(plant.status);
   const bloom =
     plant.bloom_season && plant.bloom_season !== '-' ? plant.bloom_season : null;
@@ -59,7 +59,15 @@ export default function PlantDetailLayout({ plant, locationName, imageUrl = null
           {locationName ? (
             <>
               <dt>위치</dt>
-              <dd>📍 {locationName}</dd>
+              <dd>
+                {onLocationNavigate ? (
+                  <button type="button" className="plant-detail__link" onClick={onLocationNavigate}>
+                    📍 {locationName}
+                  </button>
+                ) : (
+                  <>📍 {locationName}</>
+                )}
+              </dd>
             </>
           ) : null}
           {bloom ? (

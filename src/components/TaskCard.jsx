@@ -152,7 +152,46 @@ function ListChips({ items, prefix, maxItems = TASK_CARD_LIMITS.listChipsMax }) 
   );
 }
 
-export function TaskCard({ task, onOpenDetail, unconstrained = false }) {
+/** 상세 패널 등 — 칩 탭 시 다른 상세로 이동 */
+function NavListChips({ items, prefix, maxItems = TASK_CARD_LIMITS.listChipsMax }) {
+  if (!items || items.length === 0) return null;
+  const shown = items.slice(0, maxItems);
+  const rest = items.length - shown.length;
+  return (
+    <div style={{ display: "flex", gap: 6, flexWrap: "wrap", paddingLeft: 8, alignItems: "center" }}>
+      {shown.map((item, i) => (
+        <button
+          key={`${prefix}-${i}-${item.label}`}
+          type="button"
+          className="task-card__chip-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            item.onNavigate();
+          }}
+        >
+          {item.label}
+        </button>
+      ))}
+      {rest > 0 ? (
+        <span className="task-card__overflow-count" aria-label={`외 ${rest}건`}>
+          +{rest}
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * @param {{
+ *   task: object,
+ *   onOpenDetail?: () => void,
+ *   unconstrained?: boolean,
+ *   locationLink?: { label: string, onNavigate: () => void },
+ *   plantLinks?: Array<{ label: string, onNavigate: () => void }>,
+ *   taskLinkGroups?: { prerequisites?: Array<{ label: string, onNavigate: () => void }>, followups?: Array<{ label: string, onNavigate: () => void }> },
+ * }} props
+ */
+export function TaskCard({ task, onOpenDetail, unconstrained = false, locationLink, plantLinks, taskLinkGroups }) {
   const [hovered, setHovered] = useState(false);
   const type = taskTypeConfig[task.Task_Type] || { icon: "○", label: task.Task_Type, color: "#999", bg: "#F5F4F0" };
   const status = statusConfig[task.Status] || statusConfig["시작 전"];
@@ -271,8 +310,44 @@ export function TaskCard({ task, onOpenDetail, unconstrained = false }) {
         <MetaItem icon="⏱" label="소요" value={task.Estimated_Duration} />
       </div>
 
+      {locationLink ? (
+        <div style={{ paddingLeft: 8 }}>
+          <button
+            type="button"
+            className="task-card__location-link"
+            onClick={(e) => {
+              e.stopPropagation();
+              locationLink.onNavigate();
+            }}
+          >
+            📍 {locationLink.label}
+          </button>
+        </div>
+      ) : null}
+
       {/* Target plants */}
-      {targetPlants.length > 0 && (
+      {plantLinks && plantLinks.length > 0 ? (
+        <div style={{ display: "flex", gap: 5, flexWrap: "wrap", paddingLeft: 8, alignItems: "center" }}>
+          {plantLinks.slice(0, TASK_CARD_LIMITS.targetPlantsMax).map((item, i) => (
+            <button
+              key={`plant-nav-${i}-${item.label}`}
+              type="button"
+              className="task-card__plant-chip-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                item.onNavigate();
+              }}
+            >
+              🌿 {item.label}
+            </button>
+          ))}
+          {plantLinks.length > TASK_CARD_LIMITS.targetPlantsMax ? (
+            <span className="task-card__overflow-count" aria-label={`외 식물 ${plantLinks.length - TASK_CARD_LIMITS.targetPlantsMax}건`}>
+              +{plantLinks.length - TASK_CARD_LIMITS.targetPlantsMax}
+            </span>
+          ) : null}
+        </div>
+      ) : targetPlants.length > 0 ? (
         <div style={{ display: "flex", gap: 5, flexWrap: "wrap", paddingLeft: 8, alignItems: "center" }}>
           {targetShown.map((p, i) => (
             <span
@@ -299,21 +374,31 @@ export function TaskCard({ task, onOpenDetail, unconstrained = false }) {
             </span>
           ) : null}
         </div>
-      )}
+      ) : null}
 
       {/* 선행/후속 작업 */}
-      {task.Prerequisites && task.Prerequisites.length > 0 && (
+      {taskLinkGroups?.prerequisites && taskLinkGroups.prerequisites.length > 0 ? (
+        <>
+          <div style={{ paddingLeft: 8, fontSize: 11, color: "#A89880", fontFamily: "'DM Mono', monospace" }}>선행 작업</div>
+          <NavListChips prefix="pre" items={taskLinkGroups.prerequisites} />
+        </>
+      ) : task.Prerequisites && task.Prerequisites.length > 0 ? (
         <>
           <div style={{ paddingLeft: 8, fontSize: 11, color: "#A89880", fontFamily: "'DM Mono', monospace" }}>선행 작업</div>
           <ListChips prefix="pre" items={task.Prerequisites} />
         </>
-      )}
-      {task.Followups && task.Followups.length > 0 && (
+      ) : null}
+      {taskLinkGroups?.followups && taskLinkGroups.followups.length > 0 ? (
+        <>
+          <div style={{ paddingLeft: 8, fontSize: 11, color: "#A89880", fontFamily: "'DM Mono', monospace" }}>후속 작업</div>
+          <NavListChips prefix="post" items={taskLinkGroups.followups} />
+        </>
+      ) : task.Followups && task.Followups.length > 0 ? (
         <>
           <div style={{ paddingLeft: 8, fontSize: 11, color: "#A89880", fontFamily: "'DM Mono', monospace" }}>후속 작업</div>
           <ListChips prefix="post" items={task.Followups} />
         </>
-      )}
+      ) : null}
 
       {/* Notes: Tasks 테이블 Notes 필드 — 설명/메모 */}
       {task.Notes ? (
