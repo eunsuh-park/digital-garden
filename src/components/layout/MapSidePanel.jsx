@@ -79,8 +79,8 @@ function LocationTabContent() {
                       onClick={() => openLocationDetail(loc)}
                     >
                       <span className="map-side-panel__subitem-name">{loc.name}</span>
-                      {loc.zone_type ? (
-                        <span className="map-side-panel__subitem-meta">{loc.zone_type}</span>
+                      {loc.color_label ? (
+                        <span className="map-side-panel__subitem-meta">{loc.color_label}</span>
                       ) : null}
                     </button>
                   </li>

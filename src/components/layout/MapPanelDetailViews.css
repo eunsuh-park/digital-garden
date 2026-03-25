@@ -58,6 +58,10 @@
   padding-top: 1rem;
 }
 
+.map-panel-detail__scroll--plant-detail {
+  padding: 0;
+}
+
 .map-panel-detail__page-title {
   font-size: 1.45rem;
   font-weight: 700;
@@ -183,22 +187,8 @@
   max-height: none;
 }
 
-.map-panel-detail__card-wrap--plant {
-  max-width: 300px;
-}
-
-.map-panel-detail__card-wrap--plant .plant-card {
-  max-width: none;
-  height: 360px;
-  aspect-ratio: unset;
-}
-
 @media (min-width: 1024px) {
   .map-panel-detail__card-wrap {
     max-width: 380px;
-  }
-
-  .map-panel-detail__card-wrap--plant .plant-card {
-    height: 380px;
   }
 }

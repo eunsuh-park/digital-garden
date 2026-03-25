@@ -1,25 +1,23 @@
 /**
  * Locations DB 스키마 매핑
- * Notion DB의 실제 property 이름에 맞게 수정하세요
+ * - Color: Notion `select` — 지도 색·사이드 패널 그룹(color_token)과 라벨(color_label)에 사용
  */
 import { getTitle, getRichText, getSelect } from '../../lib/parseNotionProps';
 
 export const PROP_MAP = {
-  name: '이름',       // title
-  color: 'Color',     // Notion Color 필드 (색상 값 그대로) — '색상' 한글 폴백
-  zone_type: '구역타입',
-  svg_id: 'svg_id',
+  name: 'Name',
+  color: 'Color',
+  svg_id: 'Svg_Id',
 };
 
 export function parseLocationPage(page) {
   const props = page.properties || {};
   const name = getTitle(props[PROP_MAP.name]) || getTitle(props['Name']);
-  const colorRaw = getRichText(props[PROP_MAP.color]) || getSelect(props[PROP_MAP.color])
-    || getRichText(props['Color']) || getSelect(props['Color']) || getRichText(props['색상']) || getSelect(props['색상']);
-  const zoneType = getSelect(props[PROP_MAP.zone_type]) || getRichText(props[PROP_MAP.zone_type]);
+  const colorProp = props[PROP_MAP.color];
+  const colorLabel = (getSelect(colorProp) || getRichText(colorProp) || '').trim();
   const svgId = getRichText(props[PROP_MAP.svg_id]) || '';
 
-  // gardenMap.svg 도형 id와의 간단한 이름 기반 fallback (Notion에 svg_id가 비어있을 때만 사용)
+  // gardenMap.svg 도형 id와의 간단한 이름 기반 fallback (Notion Svg_Id가 비어 있을 때만 사용)
   const nameBasedSvgId = (() => {
     const n = (name || '').toLowerCase();
     if (!n) return '';
@@ -36,8 +34,8 @@ export function parseLocationPage(page) {
   return {
     id: page.id,
     name: name || '(이름 없음)',
-    zone_type: zoneType || 'yard',
-    color_token: colorTokenFromRaw(colorRaw),
+    color_label: colorLabel,
+    color_token: colorTokenFromRaw(colorLabel),
     svg_id: svgId || nameBasedSvgId || '',
     taskCount: 0,
     plantCount: 0,

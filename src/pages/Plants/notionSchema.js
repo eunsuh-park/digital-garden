@@ -2,23 +2,40 @@
  * Plants DB 스키마 매핑
  * - Location → Locations (1:1, Locations.Name과 연결)
  */
-import { getTitle, getRichText, getSelect, getRelation, getNumber } from '../../lib/parseNotionProps';
+import {
+  getTitle,
+  getRichText,
+  getSelect,
+  getRelation,
+  getNumber,
+  getMultiSelect,
+  getFormulaDisplay,
+  getNotionStatus,
+} from '../../lib/parseNotionProps';
 
 export const PROP_MAP = {
-  name: '이름',             // title
-  species: '종',
-  category: '카테고리',
-  status: '상태',
-  bloom_season: '개화시기',
-  section: 'Location',      // relation → Locations (1:1, Locations.Name과 연결)
-  notes: 'Notes',           // rich_text (설명/메모)
-  quantity: '개체 수',           // number or rich_text (Notion property: 개체 수)
+  name: 'Name',
+  species: 'Species',
+  category: 'Category',
+  status: 'Status',
+  bloom_season: 'Bloom_Season',
+  section: 'Location',
+  notes: 'Notes',
+  quantity: 'Quantity',
 };
 
 export function parsePlantPage(page) {
   const props = page.properties || {};
   const name = getTitle(props[PROP_MAP.name]) || getTitle(props['Name']);
-  const species = getRichText(props[PROP_MAP.species]) || getSelect(props[PROP_MAP.species]);
+  const speciesProp = props[PROP_MAP.species];
+  const speciesMulti = getMultiSelect(speciesProp);
+  const species =
+    getRichText(speciesProp) ||
+    getSelect(speciesProp) ||
+    getNotionStatus(speciesProp) ||
+    getFormulaDisplay(speciesProp) ||
+    (speciesMulti.length ? speciesMulti.join(', ') : '') ||
+    getTitle(speciesProp);
   const category = getSelect(props[PROP_MAP.category]) || getRichText(props[PROP_MAP.category]);
   const statusRaw = getSelect(props[PROP_MAP.status]);
   const bloomSeason = getRichText(props[PROP_MAP.bloom_season]) || getSelect(props[PROP_MAP.bloom_season]);

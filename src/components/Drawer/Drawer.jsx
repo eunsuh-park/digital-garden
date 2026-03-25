@@ -32,9 +32,9 @@ export default function Drawer({ section, tasks, isOpen, onClose }) {
           />
           <div className="drawer__title-wrap">
             <h2 className="drawer__title">{section.name}</h2>
-            {section.zone_type && (
+            {section.color_label && (
               <span className="drawer__chip drawer__chip--muted">
-                {section.zone_type}
+                {section.color_label}
               </span>
             )}
           </div>

@@ -39,8 +39,8 @@ export default function Popover({ section, tasks = [], plants = [], position, on
         />
         <div className="popover__header-text">
           <strong className="popover__title">{section.name}</strong>
-          {section.zone_type && (
-            <span className="popover__zone-type">{section.zone_type}</span>
+          {section.color_label && (
+            <span className="popover__color-label">{section.color_label}</span>
           )}
         </div>
       </div>

@@ -186,7 +186,9 @@
   background: unset;
   background-color: unset;
   border-radius: 12px;
-  box-shadow: var(--shadow-sm);
+  border: none;
+  box-shadow: none;
+  outline: none;
   overflow: hidden;
   overscroll-behavior: contain;
   touch-action: none;
@@ -206,6 +208,12 @@
   width: 100%;
   height: 100%;
   display: block;
+  outline: none;
+  border: none;
+}
+
+.garden-map__asset svg:focus {
+  outline: none;
 }
 
 .garden-map__asset svg * {

@@ -4,6 +4,146 @@
   color: var(--color-text-muted);
 }
 
+.plants-page__hint--error {
+  color: #b91c1c;
+  font-size: 0.88rem;
+  padding: 0.75rem 0.25rem;
+  margin: 0;
+}
+
+/* 하단 시트: 나무/꽃/풀 아코디언 + 타일 */
+.plants-embedded {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.plants-embedded__empty {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+  padding: 0.5rem 0.15rem;
+}
+
+.plants-embedded__group {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.plants-embedded__group:last-child {
+  border-bottom: none;
+}
+
+.plants-embedded__group-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.55rem 0.15rem;
+  border: none;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  color: var(--color-text);
+  text-align: left;
+}
+
+.plants-embedded__group-header:hover {
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 8px;
+}
+
+.plants-embedded__group-title {
+  flex: 1;
+  font-size: 0.92rem;
+  font-weight: 600;
+  min-width: 0;
+}
+
+.plants-embedded__group-count {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.plants-embedded__group-chevron {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+.plants-embedded__grid {
+  list-style: none;
+  margin: 0 0 0.65rem;
+  padding: 0 0 0 0.15rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.45rem;
+}
+
+.plants-embedded__cell {
+  margin: 0;
+  aspect-ratio: 1;
+}
+
+.plants-embedded__tile {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  background: rgba(45, 90, 39, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem;
+  box-sizing: border-box;
+  cursor: pointer;
+  font: inherit;
+  color: var(--color-text);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.plants-embedded__tile:hover {
+  background: rgba(45, 90, 39, 0.18);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+.plants-embedded__tile-dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e74c3c;
+}
+
+.plants-embedded__tile-name {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+.plants-embedded__tile--add {
+  cursor: default;
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--color-text-muted);
+  font-size: 1.35rem;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.plants-embedded__tile--add:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
 .plants-page__controls {
   display: flex;
   align-items: flex-end;

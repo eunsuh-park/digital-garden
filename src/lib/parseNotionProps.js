@@ -17,6 +17,31 @@ export function getSelect(prop) {
   return prop?.select?.name ?? '';
 }
 
+/** Notion `status` 타입 프로퍼티 (이름만) */
+export function getNotionStatus(prop) {
+  return prop?.status?.name ?? '';
+}
+
+/**
+ * Notion `formula` 타입 — 표시용 문자열 (종/라벨 등 텍스트 필드용)
+ */
+export function getFormulaDisplay(prop) {
+  if (!prop?.formula) return '';
+  const f = prop.formula;
+  switch (f.type) {
+    case 'string':
+      return (f.string ?? '').trim();
+    case 'number':
+      return f.number != null && !Number.isNaN(f.number) ? String(f.number) : '';
+    case 'boolean':
+      return f.boolean ? 'true' : '';
+    case 'date':
+      return (f.date?.start ?? '').trim();
+    default:
+      return '';
+  }
+}
+
 export function getMultiSelect(prop) {
   if (!prop?.multi_select) return [];
   return prop.multi_select.map((s) => s.name);

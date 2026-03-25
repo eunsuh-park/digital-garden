@@ -1,4 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Icon } from '@iconify/react';
+import arrowUpLine from '@iconify-icons/mingcute/arrow-up-line';
+import arrowDownLine from '@iconify-icons/mingcute/arrow-down-line';
 import { fetchLocations, fetchPlants } from '../../api/notionApi';
 import { parseLocationsResponse } from '../Locations/notionSchema';
 import { parsePlantsResponse } from './notionSchema';
@@ -8,6 +11,7 @@ import FullPageSorter from '../../components/FullPage/FullPageSorter';
 import ErrorState from '../../components/ErrorState/ErrorState';
 import PlantCard from '../../components/PlantCard';
 import { useMapPanelDetail } from '../../context/MapPanelDetailContext';
+import { getPlantSpeciesKind } from '../../lib/plantSpeciesKind';
 import './PlantsPage.css';
 
 const PLANTS_SORT_OPTIONS = [
@@ -16,12 +20,116 @@ const PLANTS_SORT_OPTIONS = [
   { value: 'bloom_season', label: '개화시기' },
 ];
 
+/** Notion `종`(species) 값으로 그룹 키 — 비어 있으면 기타 */
+function speciesGroupKey(species) {
+  const s = species == null ? '' : String(species).trim();
+  if (!s || s === '-') return '기타';
+  return s;
+}
+
+/**
+ * 하단 시트 전용: 종(species)별 아코디언 + 타일 그리드
+ */
+function PlantsEmbeddedAccordion({ plantsList }) {
+  const { openPlantDetail } = useMapPanelDetail();
+  const [expanded, setExpanded] = useState(() => new Set());
+
+  const { sortedKeys, groupMap } = useMemo(() => {
+    const m = new Map();
+    for (const p of plantsList) {
+      const k = speciesGroupKey(p.species);
+      if (!m.has(k)) m.set(k, []);
+      m.get(k).push(p);
+    }
+    const keys = [...m.keys()].sort((a, b) => {
+      if (a === '기타') return 1;
+      if (b === '기타') return -1;
+      return a.localeCompare(b, 'ko');
+    });
+    return { sortedKeys: keys, groupMap: m };
+  }, [plantsList]);
+
+  useEffect(() => {
+    setExpanded(new Set(sortedKeys));
+  }, [sortedKeys]);
+
+  const toggle = (key) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  if (plantsList.length === 0) {
+    return <p className="plants-embedded__empty">등록된 식물이 없습니다.</p>;
+  }
+
+  return (
+    <div className="plants-embedded">
+      {sortedKeys.map((key) => {
+        const items = groupMap.get(key) || [];
+        const label = key;
+        const isOpen = expanded.has(key);
+
+        return (
+          <section key={key} className="plants-embedded__group">
+            <button
+              type="button"
+              className="plants-embedded__group-header"
+              onClick={() => toggle(key)}
+              aria-expanded={isOpen}
+            >
+              <span className="plants-embedded__group-title">{label}</span>
+              <span className="plants-embedded__group-count">{items.length}</span>
+              <Icon
+                icon={isOpen ? arrowUpLine : arrowDownLine}
+                width={18}
+                height={18}
+                className="plants-embedded__group-chevron"
+                aria-hidden
+              />
+            </button>
+            {isOpen && (
+              <ul className="plants-embedded__grid" aria-label={`${label} 식물`}>
+                {items.map((p) => (
+                  <li key={p.id} className="plants-embedded__cell">
+                    <button
+                      type="button"
+                      className="plants-embedded__tile"
+                      onClick={() => openPlantDetail(p)}
+                    >
+                      {p.status === 'needs_care' ? (
+                        <span className="plants-embedded__tile-dot" aria-label="관리 필요" />
+                      ) : null}
+                      <span className="plants-embedded__tile-name">{p.name}</span>
+                    </button>
+                  </li>
+                ))}
+                <li className="plants-embedded__cell">
+                  <span
+                    className="plants-embedded__tile plants-embedded__tile--add"
+                    title="추가 예정"
+                    aria-disabled="true"
+                  >
+                    +
+                  </span>
+                </li>
+              </ul>
+            )}
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
 /**
  * PG-07: Plants 전체 페이지 - 식물 DB 전체 조회
- * variant="embedded": 하단 시트에 동일 UI로 삽입
+ * variant="embedded": 하단 시트 — 종(species)별 아코디언 + 타일 (상세는 PlantDetailLayout)
  */
 export default function PlantsPage({ variant = 'default' }) {
-  const { openPlantDetail } = useMapPanelDetail();
   const [locations, setLocations] = useState([]);
   const [plants, setPlants] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,12 +163,14 @@ export default function PlantsPage({ variant = 'default' }) {
     }
 
     load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const locationMap = useMemo(() => Object.fromEntries(locations.map((l) => [l.id, l])), [locations]);
   const plantsFilters = useMemo(() => {
-    const speciesKinds = [...new Set(plants.map((p) => toCardSpecies(p)).filter(Boolean))]
+    const speciesKinds = [...new Set(plants.map((p) => getPlantSpeciesKind(p)).filter(Boolean))]
       .sort()
       .map((s) => ({ value: s, label: s }));
     const locationOptions = locations.map((l) => ({ value: l.id, label: l.name }));
@@ -73,14 +183,14 @@ export default function PlantsPage({ variant = 'default' }) {
   const filteredAndSortedPlants = useMemo(() => {
     let list = plants;
     if (filterValues.status) list = list.filter((p) => (p.status || '') === filterValues.status);
-    if (filterValues.species_kind) list = list.filter((p) => toCardSpecies(p) === filterValues.species_kind);
+    if (filterValues.species_kind) list = list.filter((p) => getPlantSpeciesKind(p) === filterValues.species_kind);
     if (filterValues.section_id) list = list.filter((p) => (p.section_id || '') === filterValues.section_id);
     const field = sortValue.field || 'name';
     const dir = sortValue.dir === 'desc' ? -1 : 1;
     list = [...list].sort((a, b) => {
-      if (field === 'name') return ((a.name || '').localeCompare(b.name || '', 'ko')) * dir;
-      if (field === 'category') return ((a.category || '').localeCompare(b.category || '', 'ko')) * dir;
-      if (field === 'bloom_season') return ((a.bloom_season || '').localeCompare(b.bloom_season || '', 'ko')) * dir;
+      if (field === 'name') return (a.name || '').localeCompare(b.name || '', 'ko') * dir;
+      if (field === 'category') return (a.category || '').localeCompare(b.category || '', 'ko') * dir;
+      if (field === 'bloom_season') return (a.bloom_season || '').localeCompare(b.bloom_season || '', 'ko') * dir;
       return 0;
     });
     return list;
@@ -95,10 +205,19 @@ export default function PlantsPage({ variant = 'default' }) {
   }
 
   function toCardSpecies(plant) {
-    const raw = plant.category || plant.species || '';
-    if (/(나무|목|교목|관목)/.test(raw)) return '나무';
-    if (/(꽃|화|개화)/.test(raw)) return '꽃';
-    return '풀';
+    return getPlantSpeciesKind(plant);
+  }
+
+  if (variant === 'embedded' && loading) {
+    return <p className="plants-page__loading">데이터를 불러오는 중입니다.</p>;
+  }
+
+  if (variant === 'embedded' && error) {
+    return <p className="plants-page__hint--error">{error}</p>;
+  }
+
+  if (variant === 'embedded' && !loading && !error) {
+    return <PlantsEmbeddedAccordion plantsList={filteredAndSortedPlants} />;
   }
 
   if (loading) {
@@ -129,13 +248,7 @@ export default function PlantsPage({ variant = 'default' }) {
           Notion DB: Locations(구역) · 식물
         </p>
       )}
-      <div
-        className={
-          variant === 'embedded'
-            ? 'plants-page__controls plants-page__controls--embedded'
-            : 'plants-page__controls'
-        }
-      >
+      <div className="plants-page__controls">
         <FullPageFilter
           filters={plantsFilters}
           values={filterValues}
@@ -169,18 +282,15 @@ export default function PlantsPage({ variant = 'default' }) {
             Quantity: p.quantity ?? undefined,
             Notes:
               (p.notes && p.notes.trim()) ||
-              [p.category && p.category !== '-' ? `카테고리: ${p.category}` : null, p.species && p.species !== '-' ? `종: ${p.species}` : null]
+              [
+                p.category && p.category !== '-' ? `카테고리: ${p.category}` : null,
+                p.species && p.species !== '-' ? `종: ${p.species}` : null,
+              ]
                 .filter(Boolean)
                 .join(' · '),
           };
 
-          return (
-            <PlantCard
-              key={p.id}
-              plant={cardPlant}
-              onOpenDetail={variant === 'embedded' ? () => openPlantDetail(p) : undefined}
-            />
-          );
+          return <PlantCard key={p.id} plant={cardPlant} />;
         })}
       </div>
     </FullPage>
