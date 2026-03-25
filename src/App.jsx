@@ -1,5 +1,5 @@
 import { HashRouter, Routes, Route } from 'react-router-dom';
-import Header from './components/Header/Header';
+import AppShell from './components/layout/AppShell';
 import ErrorState from './components/ErrorState/ErrorState';
 import LandingPage from './pages/Landing/LandingPage';
 import LoginPage from './pages/login/LoginPage';
@@ -13,18 +13,17 @@ function App() {
   return (
     <HashRouter>
       <div className="app">
-        <Header />
-        <main className="app__main">
-          <Routes>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route element={<AppShell />}>
             <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<LoginPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/project" element={<ProjectPage />} />
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/plants" element={<PlantsPage />} />
             <Route path="*" element={<ErrorState variant="404" />} />
-          </Routes>
-        </main>
+          </Route>
+        </Routes>
       </div>
     </HashRouter>
   );
