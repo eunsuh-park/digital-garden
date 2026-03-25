@@ -8,6 +8,7 @@ import FullPageFilter from '../../components/FullPage/FullPageFilter';
 import FullPageSorter from '../../components/FullPage/FullPageSorter';
 import ErrorState from '../../components/ErrorState/ErrorState';
 import TaskCard from '../../components/TaskCard';
+import { useMapPanelDetail } from '../../context/MapPanelDetailContext';
 import './TasksPage.css';
 
 const TASKS_FILTERS = [
@@ -38,8 +39,10 @@ const TASKS_SORT_OPTIONS = [
 /**
  * PG-02, PG-08: 할 일 전체 페이지 - 금주 할 일 조회와 관리
  * FN-09: 기본 조회 (완료 제외, 예정일 임박순, 섹션 그룹)
+ * variant="embedded": 하단 시트에 동일 UI로 삽입
  */
-export default function TasksPage() {
+export default function TasksPage({ variant = 'default' }) {
+  const { openTaskDetail } = useMapPanelDetail();
   const [locations, setLocations] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [plants, setPlants] = useState([]);
@@ -116,7 +119,7 @@ export default function TasksPage() {
 
   if (loading) {
     return (
-      <FullPage title="이번 주 할 일" subtitle="로딩 중...">
+      <FullPage variant={variant} title="이번 주 할 일" subtitle="로딩 중...">
         <p className="tasks-page__loading">데이터를 불러오는 중입니다.</p>
       </FullPage>
     );
@@ -124,7 +127,7 @@ export default function TasksPage() {
 
   if (error) {
     return (
-      <FullPage title="이번 주 할 일">
+      <FullPage variant={variant} title="이번 주 할 일">
         <ErrorState variant="error" message={error} showHomeLink />
       </FullPage>
     );
@@ -132,14 +135,21 @@ export default function TasksPage() {
 
   return (
     <FullPage
+      variant={variant}
       title="이번 주 할 일"
       subtitle="완료 제외, 예정일 순"
       emptyMessage={!hasContent ? '이번 주 할 일이 없습니다.' : undefined}
     >
-      <p className="notion-db-badge" aria-label="연동된 Notion DB">
-        Notion DB: Locations(구역) · 할 일 · 식물
-      </p>
-      <div className="tasks-page__controls">
+      {variant !== 'embedded' && (
+        <p className="notion-db-badge" aria-label="연동된 Notion DB">
+          Notion DB: Locations(구역) · 할 일 · 식물
+        </p>
+      )}
+      <div
+        className={
+          variant === 'embedded' ? 'tasks-page__controls tasks-page__controls--embedded' : 'tasks-page__controls'
+        }
+      >
         <FullPageFilter
           filters={TASKS_FILTERS}
           values={filterValues}
@@ -181,7 +191,13 @@ export default function TasksPage() {
             Notes: t.notes || (location ? `구역: ${location.name}` : ''),
           };
 
-          return <TaskCard key={t.id} task={cardTask} />;
+          return (
+            <TaskCard
+              key={t.id}
+              task={cardTask}
+              onOpenDetail={variant === 'embedded' ? () => openTaskDetail(t) : undefined}
+            />
+          );
         })}
       </div>
     </FullPage>

@@ -63,15 +63,32 @@ const SeasonBadge = ({ label, value }) =>
     </div>
   ) : null;
 
-export function PlantCard({ plant }) {
+export function PlantCard({ plant, onOpenDetail }) {
   const [flipped, setFlipped] = useState(false);
   const status = statusConfig[plant.Status] || statusConfig["미확인"];
   const dot = colorDot[plant.Color];
 
+  const toggleOrOpen = () => {
+    if (onOpenDetail) onOpenDetail();
+    else setFlipped((f) => !f);
+  };
+
   return (
     <div
-      className="plant-card"
-      onClick={() => setFlipped((f) => !f)}
+      className={`plant-card ${onOpenDetail ? "plant-card--interactive" : ""}`}
+      onClick={toggleOrOpen}
+      onKeyDown={
+        onOpenDetail
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onOpenDetail();
+              }
+            }
+          : undefined
+      }
+      role={onOpenDetail ? "button" : undefined}
+      tabIndex={onOpenDetail ? 0 : undefined}
       style={{
         cursor: "pointer",
         perspective: 1000,
@@ -106,15 +123,7 @@ export function PlantCard({ plant }) {
         >
           {/* Top row */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-            <div
-              style={{
-                fontSize: 28,
-                lineHeight: 1,
-                color: "#C8B090",
-                fontFamily: "serif",
-                userSelect: "none",
-              }}
-            >
+            <div className="plant-card__species-icon" aria-hidden>
               {speciesIcon[plant.Species] || "○"}
             </div>
             <div
@@ -134,18 +143,7 @@ export function PlantCard({ plant }) {
 
           {/* Name */}
           <div>
-            <div
-              style={{
-                fontSize: 26,
-                fontWeight: 700,
-                color: "#2C1F0E",
-                fontFamily: "'Noto Serif KR', 'Georgia', serif",
-                lineHeight: 1.2,
-                marginBottom: 6,
-              }}
-            >
-              {plant.Name}
-            </div>
+            <div className="plant-card__name">{plant.Name}</div>
             <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
               <span
                 style={{

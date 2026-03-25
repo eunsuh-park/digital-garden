@@ -5,8 +5,6 @@ import LandingPage from './pages/Landing/LandingPage';
 import LoginPage from './pages/login/LoginPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import ProjectPage from './pages/project/ProjectPage';
-import TasksPage from './pages/Tasks/TasksPage';
-import PlantsPage from './pages/Plants/PlantsPage';
 import './App.css';
 
 function App() {
@@ -19,8 +17,9 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/project" element={<ProjectPage />} />
-            <Route path="/tasks" element={<TasksPage />} />
-            <Route path="/plants" element={<PlantsPage />} />
+            {/* Tasks/Plants UI는 MapSidePanel(하단 시트)에 표시, 본문은 지도 유지 */}
+            <Route path="/tasks" element={<LandingPage />} />
+            <Route path="/plants" element={<LandingPage />} />
             <Route path="*" element={<ErrorState variant="404" />} />
           </Route>
         </Routes>

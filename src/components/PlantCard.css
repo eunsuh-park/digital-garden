@@ -1,36 +1,68 @@
-/* PlantCard: 공통 브레이크포인트(sm 640 / md 768 / lg 1024) 반응형 */
+/* PlantCard: 모바일·태블릿(<1024) 셀 너비 + aspect-ratio / 데스크톱 고정 높이 */
 
 .plant-card {
   width: 100%;
-  max-width: 280px;
-  height: 300px;
   flex-shrink: 0;
   box-sizing: border-box;
+}
+
+.plant-card--interactive:focus-visible {
+  outline: 2px solid var(--color-primary, #2d5a27);
+  outline-offset: 3px;
+  border-radius: 16px;
 }
 
 .plant-card__face {
   padding: 16px 18px;
 }
 
-@media (min-width: 640px) {
+.plant-card__species-icon {
+  font-size: clamp(22px, 5vw, 28px);
+  line-height: 1;
+  color: #c8b090;
+  font-family: serif;
+  user-select: none;
+}
+
+.plant-card__name {
+  font-size: clamp(17px, 4vw + 6px, 26px);
+  font-weight: 700;
+  color: #2c1f0e;
+  font-family: 'Noto Serif KR', 'Georgia', serif;
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+
+@media (max-width: 1023px) {
   .plant-card {
-    max-width: 280px;
-    height: 310px;
+    max-width: none;
+    height: auto;
+    aspect-ratio: 3 / 4;
+    min-height: 200px;
   }
 
   .plant-card__face {
-    padding: 18px 20px;
+    padding: 11px 12px;
   }
 }
 
-@media (min-width: 768px) {
+@media (max-width: 1023px) and (min-width: 640px) {
   .plant-card {
-    max-width: 290px;
-    height: 320px;
+    min-height: 220px;
   }
 
   .plant-card__face {
-    padding: 20px 22px;
+    padding: 12px 14px;
+  }
+}
+
+@media (max-width: 1023px) and (min-width: 768px) {
+  .plant-card {
+    min-height: 230px;
+  }
+
+  .plant-card__face {
+    padding: 13px 15px;
   }
 }
 
@@ -38,6 +70,8 @@
   .plant-card {
     max-width: 300px;
     height: 330px;
+    aspect-ratio: unset;
+    min-height: unset;
   }
 
   .plant-card__face {

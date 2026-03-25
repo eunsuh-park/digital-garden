@@ -13,27 +13,54 @@
   margin-bottom: 0.75rem;
 }
 
+/* 하단 시트: 필터+정렬 한 줄(가로 스크롤) */
+.tasks-page__controls--embedded {
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding-bottom: 0.1rem;
+}
+
+.tasks-page__controls--embedded .full-page-sorter {
+  margin-left: auto;
+}
+
 .tasks-page__cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
-  gap: 0.75rem;
+  gap: clamp(0.5rem, 2vw, 0.75rem);
   align-items: start;
+  justify-items: stretch;
 }
 
-@media (min-width: 640px) {
+/* 태블릿·모바일: 열 최소폭↓ · 균등 gap · 카드가 셀 너비를 채움 */
+@media (max-width: 1023px) {
   .tasks-page__cards {
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(148px, 100%), 1fr));
+    gap: 0.5rem;
   }
 }
 
-@media (min-width: 768px) {
+@media (min-width: 640px) and (max-width: 1023px) {
   .tasks-page__cards {
-    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(168px, 100%), 1fr));
+    gap: 0.55rem;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .tasks-page__cards {
+    gap: 0.6rem;
   }
 }
 
 @media (min-width: 1024px) {
   .tasks-page__cards {
+    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
     gap: 1.5rem;
   }
 }

@@ -1,6 +1,18 @@
 import { useState } from "react";
 import "./TaskCard.css";
 
+/** 카드·섹션별 표시 상한 — UI 일관성 및 레이아웃 폭주 방지 */
+export const TASK_CARD_LIMITS = {
+  /** 카드 전체 최대 높이(px), 넘으면 카드 내부 스크롤 */
+  maxHeightPx: 400,
+  titleMaxLines: 2,
+  /** 대상 식물 칩 최대 개수 */
+  targetPlantsMax: 4,
+  /** 선행·후속 작업 칩 최대 개수 */
+  listChipsMax: 3,
+  notesMaxLines: 4,
+};
+
 /** Tasks 테이블 Task_Type 값 → 프론트 한글 라벨 + 아이콘/색상 */
 const taskTypeConfig = {
   Pruning:      { icon: "✂", label: "전정",   color: "#4A90C4", bg: "#E8F2FA" },
@@ -106,13 +118,15 @@ function MetaItem({ icon, label, value }) {
   );
 }
 
-function ListChips({ items, prefix }) {
+function ListChips({ items, prefix, maxItems = TASK_CARD_LIMITS.listChipsMax }) {
   if (!items || items.length === 0) return null;
+  const shown = items.slice(0, maxItems);
+  const rest = items.length - shown.length;
   return (
-    <div style={{ display: "flex", gap: 6, flexWrap: "wrap", paddingLeft: 8 }}>
-      {items.map((t) => (
+    <div style={{ display: "flex", gap: 6, flexWrap: "wrap", paddingLeft: 8, alignItems: "center" }}>
+      {shown.map((t, i) => (
         <span
-          key={`${prefix}-${t}`}
+          key={`${prefix}-${i}-${t}`}
           style={{
             fontSize: 11,
             padding: "2px 8px",
@@ -125,11 +139,20 @@ function ListChips({ items, prefix }) {
           {t}
         </span>
       ))}
+      {rest > 0 ? (
+        <span
+          className="task-card__overflow-count"
+          title={items.slice(maxItems).join(", ")}
+          aria-label={`외 ${rest}건`}
+        >
+          +{rest}
+        </span>
+      ) : null}
     </div>
   );
 }
 
-export function TaskCard({ task }) {
+export function TaskCard({ task, onOpenDetail, unconstrained = false }) {
   const [hovered, setHovered] = useState(false);
   const type = taskTypeConfig[task.Task_Type] || { icon: "○", label: task.Task_Type, color: "#999", bg: "#F5F4F0" };
   const status = statusConfig[task.Status] || statusConfig["시작 전"];
@@ -139,11 +162,28 @@ export function TaskCard({ task }) {
     ? new Date(task.Scheduled_Date).toLocaleDateString("ko-KR", { month: "short", day: "numeric" })
     : "–";
 
+  const targetPlants = task.Target_Plant || [];
+  const targetShown = targetPlants.slice(0, TASK_CARD_LIMITS.targetPlantsMax);
+  const targetRest = targetPlants.length - targetShown.length;
+
   return (
     <div
-      className="task-card"
+      className={`task-card ${onOpenDetail ? "task-card--interactive" : ""}`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onClick={onOpenDetail ? () => onOpenDetail() : undefined}
+      onKeyDown={
+        onOpenDetail
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onOpenDetail();
+              }
+            }
+          : undefined
+      }
+      role={onOpenDetail ? "button" : undefined}
+      tabIndex={onOpenDetail ? 0 : undefined}
       style={{
         background: isComplete ? "#F8F7F2" : "#FDFAF5",
         border: `1px solid ${hovered ? "#C8B090" : "#E8E0D0"}`,
@@ -152,10 +192,12 @@ export function TaskCard({ task }) {
           : "0 2px 12px rgba(90,65,40,0.06)",
         transition: "all 0.25s cubic-bezier(0.4,0,0.2,1)",
         transform: hovered ? "translateY(-3px)" : "translateY(0)",
-        cursor: "default",
+        cursor: onOpenDetail ? "pointer" : "default",
         opacity: isComplete ? 0.75 : 1,
         position: "relative",
-        overflow: "hidden",
+        maxHeight: unconstrained ? undefined : TASK_CARD_LIMITS.maxHeightPx,
+        overflowY: unconstrained ? undefined : "auto",
+        overflowX: "hidden",
       }}
     >
       {/* Accent stripe */}
@@ -212,15 +254,13 @@ export function TaskCard({ task }) {
 
       {/* Title */}
       <div
+        className="task-card__title task-card__title--clamped"
         style={{
-          paddingLeft: 8,
-          fontSize: 17,
-          fontWeight: 700,
           color: isComplete ? "#8A7A6A" : "#2C1F0E",
-          fontFamily: "'Noto Serif KR', serif",
-          lineHeight: 1.3,
           textDecoration: isComplete ? "line-through" : "none",
+          WebkitLineClamp: TASK_CARD_LIMITS.titleMaxLines,
         }}
+        title={task.Title}
       >
         {task.Title}
       </div>
@@ -232,11 +272,11 @@ export function TaskCard({ task }) {
       </div>
 
       {/* Target plants */}
-      {task.Target_Plant && task.Target_Plant.length > 0 && (
-        <div style={{ display: "flex", gap: 5, flexWrap: "wrap", paddingLeft: 8 }}>
-          {task.Target_Plant.map((p) => (
+      {targetPlants.length > 0 && (
+        <div style={{ display: "flex", gap: 5, flexWrap: "wrap", paddingLeft: 8, alignItems: "center" }}>
+          {targetShown.map((p, i) => (
             <span
-              key={p}
+              key={`plant-${i}-${p}`}
               style={{
                 fontSize: 11,
                 padding: "2px 8px",
@@ -249,6 +289,15 @@ export function TaskCard({ task }) {
               🌿 {p}
             </span>
           ))}
+          {targetRest > 0 ? (
+            <span
+              className="task-card__overflow-count"
+              title={targetPlants.slice(TASK_CARD_LIMITS.targetPlantsMax).join(", ")}
+              aria-label={`외 식물 ${targetRest}건`}
+            >
+              +{targetRest}
+            </span>
+          ) : null}
         </div>
       )}
 
@@ -270,18 +319,9 @@ export function TaskCard({ task }) {
       {task.Notes ? (
         <div style={{ paddingLeft: 8 }}>
           <div
-            style={{
-              fontSize: 13,
-              color: "#5C4A32",
-              lineHeight: 1.55,
-              fontFamily: "'Noto Serif KR', serif",
-              borderLeft: "3px solid #E8E0D0",
-              paddingLeft: 10,
-              paddingTop: 6,
-              paddingBottom: 6,
-              background: "rgba(232, 224, 208, 0.2)",
-              borderRadius: "0 8px 8px 0",
-            }}
+            className="task-card__notes"
+            style={{ WebkitLineClamp: TASK_CARD_LIMITS.notesMaxLines }}
+            title={task.Notes}
           >
             {task.Notes}
           </div>

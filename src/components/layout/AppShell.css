@@ -1,5 +1,6 @@
 /* 모바일·태블릿: 상(메인)·하(MapSidePanel) 분할 / 데스크톱: 좌 레일·본문·우 패널 가로 */
 .app-shell {
+  --app-bar-height: 52px;
   display: flex;
   flex-direction: column;
   flex: 1;

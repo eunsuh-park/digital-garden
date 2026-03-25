@@ -15,7 +15,7 @@ export default function FullPageFilter({ filters = [], values = {}, onChange, on
   const hasActive = filters.some((f) => !!values[f.key]);
 
   return (
-    <div className="full-page-filter" role="group" aria-label="??">
+    <div className="full-page-filter" role="group" aria-label="목록 필터">
       {filters.map((f) => {
         const active = !!values[f.key];
         return (
@@ -31,9 +31,9 @@ export default function FullPageFilter({ filters = [], values = {}, onChange, on
               className="full-page-filter__select"
               value={values[f.key] ?? ''}
               onChange={(e) => onChange(f.key, e.target.value)}
-              aria-label={`${f.label} ??`}
+              aria-label={`${f.label} 필터`}
             >
-              <option value="">??</option>
+              <option value="">전체</option>
               {f.options.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
@@ -49,7 +49,7 @@ export default function FullPageFilter({ filters = [], values = {}, onChange, on
           className="full-page-filter__reset"
           onClick={onReset}
           disabled={!hasActive}
-          aria-label="?? ???"
+          aria-label="필터 초기화"
         >
           <Icon icon={refresh2Line} width={14} height={14} />
         </button>

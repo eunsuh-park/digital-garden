@@ -67,6 +67,72 @@
   flex-direction: column;
 }
 
+/* MapSidePanel 등 내장용 — 헤더 없음, 본문만 */
+.full-page--embedded {
+  padding: 0;
+  margin: 0;
+  max-width: none;
+}
+
+.full-page--embedded .full-page__empty {
+  padding: 1.5rem 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* 시트 한 줄 필터: 라벨 숨김 + 컴팩트 셀렉트(ellipsis는 브라우저 기본) */
+.full-page--embedded .full-page-filter {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  flex: 0 1 auto;
+  min-width: 0;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.full-page--embedded .full-page-filter__item {
+  flex-shrink: 0;
+}
+
+.full-page--embedded .full-page-filter__label {
+  display: none;
+}
+
+.full-page--embedded .full-page-filter__select {
+  min-width: 4rem;
+  max-width: 6.5rem;
+  padding: 0.22rem 0.4rem;
+  font-size: 0.72rem;
+}
+
+.full-page--embedded .full-page-filter__reset {
+  flex-shrink: 0;
+  padding: 0.22rem 0.5rem;
+}
+
+.full-page--embedded .full-page-sorter {
+  flex-shrink: 0;
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.full-page--embedded .full-page-sorter__label {
+  display: none;
+}
+
+.full-page--embedded .full-page-sorter__select {
+  min-width: 4rem;
+  max-width: 5.5rem;
+  padding: 0.22rem 0.4rem;
+  font-size: 0.72rem;
+}
+
+.full-page--embedded .full-page-sorter__dir {
+  width: 26px;
+  height: 26px;
+}
+
 .full-page__empty {
   text-align: center;
   color: var(--color-text-muted);

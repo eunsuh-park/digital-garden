@@ -7,6 +7,7 @@ import FullPageFilter from '../../components/FullPage/FullPageFilter';
 import FullPageSorter from '../../components/FullPage/FullPageSorter';
 import ErrorState from '../../components/ErrorState/ErrorState';
 import PlantCard from '../../components/PlantCard';
+import { useMapPanelDetail } from '../../context/MapPanelDetailContext';
 import './PlantsPage.css';
 
 const PLANTS_SORT_OPTIONS = [
@@ -17,8 +18,10 @@ const PLANTS_SORT_OPTIONS = [
 
 /**
  * PG-07: Plants 전체 페이지 - 식물 DB 전체 조회
+ * variant="embedded": 하단 시트에 동일 UI로 삽입
  */
-export default function PlantsPage() {
+export default function PlantsPage({ variant = 'default' }) {
+  const { openPlantDetail } = useMapPanelDetail();
   const [locations, setLocations] = useState([]);
   const [plants, setPlants] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -100,7 +103,7 @@ export default function PlantsPage() {
 
   if (loading) {
     return (
-      <FullPage title="식물" subtitle="로딩 중...">
+      <FullPage variant={variant} title="식물" subtitle="로딩 중...">
         <p className="plants-page__loading">데이터를 불러오는 중입니다.</p>
       </FullPage>
     );
@@ -108,7 +111,7 @@ export default function PlantsPage() {
 
   if (error) {
     return (
-      <FullPage title="식물">
+      <FullPage variant={variant} title="식물">
         <ErrorState variant="error" message={error} showHomeLink />
       </FullPage>
     );
@@ -116,14 +119,23 @@ export default function PlantsPage() {
 
   return (
     <FullPage
+      variant={variant}
       title="식물"
       subtitle={`식재된 식물 ${plants.length}종`}
       emptyMessage={!hasContent ? '등록된 식물이 없습니다.' : undefined}
     >
-      <p className="notion-db-badge" aria-label="연동된 Notion DB">
-        Notion DB: Locations(구역) · 식물
-      </p>
-      <div className="plants-page__controls">
+      {variant !== 'embedded' && (
+        <p className="notion-db-badge" aria-label="연동된 Notion DB">
+          Notion DB: Locations(구역) · 식물
+        </p>
+      )}
+      <div
+        className={
+          variant === 'embedded'
+            ? 'plants-page__controls plants-page__controls--embedded'
+            : 'plants-page__controls'
+        }
+      >
         <FullPageFilter
           filters={plantsFilters}
           values={filterValues}
@@ -162,7 +174,13 @@ export default function PlantsPage() {
                 .join(' · '),
           };
 
-          return <PlantCard key={p.id} plant={cardPlant} />;
+          return (
+            <PlantCard
+              key={p.id}
+              plant={cardPlant}
+              onOpenDetail={variant === 'embedded' ? () => openPlantDetail(p) : undefined}
+            />
+          );
         })}
       </div>
     </FullPage>
