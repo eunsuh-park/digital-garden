@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { Icon } from '@iconify/react';
+import refresh2Line from '@iconify-icons/mingcute/refresh-2-line';
 import { useMapPanelLayout } from '../../context/MapPanelLayoutContext';
 import Drawer from '../Drawer/Drawer';
-import MapRotationTool from '../MapRotationTool/MapRotationTool';
-import MapZoomTool from '../MapZoomTool/MapZoomTool';
 import Popover from '../Popover/Popover';
 import './GardenMap.css';
 import gardenMapSvg from '../../gardenMap.svg?raw';
@@ -23,11 +23,24 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
   const [mapBase, setMapBase] = useState('road'); // road | house
   const [mapDirection, setMapDirection] = useState('horizontal'); // vertical | horizontal
   const [zoom, setZoom] = useState(1); // 1 = 100% (최소)
+  const [mapOnlyMode, setMapOnlyMode] = useState(false);
   const [popoverPos, setPopoverPos] = useState({ x: 0, y: 0 });
   const svgHostRef = useRef(null);
   const svgViewBoxRef = useRef(null);
   const svgOriginalViewBoxRef = useRef(null);
   const panRef = useRef({ active: false, startX: 0, startY: 0, startVbX: 0, startVbY: 0 });
+  const pinchRef = useRef({ active: false, startDistance: 0, startZoom: 1 });
+
+  const ORIENTATION_OPTIONS = useMemo(
+    () => [
+      { value: 'road-horizontal', label: '도로를 기준으로 수평 View', base: 'road', direction: 'horizontal' },
+      { value: 'road-vertical', label: '도로를 기준으로 수직 View', base: 'road', direction: 'vertical' },
+      { value: 'house-horizontal', label: '집을 기준으로 수평 View', base: 'house', direction: 'horizontal' },
+      { value: 'house-vertical', label: '집을 기준으로 수직 View', base: 'house', direction: 'vertical' },
+    ],
+    []
+  );
+  const orientationValue = `${mapBase}-${mapDirection}`;
 
   const handleLocationClick = useCallback((e, locationId) => {
     setActiveLocationId(locationId);
@@ -53,14 +66,6 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
     return Math.max(min, Math.min(max, v));
   }, []);
 
-  const handleZoomIn = useCallback(() => {
-    setZoom((z) => clampZoom(Number((z + 0.1).toFixed(2))));
-  }, [clampZoom]);
-
-  const handleZoomOut = useCallback(() => {
-    setZoom((z) => clampZoom(Number((z - 0.1).toFixed(2))));
-  }, [clampZoom]);
-
   const handleZoomReset = useCallback(() => {
     setZoom(1);
   }, []);
@@ -76,6 +81,30 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
       });
     },
     [clampZoom]
+  );
+
+  const applyPanFromClient = useCallback(
+    (wrapper, clientX, clientY) => {
+      const rect = wrapper.getBoundingClientRect();
+      const vb = svgViewBoxRef.current;
+      const svg = svgHostRef.current?.querySelector?.('svg');
+      if (!vb || !svg) return;
+
+      const dxPx = clientX - panRef.current.startX;
+      const dyPx = clientY - panRef.current.startY;
+      const dx = (dxPx * vb.w) / rect.width;
+      const dy = (dyPx * vb.h) / rect.height;
+
+      const next = clampViewBox({
+        x: panRef.current.startVbX - dx,
+        y: panRef.current.startVbY - dy,
+        w: vb.w,
+        h: vb.h,
+      });
+      svgViewBoxRef.current = next;
+      svg.setAttribute('viewBox', `${next.x} ${next.y} ${next.w} ${next.h}`);
+    },
+    []
   );
 
   const rotationDeg = useMemo(() => {
@@ -160,32 +189,88 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
     (e) => {
       if (!panRef.current.active) return;
       e.preventDefault();
-      const wrapper = e.currentTarget;
-      const rect = wrapper.getBoundingClientRect();
-      const vb = svgViewBoxRef.current;
-      const svg = svgHostRef.current?.querySelector?.('svg');
-      if (!vb || !svg) return;
-
-      const dxPx = e.clientX - panRef.current.startX;
-      const dyPx = e.clientY - panRef.current.startY;
-      const dx = (dxPx * vb.w) / rect.width;
-      const dy = (dyPx * vb.h) / rect.height;
-
-      const next = clampViewBox({
-        x: panRef.current.startVbX - dx,
-        y: panRef.current.startVbY - dy,
-        w: vb.w,
-        h: vb.h,
-      });
-      svgViewBoxRef.current = next;
-      svg.setAttribute('viewBox', `${next.x} ${next.y} ${next.w} ${next.h}`);
+      applyPanFromClient(e.currentTarget, e.clientX, e.clientY);
     },
-    [clampViewBox]
+    [applyPanFromClient]
   );
 
   const handlePanEnd = useCallback(() => {
     panRef.current.active = false;
   }, []);
+
+  const distanceBetweenTouches = useCallback((touchA, touchB) => {
+    const dx = touchA.clientX - touchB.clientX;
+    const dy = touchA.clientY - touchB.clientY;
+    return Math.hypot(dx, dy);
+  }, []);
+
+  const handleTouchStart = useCallback(
+    (e) => {
+      if (e.touches.length === 2) {
+        pinchRef.current.active = true;
+        pinchRef.current.startDistance = distanceBetweenTouches(e.touches[0], e.touches[1]);
+        pinchRef.current.startZoom = zoom;
+        panRef.current.active = false;
+        return;
+      }
+      if (e.touches.length === 1 && zoom > 1.00001 && svgViewBoxRef.current) {
+        panRef.current.active = true;
+        panRef.current.startX = e.touches[0].clientX;
+        panRef.current.startY = e.touches[0].clientY;
+        panRef.current.startVbX = svgViewBoxRef.current.x;
+        panRef.current.startVbY = svgViewBoxRef.current.y;
+      }
+    },
+    [distanceBetweenTouches, zoom]
+  );
+
+  const handleTouchMove = useCallback(
+    (e) => {
+      if (e.touches.length === 2 && pinchRef.current.active) {
+        e.preventDefault();
+        const dist = distanceBetweenTouches(e.touches[0], e.touches[1]);
+        const ratio = pinchRef.current.startDistance > 0 ? dist / pinchRef.current.startDistance : 1;
+        const next = clampZoom(Number((pinchRef.current.startZoom * ratio).toFixed(2)));
+        setZoom(next);
+        return;
+      }
+      if (e.touches.length === 1 && panRef.current.active) {
+        e.preventDefault();
+        applyPanFromClient(e.currentTarget, e.touches[0].clientX, e.touches[0].clientY);
+      }
+    },
+    [applyPanFromClient, clampZoom, distanceBetweenTouches]
+  );
+
+  const handleTouchEnd = useCallback((e) => {
+    if (e.touches.length < 2) pinchRef.current.active = false;
+    if (e.touches.length === 0) panRef.current.active = false;
+  }, []);
+
+  const handleOrientationChange = useCallback(
+    (e) => {
+      const selected = ORIENTATION_OPTIONS.find((opt) => opt.value === e.target.value);
+      if (!selected) return;
+      setMapBase(selected.base);
+      setMapDirection(selected.direction);
+    },
+    [ORIENTATION_OPTIONS]
+  );
+
+  const toggleMapOnlyMode = useCallback(() => {
+    setMapOnlyMode((prev) => !prev);
+  }, []);
+
+  useEffect(() => {
+    const cls = 'map-only-mode';
+    document.body.classList.toggle(cls, mapOnlyMode);
+    if (mapOnlyMode) {
+      setDrawerOpen(false);
+      setHoverLocationId(null);
+      setPopoverPos({ x: 0, y: 0 });
+    }
+    return () => document.body.classList.remove(cls);
+  }, [mapOnlyMode]);
 
   const selectedLocation = activeLocationId && getLocationById ? getLocationById(activeLocationId) : null;
   const hoverLocation = hoverLocationId && getLocationById ? getLocationById(hoverLocationId) : null;
@@ -323,6 +408,10 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
         onMouseMove={handlePanMove}
         onMouseUp={handlePanEnd}
         onMouseLeave={handlePanEnd}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
         style={{ transform: `rotate(${rotationDeg}deg)` }}
       >
         <div
@@ -337,21 +426,49 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
       <div className="garden-map__controls" aria-label="지도 도구">
         <div className="garden-map__toolbar" role="toolbar" aria-label="지도 도구">
           <div className="garden-map__toolbar-inner">
-            <MapRotationTool
-              base={mapBase}
-              direction={mapDirection}
-              onChangeBase={setMapBase}
-              onChangeDirection={setMapDirection}
-            />
-          </div>
-        </div>
+            {!mapOnlyMode ? (
+              <label className="garden-map__select-wrap" aria-label="지도의 기준과 방향 선택">
+                <select
+                  className="garden-map__select"
+                  value={orientationValue}
+                  onChange={handleOrientationChange}
+                >
+                  {ORIENTATION_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
 
-        <div className="garden-map__zoom-ui">
-          <MapZoomTool zoom={zoom} onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} onReset={handleZoomReset} />
+            {!mapOnlyMode ? (
+              <button
+                type="button"
+                className="garden-map__icon-btn"
+                onClick={handleZoomReset}
+                disabled={zoom <= 1.00001}
+                aria-label="축척 원래대로"
+                title="축척 원래대로"
+              >
+                <Icon icon={refresh2Line} width={16} height={16} />
+              </button>
+            ) : null}
+
+            <button
+              type="button"
+              className="garden-map__icon-btn"
+              onClick={toggleMapOnlyMode}
+              aria-label={mapOnlyMode ? '전체 UI 다시 표시' : '맵만 보기'}
+              title={mapOnlyMode ? '전체 UI 다시 표시' : '맵만 보기'}
+            >
+              ⛶
+            </button>
+          </div>
         </div>
       </div>
 
-      {hoverLocation && (
+      {!mapOnlyMode && hoverLocation ? (
         <Popover
           section={hoverLocation}
           tasks={getTasks(hoverLocation.id)}
@@ -363,14 +480,16 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
             setHoverLocationId(null);
           }}
         />
-      )}
+      ) : null}
 
-      <Drawer
-        section={selectedLocation}
-        tasks={selectedLocation ? getTasks(selectedLocation.id) : []}
-        isOpen={drawerOpen}
-        onClose={handleCloseDrawer}
-      />
+      {!mapOnlyMode ? (
+        <Drawer
+          section={selectedLocation}
+          tasks={selectedLocation ? getTasks(selectedLocation.id) : []}
+          isOpen={drawerOpen}
+          onClose={handleCloseDrawer}
+        />
+      ) : null}
     </div>
   );
 }
