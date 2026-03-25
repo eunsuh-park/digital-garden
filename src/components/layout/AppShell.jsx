@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
+import { LocationsProvider } from '../../context/LocationsContext';
+import { MapPanelLayoutProvider } from '../../context/MapPanelLayoutContext';
 import NavigationRail from './NavigationRail';
 import MapSidePanel from './MapSidePanel';
 import AppBar from './AppBar';
@@ -7,27 +9,32 @@ import NavDrawer from './NavDrawer';
 import './AppShell.css';
 
 /**
- * 로그인 후 공통 레이아웃 — 좌측 프로젝트 레일, 우측 섹션 레일(데스크톱),
- * 태블릿/모바일 App Bar + 좌측 드로어
+ * 로그인 후 공통 레이아웃
+ * - 데스크톱: 좌 NavigationRail · 가운데 본문 · 우 MapSidePanel
+ * - 모바일·태블릿: App Bar + 본문(상) + MapSidePanel(하) + NavDrawer
  */
 export default function AppShell() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [sectionNavCollapsed, setSectionNavCollapsed] = useState(false);
 
   return (
-    <div className="app-shell">
-      <NavigationRail />
-      <div className="app-shell__body">
-        <AppBar onOpenMenu={() => setDrawerOpen(true)} />
-        <main className="app-shell__main">
-          <Outlet />
-        </main>
+    <LocationsProvider>
+      <MapPanelLayoutProvider>
+      <div className="app-shell">
+        <NavigationRail />
+        <div className="app-shell__body">
+          <AppBar onOpenMenu={() => setDrawerOpen(true)} />
+          <main className="app-shell__main">
+            <Outlet />
+          </main>
+        </div>
+        <MapSidePanel
+          collapsed={sectionNavCollapsed}
+          onToggleCollapsed={() => setSectionNavCollapsed((c) => !c)}
+        />
+        <NavDrawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} />
       </div>
-      <MapSidePanel
-        collapsed={sectionNavCollapsed}
-        onToggleCollapsed={() => setSectionNavCollapsed((c) => !c)}
-      />
-      <NavDrawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} />
-    </div>
+      </MapPanelLayoutProvider>
+    </LocationsProvider>
   );
 }

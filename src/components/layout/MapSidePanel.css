@@ -1,50 +1,81 @@
-/* 우측 지도 패널 — 좌측 핸들(반원 탭) + 흰 카드 본문 */
+/* MapSidePanel — 경로: src/components/layout/MapSidePanel.jsx
+ * <1024px: 본문 아래 하단 시트(상하 분할) / ≥1024px: 본문 우측 세로 패널 */
+
 .map-side-panel {
   --map-panel-accent: #6d28d9;
   --map-panel-handle-w: 26px;
 
-  display: none;
   position: relative;
   flex-shrink: 0;
-  height: 100%;
-  min-height: 0;
-  width: min(340px, 40vw);
-  transition: width 0.28s ease;
-  overflow: visible;
+  display: flex;
+  flex-direction: column;
   z-index: 10;
+  overflow: visible;
+  width: 100%;
+  max-height: min(42vh, 320px);
+  min-height: 132px;
+  box-sizing: border-box;
+  transition: max-height 0.28s ease, width 0.28s ease, min-height 0.28s ease;
 }
 
 @media (min-width: 1024px) {
   .map-side-panel {
-    display: block;
+    width: min(340px, 40vw);
+    max-height: none;
+    min-height: 0;
+    height: 100%;
   }
 }
 
+/* 접힘: 모바일·태블릿 = 얇은 막대만 / 데스크톱 = 폭 0 */
 .map-side-panel--collapsed {
-  width: 0;
-  min-width: 0;
+  max-height: 26px;
+  min-height: 26px;
+  padding-bottom: 0;
 }
 
-/* 패널 좌측 경계 중앙에 붙는 Drawer 핸들 — 지도 쪽으로 반쯤 돌출 */
+@media (min-width: 1024px) {
+  .map-side-panel--collapsed {
+    width: 0;
+    min-width: 0;
+    max-height: none;
+    min-height: 0;
+  }
+}
+
+/* 접기 핸들 — 하단 레이아웃: 상단 중앙으로 위로 돌출 / 우측 레이아웃: 좌측 중앙 */
 .map-side-panel__handle {
   position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translate(-50%, -50%);
   z-index: 5;
+  padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--map-panel-handle-w);
-  height: 52px;
-  padding: 0;
-  border: 1px solid var(--color-border);
-  border-radius: 12px 0 0 12px;
   background: var(--color-surface);
+  border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
   cursor: pointer;
   color: var(--color-text-muted);
   transition: background 0.2s, color 0.2s;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 56px;
+  height: 24px;
+  border-radius: 12px 12px 0 0;
+  border-bottom: none;
+}
+
+@media (min-width: 1024px) {
+  .map-side-panel__handle {
+    top: 50%;
+    left: 0;
+    transform: translate(-50%, -50%);
+    width: var(--map-panel-handle-w);
+    height: 52px;
+    border-radius: 12px 0 0 12px;
+    border-bottom: 1px solid var(--color-border);
+  }
 }
 
 .map-side-panel__handle:hover {
@@ -52,24 +83,62 @@
   color: var(--color-text);
 }
 
+.map-side-panel__handle-icons {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .map-side-panel__handle-icon {
-  font-size: 1.1rem;
   font-weight: 600;
   line-height: 1;
   user-select: none;
 }
 
+.map-side-panel__handle-icon--desktop {
+  display: none;
+  font-size: 1.1rem;
+}
+
+.map-side-panel__handle-icon--mobile {
+  display: inline;
+  font-size: 0.82rem;
+}
+
+@media (min-width: 1024px) {
+  .map-side-panel__handle-icon--desktop {
+    display: inline;
+  }
+
+  .map-side-panel__handle-icon--mobile {
+    display: none;
+  }
+}
+
 .map-side-panel__surface {
-  height: 100%;
+  flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
   background: var(--color-surface);
-  border-left: 1px solid var(--color-border);
-  border-radius: 16px 0 0 16px;
-  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.06);
   overflow: hidden;
   transition: opacity 0.22s ease, visibility 0.22s ease;
+  margin-top: 10px;
+  border: 1px solid var(--color-border);
+  border-bottom: none;
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+}
+
+@media (min-width: 1024px) {
+  .map-side-panel__surface {
+    height: 100%;
+    margin-top: 0;
+    border: none;
+    border-left: 1px solid var(--color-border);
+    border-radius: 16px 0 0 16px;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.06);
+  }
 }
 
 .map-side-panel--collapsed .map-side-panel__surface {
@@ -194,9 +263,36 @@ div.map-side-panel__row {
 }
 
 .map-side-panel__subitem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.35rem 0;
   font-size: 0.85rem;
+  color: var(--color-text);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.map-side-panel__subitem:last-child {
+  border-bottom: none;
+}
+
+.map-side-panel__subitem-name {
+  font-weight: 500;
+}
+
+.map-side-panel__subitem-meta {
+  font-size: 0.75rem;
   color: var(--color-text-muted);
-  padding: 0.25rem 0;
+}
+
+.map-side-panel__hint {
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+  padding: 0.5rem 0.25rem;
+}
+
+.map-side-panel__hint--error {
+  color: #b91c1c;
 }
 
 .map-side-panel__placeholder {

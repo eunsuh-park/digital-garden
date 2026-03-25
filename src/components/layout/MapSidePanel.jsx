@@ -1,70 +1,79 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import arrowUpLine from '@iconify-icons/mingcute/arrow-up-line';
 import arrowDownLine from '@iconify-icons/mingcute/arrow-down-line';
+import { useLocations } from '../../context/LocationsContext';
+import { groupLocationsByColor, labelForColorGroup } from '../../lib/locationsGroup';
 import './MapSidePanel.css';
 
 /**
- * 지도 우측 패널 — Location / Tasks / Plants 탭 + 좌측 접기 핸들(Drawer)
- * 데스크톱(≥1024px) 전용. 라우트와 탭을 동기화한다.
+ * Location / Tasks / Plants 패널
+ * 데스크톱: 본문 우측 세로 패널 + 좌측 접기 핸들
+ * 모바일·태블릿: 본문 아래 하단 시트 + 상단 접기 핸들
  */
 
-const LOCATION_MOCK = [
-  {
-    id: 'garden',
-    label: '텃밭',
-    count: 2,
-    dot: '#3d8c4a',
-    children: [{ id: 'g1', label: '텃밭' }, { id: 'g2', label: '텃밭' }],
-  },
-  { id: 'herb', label: '허브 zone', count: 3, dot: '#5eb8c4' },
-  { id: 'tree', label: '나무 zone', count: 3, dot: '#1f5c3a' },
-  { id: 'etc', label: 'etc', count: 1, dot: '#e08a4c' },
-  { id: 'none', label: 'No Label', count: 1, dot: '#9ca3af' },
-];
-
 function LocationTabContent() {
-  const [expandedId, setExpandedId] = useState('garden');
+  const { locations, loading, error } = useLocations();
+  const [expandedColors, setExpandedColors] = useState(() => new Set());
+
+  const groups = useMemo(() => groupLocationsByColor(locations), [locations]);
+
+  const toggleColor = (color) => {
+    setExpandedColors((prev) => {
+      const next = new Set(prev);
+      if (next.has(color)) next.delete(color);
+      else next.add(color);
+      return next;
+    });
+  };
+
+  if (loading) {
+    return <p className="map-side-panel__hint">구역을 불러오는 중…</p>;
+  }
+
+  if (error) {
+    return <p className="map-side-panel__hint map-side-panel__hint--error">{error}</p>;
+  }
+
+  if (!locations.length) {
+    return <p className="map-side-panel__hint">등록된 구역이 없습니다.</p>;
+  }
 
   return (
     <ul className="map-side-panel__list" role="list">
-      {LOCATION_MOCK.map((row) => {
-        const hasChildren = row.children?.length;
-        const expanded = expandedId === row.id;
-
-        const RowTag = hasChildren ? 'button' : 'div';
-        const rowProps = hasChildren
-          ? {
-              type: 'button',
-              onClick: () => setExpandedId((prev) => (prev === row.id ? '' : row.id)),
-              'aria-expanded': expanded,
-            }
-          : {};
+      {groups.map(({ color, items }) => {
+        const label = labelForColorGroup(items);
+        const count = items.length;
+        const expanded = expandedColors.has(color);
 
         return (
-          <li key={row.id} className="map-side-panel__list-item">
-            <RowTag className="map-side-panel__row" {...rowProps}>
-              <span className="map-side-panel__dot" style={{ background: row.dot }} aria-hidden />
-              <span className="map-side-panel__row-label">{row.label}</span>
-              <span className="map-side-panel__row-count">{row.count}</span>
-              {hasChildren ? (
-                <Icon
-                  icon={expanded ? arrowUpLine : arrowDownLine}
-                  width={16}
-                  height={16}
-                  className="map-side-panel__row-chevron"
-                  aria-hidden
-                />
-              ) : (
-                <span className="map-side-panel__row-chevron map-side-panel__row-chevron--spacer" />
-              )}
-            </RowTag>
-            {hasChildren && expanded && (
+          <li key={color} className="map-side-panel__list-item">
+            <button
+              type="button"
+              className="map-side-panel__row"
+              onClick={() => toggleColor(color)}
+              aria-expanded={expanded}
+            >
+              <span className="map-side-panel__dot" style={{ background: color }} aria-hidden />
+              <span className="map-side-panel__row-label">{label}</span>
+              <span className="map-side-panel__row-count">{count}</span>
+              <Icon
+                icon={expanded ? arrowUpLine : arrowDownLine}
+                width={16}
+                height={16}
+                className="map-side-panel__row-chevron"
+                aria-hidden
+              />
+            </button>
+            {expanded && (
               <ul className="map-side-panel__sublist">
-                {row.children.map((c) => (
-                  <li key={c.id} className="map-side-panel__subitem">
-                    {c.label}
+                {items.map((loc) => (
+                  <li key={loc.id} className="map-side-panel__subitem">
+                    <span className="map-side-panel__subitem-name">{loc.name}</span>
+                    {loc.zone_type ? (
+                      <span className="map-side-panel__subitem-meta">{loc.zone_type}</span>
+                    ) : null}
                   </li>
                 ))}
               </ul>
@@ -87,11 +96,12 @@ function PlaceholderTab({ title }) {
 
 export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
   const { pathname } = useLocation();
+  const { locations, loading } = useLocations();
 
   const tabFromPath =
     pathname.startsWith('/tasks') ? 'tasks' : pathname.startsWith('/plants') ? 'plants' : 'location';
 
-  const locationCount = 9;
+  const locationTotal = loading ? '…' : String(locations.length);
 
   return (
     <aside
@@ -105,8 +115,13 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
         aria-expanded={!collapsed}
         aria-label={collapsed ? '패널 펼치기' : '패널 접기'}
       >
-        <span className="map-side-panel__handle-icon" aria-hidden>
-          {collapsed ? '›' : '‹'}
+        <span className="map-side-panel__handle-icons" aria-hidden>
+          <span className="map-side-panel__handle-icon map-side-panel__handle-icon--desktop">
+            {collapsed ? '›' : '‹'}
+          </span>
+          <span className="map-side-panel__handle-icon map-side-panel__handle-icon--mobile">
+            {collapsed ? '▴' : '▾'}
+          </span>
         </span>
       </button>
 
@@ -121,7 +136,7 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
               `map-side-panel__tab ${isActive ? 'map-side-panel__tab--active' : ''}`
             }
           >
-            Location ({locationCount})
+            Location ({locationTotal})
           </NavLink>
           <NavLink
             to="/tasks"

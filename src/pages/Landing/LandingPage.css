@@ -18,6 +18,13 @@
   flex-direction: column;
 }
 
+.landing-page__wrap:has(.garden-map--stacked) {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
 .notion-db-badge--landing {
   position: absolute;
   top: 0.35rem;
