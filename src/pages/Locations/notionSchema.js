@@ -7,6 +7,7 @@ import { getTitle, getRichText, getSelect } from '../../lib/parseNotionProps';
 export const PROP_MAP = {
   name: 'Name',
   color: 'Color',
+  description: 'Description',
   svg_id: 'Svg_Id',
 };
 
@@ -16,6 +17,7 @@ export function parseLocationPage(page) {
   const colorProp = props[PROP_MAP.color];
   const colorLabel = (getSelect(colorProp) || getRichText(colorProp) || '').trim();
   const svgId = getRichText(props[PROP_MAP.svg_id]) || '';
+  const description = getRichText(props[PROP_MAP.description]) || '';
 
   // gardenMap.svg 도형 id와의 간단한 이름 기반 fallback (Notion Svg_Id가 비어 있을 때만 사용)
   const nameBasedSvgId = (() => {
@@ -37,6 +39,7 @@ export function parseLocationPage(page) {
     color_label: colorLabel,
     color_token: colorTokenFromRaw(colorLabel),
     svg_id: svgId || nameBasedSvgId || '',
+    description: description.trim(),
     taskCount: 0,
     plantCount: 0,
   };

@@ -43,6 +43,43 @@ async function fetchApi(path, label) {
   }
 }
 
+async function mutateApi(path, label, options = {}) {
+  const apiOrigin = import.meta.env.VITE_API_ORIGIN;
+  const url = joinUrl(apiOrigin, `/api${path}`);
+  console.log(`${LOG_PREFIX} 요청: ${label || path} → ${url}`);
+
+  try {
+    const res = await fetch(url, {
+      method: options.method || 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: options.body != null ? JSON.stringify(options.body) : undefined,
+    });
+
+    const contentType = res.headers.get('content-type') || '';
+    const isJson = contentType.includes('application/json');
+    const data = isJson ? await res.json().catch(() => null) : null;
+
+    if (!isJson || data == null) {
+      const hint = apiOrigin
+        ? 'API 응답 형식이 올바르지 않습니다.'
+        : '정적 호스팅에서는 /api가 동작하지 않습니다. `VITE_API_ORIGIN`을 Vercel 도메인으로 설정하세요.';
+      throw new Error(`${hint} (${label || path})`);
+    }
+
+    if (!res.ok) {
+      console.warn(`${LOG_PREFIX} 실패: ${label || path}`, res.status, data);
+      throw new Error(data.error || `API error: ${res.status}`);
+    }
+
+    return data;
+  } catch (e) {
+    console.error(`${LOG_PREFIX} 오류: ${label || path}`, e.message);
+    throw e;
+  }
+}
+
 export async function fetchSections() {
   return fetchLocations();
 }
@@ -57,4 +94,16 @@ export async function fetchTasks() {
 
 export async function fetchPlants() {
   return fetchApi('/notion-plants', 'Plants(식물)');
+}
+
+/**
+ * Locations DB: 안전 필드만 업데이트(Name/Description)
+ * - create는 보류
+ * - relation(color/svg_id 등)은 payload에서 제외
+ */
+export async function updateLocation(id, updates) {
+  return mutateApi('/notion-locations-update', 'Locations(구역) update', {
+    method: 'POST',
+    body: { id, ...updates },
+  });
 }

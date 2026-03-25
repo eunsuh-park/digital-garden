@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { fetchLocations, fetchTasks, fetchPlants } from '../api/notionApi';
 import { parseLocationsResponse } from '../pages/Locations/notionSchema';
 import { parseTasksResponse } from '../pages/Tasks/notionSchema';
@@ -16,63 +16,66 @@ export function LocationsProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    let cancelled = false;
+  const requestIdRef = useRef(0);
 
-    async function load() {
-      try {
-        setLoading(true);
-        setError(null);
-        const [locationsRes, tasksRes, plantsRes] = await Promise.all([
-          fetchLocations(),
-          fetchTasks(),
-          fetchPlants(),
-        ]);
-        if (cancelled) return;
+  const load = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
+    try {
+      setLoading(true);
+      setError(null);
+      const [locationsRes, tasksRes, plantsRes] = await Promise.all([
+        fetchLocations(),
+        fetchTasks(),
+        fetchPlants(),
+      ]);
 
-        const tasksList = parseTasksResponse(tasksRes);
-        const plantsList = parsePlantsResponse(plantsRes);
-        const taskCountMap = {};
-        const plantCountMap = {};
-        const normId = (id) => (id == null ? '' : String(id).trim());
-        tasksList.filter((t) => t.status !== 'completed').forEach((t) => {
-          const sid = normId(t.section_id);
-          if (sid) taskCountMap[sid] = (taskCountMap[sid] || 0) + 1;
-        });
-        plantsList.forEach((p) => {
-          const sid = normId(p.section_id);
-          if (sid) plantCountMap[sid] = (plantCountMap[sid] || 0) + 1;
-        });
+      if (requestIdRef.current !== requestId) return;
 
-        let locationsList = parseLocationsResponse(
-          locationsRes,
-          taskCountMap,
-          plantCountMap
-        );
-        locationsList = locationsList.map((loc) => ({
-          ...loc,
-          taskCount: taskCountMap[normId(loc.id)] ?? loc.taskCount ?? 0,
-          plantCount: plantCountMap[normId(loc.id)] ?? loc.plantCount ?? 0,
-        }));
-        setLocations(locationsList);
-        setTasks(tasksList);
-        setPlants(plantsList);
-      } catch (e) {
-        if (!cancelled) setError(e.message);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+      const tasksList = parseTasksResponse(tasksRes);
+      const plantsList = parsePlantsResponse(plantsRes);
+      const taskCountMap = {};
+      const plantCountMap = {};
+      const normId = (id) => (id == null ? '' : String(id).trim());
+      tasksList.filter((t) => t.status !== 'completed').forEach((t) => {
+        const sid = normId(t.section_id);
+        if (sid) taskCountMap[sid] = (taskCountMap[sid] || 0) + 1;
+      });
+      plantsList.forEach((p) => {
+        const sid = normId(p.section_id);
+        if (sid) plantCountMap[sid] = (plantCountMap[sid] || 0) + 1;
+      });
+
+      let locationsList = parseLocationsResponse(
+        locationsRes,
+        taskCountMap,
+        plantCountMap
+      );
+      locationsList = locationsList.map((loc) => ({
+        ...loc,
+        taskCount: taskCountMap[normId(loc.id)] ?? loc.taskCount ?? 0,
+        plantCount: plantCountMap[normId(loc.id)] ?? loc.plantCount ?? 0,
+      }));
+      setLocations(locationsList);
+      setTasks(tasksList);
+      setPlants(plantsList);
+    } catch (e) {
+      if (requestIdRef.current === requestId) setError(e.message);
+    } finally {
+      if (requestIdRef.current === requestId) setLoading(false);
     }
-
-    load();
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const reload = useCallback(() => {
+    load();
+  }, [load]);
+
   const value = useMemo(
-    () => ({ locations, tasks, plants, loading, error }),
-    [locations, tasks, plants, loading, error]
+    () => ({ locations, tasks, plants, loading, error, reload }),
+    [locations, tasks, plants, loading, error, reload]
   );
 
   return <LocationsContext.Provider value={value}>{children}</LocationsContext.Provider>;
