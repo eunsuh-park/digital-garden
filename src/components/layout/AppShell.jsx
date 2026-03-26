@@ -11,7 +11,7 @@ import './AppShell.css';
 
 function AppShellWithDetailSync() {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [sectionNavCollapsed, setSectionNavCollapsed] = useState(false);
+  const [sectionNavCollapsed, setSectionNavCollapsed] = useState(true);
   const { detail } = useMapPanelDetail();
 
   useEffect(() => {

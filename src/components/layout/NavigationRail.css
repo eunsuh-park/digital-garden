@@ -6,8 +6,6 @@
   min-height: 100%;
   flex-shrink: 0;
   padding: 0.75rem 0.4rem;
-  background: var(--color-surface);
-  border-right: 1px solid var(--color-border);
   box-sizing: border-box;
 }
 
@@ -42,6 +40,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 0.85rem;
   flex: 1;
   width: 100%;
@@ -101,6 +100,14 @@
 .navigation-rail__project-btn:disabled {
   opacity: 0.85;
   cursor: not-allowed;
+}
+
+.navigation-rail__project--empty .navigation-rail__project-btn {
+  box-shadow: none;
+}
+
+.navigation-rail__project--empty .navigation-rail__project-btn:hover:not(:disabled) {
+  box-shadow: none;
 }
 
 .navigation-rail__bottom {

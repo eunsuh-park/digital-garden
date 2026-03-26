@@ -29,13 +29,11 @@ export default function NavigationRail() {
           <button type="button" className="navigation-rail__project-btn" aria-label="프로젝트 추가 (준비 중)" disabled>
             <Icon icon={addLine} width={22} height={22} aria-hidden />
           </button>
-          <span className="navigation-rail__project-label navigation-rail__project-label--muted">빈 슬롯</span>
         </div>
         <div className="navigation-rail__project navigation-rail__project--empty">
           <button type="button" className="navigation-rail__project-btn" aria-label="프로젝트 추가 (준비 중)" disabled>
             <Icon icon={addLine} width={22} height={22} aria-hidden />
           </button>
-          <span className="navigation-rail__project-label navigation-rail__project-label--muted">빈 슬롯</span>
         </div>
       </nav>
 
