@@ -395,6 +395,61 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
     });
   }, [resolvedLocations, activeLocationId, hoverLocationId, svgIdFallbackMap]);
 
+  // 할 일이 있는 구역(taskCount > 0)에 지도 배지(빨간 점) 표시
+  useEffect(() => {
+    const host = svgHostRef.current;
+    if (!host) return;
+    const svg = host.querySelector('svg');
+    if (!svg) return;
+
+    const NS = 'http://www.w3.org/2000/svg';
+    const layerId = 'map-task-badge-layer';
+
+    const prevLayer = svg.querySelector(`#${layerId}`);
+    if (prevLayer) prevLayer.remove();
+
+    const layer = document.createElementNS(NS, 'g');
+    layer.setAttribute('id', layerId);
+    layer.setAttribute('pointer-events', 'none');
+
+    function getTargetEl(svgId) {
+      if (!svgId) return null;
+      const direct = svg.querySelector(`#${svgId}`);
+      if (direct) return direct;
+      const fallback = svgIdFallbackMap[svgId];
+      if (fallback) return svg.querySelector(`#${fallback}`);
+      return null;
+    }
+
+    resolvedLocations.forEach((location) => {
+      const pendingTasks = Number(location.taskCount || 0);
+      if (pendingTasks <= 0) return;
+
+      const target = getTargetEl(location.resolved_svg_id);
+      if (!target || typeof target.getBBox !== 'function') return;
+
+      const box = target.getBBox();
+      if (!Number.isFinite(box?.x) || !Number.isFinite(box?.y)) return;
+
+      // 도형 우상단 근처(살짝 바깥)에 배지 점 배치
+      const cx = box.x + box.width + 5;
+      const cy = box.y - 5;
+      const dot = document.createElementNS(NS, 'circle');
+      dot.setAttribute('cx', String(cx));
+      dot.setAttribute('cy', String(cy));
+      dot.setAttribute('r', '6');
+      dot.setAttribute('fill', '#e53935');
+      dot.setAttribute('stroke', '#ffffff');
+      dot.setAttribute('stroke-width', '2');
+      dot.setAttribute('opacity', '0.96');
+
+      layer.appendChild(dot);
+    });
+
+    svg.appendChild(layer);
+    return () => layer.remove();
+  }, [resolvedLocations, svgIdFallbackMap]);
+
   return (
     <div className={stackedLayout ? 'garden-map garden-map--stacked' : 'garden-map'}>
       <div
