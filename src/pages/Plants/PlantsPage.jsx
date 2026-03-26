@@ -31,7 +31,7 @@ function speciesGroupKey(species) {
  * 하단 시트 전용: 종(species)별 아코디언 + 타일 그리드
  */
 function PlantsEmbeddedAccordion({ plantsList }) {
-  const { openPlantDetail } = useMapPanelDetail();
+  const { openPlantDetail, openPlantCreate } = useMapPanelDetail();
   const [expanded, setExpanded] = useState(() => new Set());
 
   const { sortedKeys, groupMap } = useMemo(() => {
@@ -108,13 +108,14 @@ function PlantsEmbeddedAccordion({ plantsList }) {
                   </li>
                 ))}
                 <li className="plants-embedded__cell">
-                  <span
+                  <button
+                    type="button"
                     className="plants-embedded__tile plants-embedded__tile--add"
-                    title="추가 예정"
-                    aria-disabled="true"
+                    onClick={() => openPlantCreate()}
+                    aria-label="식물 추가"
                   >
                     +
-                  </span>
+                  </button>
                 </li>
               </ul>
             )}

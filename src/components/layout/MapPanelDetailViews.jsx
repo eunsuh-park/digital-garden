@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Icon } from '@iconify/react';
 import arrowLeftLine from '@iconify-icons/mingcute/arrow-left-line';
-import TaskCard from '../TaskCard';
 import TaskDetailLayout from '../TaskDetailLayout/TaskDetailLayout';
 import PlantDetailLayout from '../PlantDetailLayout/PlantDetailLayout';
 import { useLocations } from '../../context/LocationsContext';
 import { useMapPanelDetail } from '../../context/MapPanelDetailContext';
-import { createTask, updateLocation, updateTask } from '../../api/notionApi';
+import { createPlant, createTask, updateLocation, updateTask } from '../../api/notionApi';
 import { TASK_TYPE_KEYS, TASK_TYPE_LABEL_KO } from '../../pages/Tasks/notionSchema';
 import searchLine from '@iconify-icons/mingcute/search-line';
 import './MapPanelDetailViews.css';
@@ -193,6 +192,11 @@ export function MapPanelLocationDetail({ location, onBack }) {
 }
 
 const DIFFICULTY_ORDER = ['Easy', 'Medium', 'Hard'];
+const PLANT_STATUS_OPTIONS = [
+  { value: 'planted', label: '확인됨' },
+  { value: 'planned', label: '식재 예정' },
+  { value: 'needs_care', label: '관리 필요' },
+];
 
 /** 할 일 생성(상세와 동일 툴바·폼 레이아웃) */
 export function MapPanelTaskCreate({ onBack }) {
@@ -516,6 +520,246 @@ export function MapPanelTaskCreate({ onBack }) {
               className="location-edit__save-btn"
               onClick={handleSave}
               disabled={saving || !title.trim()}
+            >
+              {saving ? 'Saving...' : 'Save'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** 식물 생성(상세와 동일 툴바·폼 레이아웃) */
+export function MapPanelPlantCreate({ onBack }) {
+  const { locations, reload } = useLocations();
+  const [name, setName] = useState('');
+  const [species, setSpecies] = useState('');
+  const [category, setCategory] = useState('');
+  const [status, setStatus] = useState('planted');
+  const [bloomSeason, setBloomSeason] = useState('');
+  const [quantity, setQuantity] = useState('');
+  const [notes, setNotes] = useState('');
+  const [locationQuery, setLocationQuery] = useState('');
+  const [locationMenuOpen, setLocationMenuOpen] = useState(false);
+  const [selectedLocationIds, setSelectedLocationIds] = useState([]);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+
+  const selectedLocations = useMemo(
+    () => selectedLocationIds.map((id) => locations.find((l) => l.id === id)).filter(Boolean),
+    [selectedLocationIds, locations]
+  );
+
+  const locationSuggestions = useMemo(() => {
+    const q = locationQuery.trim().toLowerCase();
+    const taken = new Set(selectedLocationIds);
+    return locations
+      .filter((l) => !taken.has(l.id))
+      .filter((l) => !q || String(l.name || '').toLowerCase().includes(q))
+      .slice(0, 8);
+  }, [locations, locationQuery, selectedLocationIds]);
+
+  const addLocation = (id) => {
+    setSelectedLocationIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    setLocationQuery('');
+    setLocationMenuOpen(false);
+  };
+
+  const removeLocation = (id) => {
+    setSelectedLocationIds((prev) => prev.filter((x) => x !== id));
+  };
+
+  const handleSave = async () => {
+    const v = name.trim();
+    if (!v || saving) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await createPlant({
+        name: v,
+        species: species.trim(),
+        category: category.trim(),
+        status,
+        bloom_season: bloomSeason.trim(),
+        quantity: quantity.trim(),
+        notes: notes.trim(),
+        location_ids: selectedLocationIds,
+      });
+      await reload();
+      onBack();
+    } catch (e) {
+      setSaveError(e.message || '저장 실패');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="map-panel-detail">
+      <header className="map-panel-detail__toolbar">
+        <button type="button" className="map-panel-detail__icon-btn" onClick={onBack} aria-label="뒤로">
+          <Icon icon={arrowLeftLine} width={22} height={22} />
+        </button>
+        <span className="map-panel-detail__toolbar-title">정보</span>
+        <span className="map-panel-detail__toolbar-spacer" aria-hidden />
+      </header>
+
+      <div className="map-panel-detail__scroll">
+        <div className="task-create">
+          <div className="location-edit__field">
+            <label className="location-edit__label" htmlFor="plant-create-name">
+              Name
+            </label>
+            <input
+              id="plant-create-name"
+              className="location-edit__input"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoComplete="off"
+            />
+          </div>
+
+          <div className="location-edit__field">
+            <label className="location-edit__label" htmlFor="plant-create-species">
+              Species
+            </label>
+            <input
+              id="plant-create-species"
+              className="location-edit__input"
+              value={species}
+              onChange={(e) => setSpecies(e.target.value)}
+              autoComplete="off"
+              placeholder="예: 나무, 꽃, 풀"
+            />
+          </div>
+
+          <div className="location-edit__field">
+            <label className="location-edit__label" htmlFor="plant-create-category">
+              Category
+            </label>
+            <input
+              id="plant-create-category"
+              className="location-edit__input"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              autoComplete="off"
+            />
+          </div>
+
+          <div className="location-edit__field">
+            <span className="location-edit__label">Status</span>
+            <div className="task-create__chips" role="group" aria-label="식물 상태">
+              {PLANT_STATUS_OPTIONS.map((s) => (
+                <button
+                  key={s.value}
+                  type="button"
+                  className={`task-create__chip ${status === s.value ? 'task-create__chip--active' : ''}`}
+                  onClick={() => setStatus(s.value)}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="location-edit__field task-create__plant-field">
+            <span className="location-edit__label">Location</span>
+            {selectedLocations.length > 0 && (
+              <ul className="task-create__picked" aria-label="선택한 위치">
+                {selectedLocations.map((l) => (
+                  <li key={l.id}>
+                    <button
+                      type="button"
+                      className="task-create__picked-chip"
+                      onClick={() => removeLocation(l.id)}
+                      aria-label={`${l.name} 제거`}
+                    >
+                      {l.name}
+                      <span aria-hidden> ×</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="task-create__search-wrap">
+              <input
+                type="search"
+                className="task-create__search-input location-edit__input"
+                value={locationQuery}
+                onChange={(e) => {
+                  setLocationQuery(e.target.value);
+                  setLocationMenuOpen(true);
+                }}
+                onFocus={() => setLocationMenuOpen(true)}
+                onBlur={() => window.setTimeout(() => setLocationMenuOpen(false), 150)}
+                placeholder="구역 이름 검색"
+                autoComplete="off"
+              />
+              <Icon icon={searchLine} width={20} height={20} className="task-create__search-icon" aria-hidden />
+            </div>
+            {locationMenuOpen && locationSuggestions.length > 0 ? (
+              <ul className="task-create__suggest" role="listbox">
+                {locationSuggestions.map((l) => (
+                  <li key={l.id} role="option">
+                    <button type="button" className="task-create__suggest-btn" onMouseDown={() => addLocation(l.id)}>
+                      {l.name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+
+          <div className="location-edit__field">
+            <label className="location-edit__label" htmlFor="plant-create-bloom">
+              Bloom Season
+            </label>
+            <input
+              id="plant-create-bloom"
+              className="location-edit__input"
+              value={bloomSeason}
+              onChange={(e) => setBloomSeason(e.target.value)}
+              autoComplete="off"
+              placeholder="예: 5월~6월"
+            />
+          </div>
+
+          <div className="location-edit__field">
+            <label className="location-edit__label" htmlFor="plant-create-quantity">
+              Quantity
+            </label>
+            <input
+              id="plant-create-quantity"
+              type="number"
+              min="0"
+              className="location-edit__input"
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+            />
+          </div>
+
+          <div className="location-edit__field">
+            <label className="location-edit__label" htmlFor="plant-create-notes">
+              Notes
+            </label>
+            <textarea
+              id="plant-create-notes"
+              className="location-edit__textarea location-edit__textarea--compact"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={4}
+            />
+          </div>
+
+          {saveError ? <p className="location-edit__error">{saveError}</p> : null}
+
+          <div className="location-edit__actions">
+            <button
+              type="button"
+              className="location-edit__save-btn"
+              onClick={handleSave}
+              disabled={saving || !name.trim()}
             >
               {saving ? 'Saving...' : 'Save'}
             </button>

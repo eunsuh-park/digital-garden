@@ -11,6 +11,7 @@ import PlantsPage from '../../pages/Plants/PlantsPage';
 import {
   MapPanelLocationDetail,
   MapPanelPlantDetail,
+  MapPanelPlantCreate,
   MapPanelTaskCreate,
   MapPanelTaskDetail,
 } from './MapPanelDetailViews';
@@ -199,6 +200,7 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
             <MapPanelLocationDetail location={detail.location} onBack={closeDetail} />
           )}
           {detail?.type === 'task-create' && <MapPanelTaskCreate onBack={closeDetail} />}
+          {detail?.type === 'plant-create' && <MapPanelPlantCreate onBack={closeDetail} />}
           {detail?.type === 'task' && (
             <MapPanelTaskDetail
               task={detail.task}

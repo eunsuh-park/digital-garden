@@ -130,3 +130,13 @@ export async function updateTask(id, updates) {
     body: { id, ...updates },
   });
 }
+
+/**
+ * Plants DB: 새 식물 생성
+ */
+export async function createPlant(payload) {
+  return mutateApi('/notion-plants-create', 'Plants create', {
+    method: 'POST',
+    body: payload,
+  });
+}

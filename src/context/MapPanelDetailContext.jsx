@@ -4,7 +4,7 @@ const MapPanelDetailContext = createContext(null);
 
 /**
  * 하단(MapSidePanel) 상세 뷰 — 스택으로 뒤로가기 시 이전 상세로 복귀
- * @typedef {{ type: 'location', location: object } | { type: 'task', task: object } | { type: 'plant', plant: object } | { type: 'task-create' }} DetailEntry
+ * @typedef {{ type: 'location', location: object } | { type: 'task', task: object } | { type: 'plant', plant: object } | { type: 'task-create' } | { type: 'plant-create' }} DetailEntry
  */
 
 export function MapPanelDetailProvider({ children }) {
@@ -35,6 +35,11 @@ export function MapPanelDetailProvider({ children }) {
     setDetailStack((prev) => (options.push && prev.length > 0 ? [...prev, entry] : [entry]));
   }, []);
 
+  const openPlantCreate = useCallback((options = {}) => {
+    const entry = { type: 'plant-create' };
+    setDetailStack((prev) => (options.push && prev.length > 0 ? [...prev, entry] : [entry]));
+  }, []);
+
   /** 스택 한 단계만 닫기 */
   const closeDetail = useCallback(() => {
     setDetailStack((prev) => (prev.length <= 1 ? [] : prev.slice(0, -1)));
@@ -51,6 +56,7 @@ export function MapPanelDetailProvider({ children }) {
       openTaskDetail,
       openPlantDetail,
       openTaskCreate,
+      openPlantCreate,
       closeDetail,
       closeAllDetail,
     }),
@@ -61,6 +67,7 @@ export function MapPanelDetailProvider({ children }) {
       openTaskDetail,
       openPlantDetail,
       openTaskCreate,
+      openPlantCreate,
       closeDetail,
       closeAllDetail,
     ]
