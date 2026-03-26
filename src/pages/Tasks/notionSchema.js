@@ -3,7 +3,39 @@
  * - Target_Location → Locations (N:1)
  * - Target_Plant → Plants (N:1, Plants.Name과 연결)
  */
-import { getTitle, getRichText, getSelect, getDate, getRelation } from '../../lib/parseNotionProps';
+import {
+  getTitle,
+  getRichText,
+  getSelect,
+  getNotionStatus,
+  getDate,
+  getRelation,
+} from '../../lib/parseNotionProps';
+
+/** Notion Task_Type 선택값(영문) — 생성·파싱 공통 */
+export const TASK_TYPE_KEYS = [
+  'Pruning',
+  'Fertilizing',
+  'Propagation',
+  'Watering',
+  'Transplanting',
+  'Observation',
+  'Cleaning',
+  'Decorating',
+  'Construction',
+];
+
+export const TASK_TYPE_LABEL_KO = {
+  Pruning: '전정',
+  Fertilizing: '비료',
+  Propagation: '번식',
+  Watering: '물주기',
+  Transplanting: '이식',
+  Observation: '관찰',
+  Cleaning: '청소',
+  Decorating: '꾸미기',
+  Construction: '시공',
+};
 
 export const PROP_MAP = {
   title: 'Title',
@@ -24,7 +56,7 @@ export const PROP_MAP = {
 export function parseTaskPage(page) {
   const props = page.properties || {};
   const title = getTitle(props[PROP_MAP.title]) || getTitle(props.Title);
-  const statusRaw = getSelect(props[PROP_MAP.status]);
+  const statusRaw = getNotionStatus(props[PROP_MAP.status]) || getSelect(props[PROP_MAP.status]);
   const due = getDate(props[PROP_MAP.due_date]);
   const sectionIds = getRelation(props[PROP_MAP.section]);
   const targetPlantIds = getRelation(props[PROP_MAP.target_plant]);
@@ -38,6 +70,7 @@ export function parseTaskPage(page) {
 
   // status: Notion 선택값 → progress | pending | completed
   const statusMap = {
+    '시작 전': 'pending',
     진행중: 'progress',
     예정: 'pending',
     완료: 'completed',
@@ -58,10 +91,6 @@ export function parseTaskPage(page) {
   const difficulty = difficultyMap[difficultyRaw] || difficultyMap[difficultyRaw?.trim()] || 'Easy';
 
   // Task_Type: Notion 값 → 영문 키 (TaskCard taskTypeConfig에서 한글 라벨로 표시)
-  const TASK_TYPE_KEYS = [
-    'Pruning', 'Fertilizing', 'Propagation', 'Watering', 'Transplanting',
-    'Observation', 'Cleaning', 'Decorating', 'Construction',
-  ];
   const taskTypeNorm = (taskTypeRaw || '').trim();
   const task_type = TASK_TYPE_KEYS.includes(taskTypeNorm)
     ? taskTypeNorm

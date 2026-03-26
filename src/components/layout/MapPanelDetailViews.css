@@ -294,3 +294,151 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+.location-edit__textarea--compact {
+  min-height: 96px;
+}
+
+/* Task create form (Notion 반영 필드: Title, Notes, Task_Type, Difficulty, Target_Plant) */
+.task-create {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 0.5rem;
+}
+
+.task-create__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.task-create__chip {
+  padding: 0.45rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.task-create__chip:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.task-create__chip--active {
+  border-color: var(--color-primary, #6d28d9);
+  background: rgba(109, 40, 217, 0.12);
+  color: var(--color-text);
+}
+
+.task-create__plant-field {
+  position: relative;
+}
+
+.task-create__picked {
+  list-style: none;
+  margin: 0 0 0.4rem;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.task-create__picked-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.3rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: rgba(109, 40, 217, 0.08);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.task-create__search-wrap {
+  position: relative;
+}
+
+.task-create__search-input {
+  padding-right: 2.25rem;
+}
+
+.task-create__search-icon {
+  position: absolute;
+  right: 0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.task-create__suggest {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 4;
+  margin: 0.2rem 0 0;
+  padding: 0.25rem 0;
+  list-style: none;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.task-create__suggest-btn {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 0.85rem;
+  text-align: left;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.task-create__suggest-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.task-create__diff-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.task-create__diff-value {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-primary, #6d28d9);
+}
+
+.task-create__slider {
+  width: 100%;
+  margin: 0.35rem 0 0.2rem;
+  height: 6px;
+  accent-color: var(--color-primary, #6d28d9);
+  cursor: pointer;
+}
+
+.task-create__diff-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: var(--color-text-muted);
+  padding: 0 0.1rem;
+}

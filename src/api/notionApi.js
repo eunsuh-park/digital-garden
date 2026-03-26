@@ -107,3 +107,14 @@ export async function updateLocation(id, updates) {
     body: { id, ...updates },
   });
 }
+
+/**
+ * Tasks DB: 안전 필드로 새 할 일 생성
+ * - Title, Notes, Task_Type, Difficulty, Target_Plant, Status(예정)
+ */
+export async function createTask(payload) {
+  return mutateApi('/notion-tasks-create', 'Tasks create', {
+    method: 'POST',
+    body: payload,
+  });
+}

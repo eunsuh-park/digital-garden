@@ -5,7 +5,9 @@ import TaskCard from '../TaskCard';
 import PlantDetailLayout from '../PlantDetailLayout/PlantDetailLayout';
 import { useLocations } from '../../context/LocationsContext';
 import { useMapPanelDetail } from '../../context/MapPanelDetailContext';
-import { updateLocation } from '../../api/notionApi';
+import { createTask, updateLocation } from '../../api/notionApi';
+import { TASK_TYPE_KEYS, TASK_TYPE_LABEL_KO } from '../../pages/Tasks/notionSchema';
+import searchLine from '@iconify-icons/mingcute/search-line';
 import './MapPanelDetailViews.css';
 
 function toCardStatus(status) {
@@ -190,6 +192,224 @@ export function MapPanelLocationDetail({ location, onBack }) {
             </div>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+const DIFFICULTY_ORDER = ['Easy', 'Medium', 'Hard'];
+
+/** 할 일 생성(상세와 동일 툴바·폼 레이아웃) */
+export function MapPanelTaskCreate({ onBack }) {
+  const { plants, reload } = useLocations();
+  const [title, setTitle] = useState('');
+  const [notes, setNotes] = useState('');
+  const [taskType, setTaskType] = useState('Observation');
+  const [difficultyIdx, setDifficultyIdx] = useState(0);
+  const [plantQuery, setPlantQuery] = useState('');
+  const [plantMenuOpen, setPlantMenuOpen] = useState(false);
+  const [selectedPlantIds, setSelectedPlantIds] = useState([]);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+
+  const difficulty = DIFFICULTY_ORDER[difficultyIdx] ?? 'Easy';
+
+  const selectedPlants = useMemo(() => {
+    return selectedPlantIds
+      .map((id) => plants.find((p) => p.id === id))
+      .filter(Boolean);
+  }, [plants, selectedPlantIds]);
+
+  const plantSuggestions = useMemo(() => {
+    const q = plantQuery.trim().toLowerCase();
+    const taken = new Set(selectedPlantIds);
+    return plants
+      .filter((p) => !taken.has(p.id))
+      .filter((p) => !q || String(p.name || '').toLowerCase().includes(q))
+      .slice(0, 8);
+  }, [plants, plantQuery, selectedPlantIds]);
+
+  const addPlant = (id) => {
+    setSelectedPlantIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    setPlantQuery('');
+    setPlantMenuOpen(false);
+  };
+
+  const removePlant = (id) => {
+    setSelectedPlantIds((prev) => prev.filter((x) => x !== id));
+  };
+
+  const handleSave = async () => {
+    const t = title.trim();
+    if (!t || saving) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await createTask({
+        title: t,
+        notes: notes.trim(),
+        task_type: taskType,
+        difficulty,
+        target_plant_ids: selectedPlantIds,
+      });
+      await reload();
+      onBack();
+    } catch (e) {
+      setSaveError(e.message || '저장 실패');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="map-panel-detail">
+      <header className="map-panel-detail__toolbar">
+        <button type="button" className="map-panel-detail__icon-btn" onClick={onBack} aria-label="뒤로">
+          <Icon icon={arrowLeftLine} width={22} height={22} />
+        </button>
+        <span className="map-panel-detail__toolbar-title">정보</span>
+        <span className="map-panel-detail__toolbar-spacer" aria-hidden />
+      </header>
+
+      <div className="map-panel-detail__scroll">
+        <div className="task-create">
+          <div className="location-edit__field">
+            <label className="location-edit__label" htmlFor="task-create-title">
+              Name
+            </label>
+            <input
+              id="task-create-title"
+              className="location-edit__input"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              autoComplete="off"
+              placeholder=""
+            />
+          </div>
+
+          <div className="location-edit__field">
+            <label className="location-edit__label" htmlFor="task-create-notes">
+              Description
+            </label>
+            <textarea
+              id="task-create-notes"
+              className="location-edit__textarea location-edit__textarea--compact"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={4}
+            />
+          </div>
+
+          <div className="location-edit__field">
+            <span className="location-edit__label">Task Type</span>
+            <div className="task-create__chips" role="group" aria-label="작업 유형">
+              {TASK_TYPE_KEYS.map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={`task-create__chip ${taskType === key ? 'task-create__chip--active' : ''}`}
+                  onClick={() => setTaskType(key)}
+                >
+                  {TASK_TYPE_LABEL_KO[key] || key}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="location-edit__field task-create__plant-field">
+            <span className="location-edit__label">Related Plants</span>
+            {selectedPlants.length > 0 && (
+              <ul className="task-create__picked" aria-label="선택한 식물">
+                {selectedPlants.map((p) => (
+                  <li key={p.id}>
+                    <button
+                      type="button"
+                      className="task-create__picked-chip"
+                      onClick={() => removePlant(p.id)}
+                      aria-label={`${p.name} 제거`}
+                    >
+                      {p.name}
+                      <span aria-hidden> ×</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="task-create__search-wrap">
+              <input
+                type="search"
+                className="task-create__search-input location-edit__input"
+                value={plantQuery}
+                onChange={(e) => {
+                  setPlantQuery(e.target.value);
+                  setPlantMenuOpen(true);
+                }}
+                onFocus={() => setPlantMenuOpen(true)}
+                onBlur={() => {
+                  window.setTimeout(() => setPlantMenuOpen(false), 150);
+                }}
+                placeholder="식물 이름 검색"
+                autoComplete="off"
+              />
+              <Icon
+                icon={searchLine}
+                width={20}
+                height={20}
+                className="task-create__search-icon"
+                aria-hidden
+              />
+            </div>
+            {plantMenuOpen && plantSuggestions.length > 0 ? (
+              <ul className="task-create__suggest" role="listbox">
+                {plantSuggestions.map((p) => (
+                  <li key={p.id} role="option">
+                    <button type="button" className="task-create__suggest-btn" onMouseDown={() => addPlant(p.id)}>
+                      {p.name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+
+          <div className="location-edit__field">
+            <div className="task-create__diff-head">
+              <span className="location-edit__label">Difficulty</span>
+              <span className="task-create__diff-value">{difficulty}</span>
+            </div>
+            <input
+              type="range"
+              className="task-create__slider"
+              min={0}
+              max={2}
+              step={1}
+              value={difficultyIdx}
+              onChange={(e) => setDifficultyIdx(Number(e.target.value))}
+              aria-valuemin={0}
+              aria-valuemax={2}
+              aria-valuenow={difficultyIdx}
+              aria-label={`난이도 ${difficulty}`}
+            />
+            <div className="task-create__diff-ticks" aria-hidden>
+              <span>Easy</span>
+              <span>Medium</span>
+              <span>Hard</span>
+            </div>
+          </div>
+
+          {saveError ? <p className="location-edit__error">{saveError}</p> : null}
+
+          <div className="location-edit__actions">
+            <button
+              type="button"
+              className="location-edit__save-btn"
+              onClick={handleSave}
+              disabled={saving || !title.trim()}
+            >
+              {saving ? 'Saving...' : 'Save'}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

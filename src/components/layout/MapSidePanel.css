@@ -197,14 +197,18 @@
 .map-side-panel__body {
   flex: 1;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
   padding: 0.65rem 0.75rem 0.85rem;
 }
 
 .map-side-panel__page-host {
+  flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .map-side-panel__list {
