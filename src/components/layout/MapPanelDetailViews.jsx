@@ -5,10 +5,66 @@ import TaskDetailLayout from '../TaskDetailLayout/TaskDetailLayout';
 import PlantDetailLayout from '../PlantDetailLayout/PlantDetailLayout';
 import { useLocations } from '../../context/LocationsContext';
 import { useMapPanelDetail } from '../../context/MapPanelDetailContext';
-import { createPlant, createTask, updateLocation, updateTask } from '../../api/notionApi';
+import {
+  createPlant,
+  createTask,
+  updateLocation,
+  updatePlant,
+  updateTask,
+  deletePlant,
+  deleteTask,
+} from '../../api/notionApi';
 import { TASK_TYPE_KEYS, TASK_TYPE_LABEL_KO } from '../../pages/Tasks/notionSchema';
 import searchLine from '@iconify-icons/mingcute/search-line';
+import trashLine from '@iconify-icons/mingcute/delete-2-line';
 import './MapPanelDetailViews.css';
+
+function ConfirmDeleteDialog({
+  open,
+  title,
+  message,
+  confirmLabel = '삭제',
+  cancelLabel = '취소',
+  onClose,
+  onConfirm,
+  deleting = false,
+}) {
+  if (!open) return null;
+
+  return (
+    <div
+      className="confirm-dialog__backdrop"
+      role="presentation"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget && !deleting) onClose();
+      }}
+    >
+      <div className="confirm-dialog__panel" role="dialog" aria-modal="true" aria-label={title}>
+        <div className="confirm-dialog__title">{title}</div>
+        <p className="confirm-dialog__message">{message}</p>
+
+        <div className="confirm-dialog__actions">
+          <button
+            type="button"
+            className="confirm-dialog__btn confirm-dialog__btn--cancel"
+            onClick={onClose}
+            disabled={deleting}
+          >
+            {cancelLabel}
+          </button>
+          <button
+            type="button"
+            className="confirm-dialog__btn confirm-dialog__btn--confirm"
+            onClick={onConfirm}
+            disabled={deleting}
+          >
+            {deleting ? '삭제 중…' : confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /** @param {{ location: object, onBack: () => void }} props */
 export function MapPanelLocationDetail({ location, onBack }) {
@@ -803,6 +859,8 @@ export function MapPanelTaskDetail({ task, onBack, locationMap, plantMap, taskTi
 
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!isEditing) {
@@ -955,16 +1013,30 @@ export function MapPanelTaskDetail({ task, onBack, locationMap, plantMap, taskTi
 
       <div className="map-panel-detail__scroll map-panel-detail__scroll--task-detail">
         {!isEditing ? (
-          <TaskDetailLayout
-            task={task}
-            locationName={location?.name ?? null}
-            onLocationNavigate={onLocationNavigate}
-            plantLinks={plantNavLinks}
-            taskLinkGroups={{
-              prerequisites: prerequisiteNavLinks,
-              followups: followupNavLinks,
-            }}
-          />
+          <>
+            <TaskDetailLayout
+              task={task}
+              locationName={location?.name ?? null}
+              onLocationNavigate={onLocationNavigate}
+              plantLinks={plantNavLinks}
+              taskLinkGroups={{
+                prerequisites: prerequisiteNavLinks,
+                followups: followupNavLinks,
+              }}
+            />
+            <div className="detail-delete-footer">
+              <button
+                type="button"
+                className="detail-delete-btn"
+                onClick={() => setDeleteOpen(true)}
+                aria-label="할 일 삭제"
+                title="삭제"
+                disabled={deleting}
+              >
+                <Icon icon={trashLine} width={22} height={22} aria-hidden />
+              </button>
+            </div>
+          </>
         ) : (
           <div className="task-create">
             <div className="location-edit__field">
@@ -1183,14 +1255,125 @@ export function MapPanelTaskDetail({ task, onBack, locationMap, plantMap, taskTi
           </div>
         )}
       </div>
+
+      <ConfirmDeleteDialog
+        open={deleteOpen}
+        title="삭제 확인"
+        message={`이 할 일을 삭제할까요? (Notion에서도 삭제됩니다)`}
+        confirmLabel="삭제"
+        cancelLabel="취소"
+        deleting={deleting}
+        onClose={() => {
+          if (!deleting) setDeleteOpen(false);
+        }}
+        onConfirm={async () => {
+          if (deleting) return;
+          setDeleting(true);
+          try {
+            await deleteTask(task.id);
+            await reload();
+            setDeleteOpen(false);
+            onBack();
+          } catch (e) {
+            // 실패 시 다이얼로그만 닫지 않고 유지(추가 에러 표시는 최소화)
+          } finally {
+            setDeleting(false);
+          }
+        }}
+      />
     </div>
   );
 }
 
 /** @param {{ plant: object, onBack: () => void, locationMap: Record<string, object> }} props */
 export function MapPanelPlantDetail({ plant, onBack, locationMap }) {
+  const { locations, reload } = useLocations();
   const { openLocationDetail } = useMapPanelDetail();
   const location = plant.section_id ? locationMap[plant.section_id] : null;
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [draftName, setDraftName] = useState(plant.name || '');
+  const [draftSpecies, setDraftSpecies] = useState(plant.species && plant.species !== '-' ? plant.species : '나무');
+  const [draftCategory, setDraftCategory] = useState(plant.category && plant.category !== '-' ? plant.category : '');
+  const [draftStatus, setDraftStatus] = useState(plant.status || 'planted');
+  const [draftBloomSeason, setDraftBloomSeason] = useState(
+    plant.bloom_season && plant.bloom_season !== '-' ? plant.bloom_season : ''
+  );
+  const [draftQuantity, setDraftQuantity] = useState(
+    plant.quantity == null ? '' : String(plant.quantity)
+  );
+  const [draftNotes, setDraftNotes] = useState(plant.notes || '');
+  const [selectedLocationIds, setSelectedLocationIds] = useState(() =>
+    plant.section_id ? [plant.section_id] : []
+  );
+  const [locationQuery, setLocationQuery] = useState('');
+  const [locationMenuOpen, setLocationMenuOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    if (isEditing) return;
+    setDraftName(plant.name || '');
+    setDraftSpecies(plant.species && plant.species !== '-' ? plant.species : '나무');
+    setDraftCategory(plant.category && plant.category !== '-' ? plant.category : '');
+    setDraftStatus(plant.status || 'planted');
+    setDraftBloomSeason(plant.bloom_season && plant.bloom_season !== '-' ? plant.bloom_season : '');
+    setDraftQuantity(plant.quantity == null ? '' : String(plant.quantity));
+    setDraftNotes(plant.notes || '');
+    setSelectedLocationIds(plant.section_id ? [plant.section_id] : []);
+    setSaveError(null);
+  }, [plant.id, isEditing, plant.name, plant.species, plant.category, plant.status, plant.bloom_season, plant.quantity, plant.notes, plant.section_id]);
+
+  const selectedLocations = useMemo(
+    () => selectedLocationIds.map((id) => locations.find((l) => l.id === id)).filter(Boolean),
+    [selectedLocationIds, locations]
+  );
+
+  const locationSuggestions = useMemo(() => {
+    const q = locationQuery.trim().toLowerCase();
+    const taken = new Set(selectedLocationIds);
+    return locations
+      .filter((l) => !taken.has(l.id))
+      .filter((l) => !q || String(l.name || '').toLowerCase().includes(q))
+      .slice(0, 8);
+  }, [locations, locationQuery, selectedLocationIds]);
+
+  const addLocation = (id) => {
+    setSelectedLocationIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    setLocationQuery('');
+    setLocationMenuOpen(false);
+  };
+
+  const removeLocation = (id) => {
+    setSelectedLocationIds((prev) => prev.filter((x) => x !== id));
+  };
+
+  const handleSave = async () => {
+    const v = draftName.trim();
+    if (!v || saving) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await updatePlant(plant.id, {
+        name: v,
+        species: draftSpecies,
+        category: draftCategory.trim(),
+        status: draftStatus,
+        bloom_season: draftBloomSeason.trim(),
+        quantity: draftQuantity,
+        notes: draftNotes.trim(),
+        location_ids: selectedLocationIds,
+      });
+      await reload();
+      setIsEditing(false);
+    } catch (e) {
+      setSaveError(e.message || '저장 실패');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="map-panel-detail">
@@ -1199,17 +1382,232 @@ export function MapPanelPlantDetail({ plant, onBack, locationMap }) {
           <Icon icon={arrowLeftLine} width={22} height={22} />
         </button>
         <span className="map-panel-detail__toolbar-title">식물</span>
-        <span className="map-panel-detail__toolbar-spacer" aria-hidden />
+        {isEditing ? (
+          <span className="map-panel-detail__toolbar-spacer" aria-hidden />
+        ) : (
+          <button
+            type="button"
+            className="map-panel-detail__icon-btn"
+            onClick={() => setIsEditing(true)}
+            aria-label="편집"
+            title="편집"
+          >
+            ✎
+          </button>
+        )}
       </header>
       <div className="map-panel-detail__scroll map-panel-detail__scroll--plant-detail">
-        <PlantDetailLayout
-          plant={plant}
-          locationName={location?.name ?? null}
-          onLocationNavigate={
-            location ? () => openLocationDetail(location, { push: true }) : undefined
-          }
-        />
+        {!isEditing ? (
+          <>
+            <PlantDetailLayout
+              plant={plant}
+              locationName={location?.name ?? null}
+              onLocationNavigate={
+                location ? () => openLocationDetail(location, { push: true }) : undefined
+              }
+            />
+            <div className="detail-delete-footer">
+              <button
+                type="button"
+                className="detail-delete-btn"
+                onClick={() => setDeleteOpen(true)}
+                aria-label="식물 삭제"
+                title="삭제"
+                disabled={deleting}
+              >
+                <Icon icon={trashLine} width={22} height={22} aria-hidden />
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="task-create task-create--plant-edit">
+            <div className="location-edit__field">
+              <label className="location-edit__label" htmlFor="plant-edit-name">
+                Name
+              </label>
+              <input
+                id="plant-edit-name"
+                className="location-edit__input"
+                value={draftName}
+                onChange={(e) => setDraftName(e.target.value)}
+                autoComplete="off"
+              />
+            </div>
+
+            <div className="location-edit__field">
+              <span className="location-edit__label">Species</span>
+              <div className="task-create__chips" role="group" aria-label="식물 종">
+                {PLANT_SPECIES_OPTIONS.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    className={`task-create__chip ${draftSpecies === s ? 'task-create__chip--active' : ''}`}
+                    onClick={() => setDraftSpecies(s)}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="location-edit__field">
+              <label className="location-edit__label" htmlFor="plant-edit-category">
+                Category
+              </label>
+              <input
+                id="plant-edit-category"
+                className="location-edit__input"
+                value={draftCategory}
+                onChange={(e) => setDraftCategory(e.target.value)}
+                autoComplete="off"
+              />
+            </div>
+
+            <div className="location-edit__field">
+              <span className="location-edit__label">Status</span>
+              <div className="task-create__chips" role="group" aria-label="식물 상태">
+                {PLANT_STATUS_OPTIONS.map((s) => (
+                  <button
+                    key={s.value}
+                    type="button"
+                    className={`task-create__chip ${draftStatus === s.value ? 'task-create__chip--active' : ''}`}
+                    onClick={() => setDraftStatus(s.value)}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="location-edit__field task-create__plant-field">
+              <span className="location-edit__label">Location</span>
+              {selectedLocations.length > 0 && (
+                <ul className="task-create__picked" aria-label="선택한 위치">
+                  {selectedLocations.map((l) => (
+                    <li key={l.id}>
+                      <button
+                        type="button"
+                        className="task-create__picked-chip"
+                        onClick={() => removeLocation(l.id)}
+                        aria-label={`${l.name} 제거`}
+                      >
+                        {l.name}
+                        <span aria-hidden> ×</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <div className="task-create__search-wrap">
+                <input
+                  type="search"
+                  className="task-create__search-input location-edit__input"
+                  value={locationQuery}
+                  onChange={(e) => {
+                    setLocationQuery(e.target.value);
+                    setLocationMenuOpen(true);
+                  }}
+                  onFocus={() => setLocationMenuOpen(true)}
+                  onBlur={() => window.setTimeout(() => setLocationMenuOpen(false), 150)}
+                  placeholder="구역 이름 검색"
+                  autoComplete="off"
+                />
+                <Icon icon={searchLine} width={20} height={20} className="task-create__search-icon" aria-hidden />
+              </div>
+              {locationMenuOpen && locationSuggestions.length > 0 ? (
+                <ul className="task-create__suggest" role="listbox">
+                  {locationSuggestions.map((l) => (
+                    <li key={l.id} role="option">
+                      <button type="button" className="task-create__suggest-btn" onMouseDown={() => addLocation(l.id)}>
+                        {l.name}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+
+            <div className="location-edit__field">
+              <label className="location-edit__label" htmlFor="plant-edit-bloom">
+                Bloom Season
+              </label>
+              <input
+                id="plant-edit-bloom"
+                className="location-edit__input"
+                value={draftBloomSeason}
+                onChange={(e) => setDraftBloomSeason(e.target.value)}
+                autoComplete="off"
+              />
+            </div>
+
+            <div className="location-edit__field">
+              <label className="location-edit__label" htmlFor="plant-edit-quantity">
+                Quantity
+              </label>
+              <input
+                id="plant-edit-quantity"
+                type="number"
+                min="0"
+                className="location-edit__input"
+                value={draftQuantity}
+                onChange={(e) => setDraftQuantity(e.target.value)}
+              />
+            </div>
+
+            <div className="location-edit__field">
+              <label className="location-edit__label" htmlFor="plant-edit-notes">
+                Notes
+              </label>
+              <textarea
+                id="plant-edit-notes"
+                className="location-edit__textarea location-edit__textarea--compact"
+                value={draftNotes}
+                onChange={(e) => setDraftNotes(e.target.value)}
+                rows={4}
+              />
+            </div>
+
+            {saveError ? <p className="location-edit__error">{saveError}</p> : null}
+
+            <div className="location-edit__actions">
+              <button
+                type="button"
+                className="location-edit__save-btn"
+                onClick={handleSave}
+                disabled={saving || !draftName.trim()}
+              >
+                {saving ? 'Saving...' : 'Save'}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
+
+      <ConfirmDeleteDialog
+        open={deleteOpen}
+        title="삭제 확인"
+        message={`이 식물을 삭제할까요? (Notion에서도 삭제됩니다)`}
+        confirmLabel="삭제"
+        cancelLabel="취소"
+        deleting={deleting}
+        onClose={() => {
+          if (!deleting) setDeleteOpen(false);
+        }}
+        onConfirm={async () => {
+          if (deleting) return;
+          setDeleting(true);
+          try {
+            await deletePlant(plant.id);
+            await reload();
+            setDeleteOpen(false);
+            onBack();
+          } catch (e) {
+            // 실패 시 유지
+          } finally {
+            setDeleting(false);
+          }
+        }}
+      />
     </div>
   );
 }

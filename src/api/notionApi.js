@@ -132,11 +132,41 @@ export async function updateTask(id, updates) {
 }
 
 /**
+ * Tasks DB: 할 일 삭제(archive)
+ */
+export async function deleteTask(id) {
+  return mutateApi('/notion-tasks-delete', 'Tasks delete', {
+    method: 'POST',
+    body: { id },
+  });
+}
+
+/**
  * Plants DB: 새 식물 생성
  */
 export async function createPlant(payload) {
   return mutateApi('/notion-plants-create', 'Plants create', {
     method: 'POST',
     body: payload,
+  });
+}
+
+/**
+ * Plants DB: 식물 업데이트
+ */
+export async function updatePlant(id, updates) {
+  return mutateApi('/notion-plants-update', 'Plants update', {
+    method: 'POST',
+    body: { id, ...updates },
+  });
+}
+
+/**
+ * Plants DB: 식물 삭제(archive)
+ */
+export async function deletePlant(id) {
+  return mutateApi('/notion-plants-delete', 'Plants delete', {
+    method: 'POST',
+    body: { id },
   });
 }
