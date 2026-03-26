@@ -3,15 +3,21 @@
  * - Title (title) 필수
  * - Notes (rich_text)
  * - Task_Type, Difficulty (select)
+ * - Estimated_Duration (rich_text)
+ * - Scheduled_Date (date)
  * - Target_Plant (relation)
- * - Status → 예정 (status)
+ * - Target_Location (relation)
+ * - Status → 시작 전 (status)
  *
  * body: {
  *   title: string,
  *   notes?: string,
  *   task_type?: string,
  *   difficulty?: 'Easy'|'Medium'|'Hard',
+ *   estimated_duration?: string,
+ *   scheduled_date?: string, // YYYY-MM-DD
  *   target_plant_ids?: string[],
+ *   target_location_ids?: string[],
  * }
  */
 function setCors(res) {
@@ -44,8 +50,12 @@ export default async function handler(req, res) {
     const taskType = String(body.task_type ?? 'Observation').trim() || 'Observation';
     const difficultyRaw = String(body.difficulty ?? 'Easy').trim();
     const difficulty = ['Easy', 'Medium', 'Hard'].includes(difficultyRaw) ? difficultyRaw : 'Easy';
+    const estimatedDuration = String(body.estimated_duration ?? '').trim();
+    const scheduledDate = String(body.scheduled_date ?? '').trim();
     const plantIds = Array.isArray(body.target_plant_ids) ? body.target_plant_ids : [];
-    const relationIds = plantIds.map((id) => String(id || '').trim()).filter(Boolean);
+    const relationPlantIds = plantIds.map((id) => String(id || '').trim()).filter(Boolean);
+    const locationIds = Array.isArray(body.target_location_ids) ? body.target_location_ids : [];
+    const relationLocationIds = locationIds.map((id) => String(id || '').trim()).filter(Boolean);
 
     const properties = {
       Title: {
@@ -74,9 +84,29 @@ export default async function handler(req, res) {
       properties.Notes = { rich_text: [] };
     }
 
-    if (relationIds.length > 0) {
+    if (estimatedDuration) {
+      properties.Estimated_Duration = {
+        rich_text: [{ text: { content: estimatedDuration } }],
+      };
+    } else {
+      properties.Estimated_Duration = { rich_text: [] };
+    }
+
+    if (scheduledDate) {
+      properties.Scheduled_Date = {
+        date: { start: scheduledDate },
+      };
+    }
+
+    if (relationPlantIds.length > 0) {
       properties.Target_Plant = {
-        relation: relationIds.map((id) => ({ id })),
+        relation: relationPlantIds.map((id) => ({ id })),
+      };
+    }
+
+    if (relationLocationIds.length > 0) {
+      properties.Target_Location = {
+        relation: relationLocationIds.map((id) => ({ id })),
       };
     }
 

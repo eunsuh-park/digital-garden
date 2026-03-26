@@ -62,6 +62,11 @@
   padding: 0;
 }
 
+/* Task 상세 전용: 상세 컴포넌트 내부에서 패딩 처리 */
+.map-panel-detail__scroll--task-detail {
+  padding: 0;
+}
+
 .map-panel-detail__page-title {
   font-size: 1.45rem;
   font-weight: 700;

@@ -2,19 +2,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { Icon } from '@iconify/react';
 import arrowLeftLine from '@iconify-icons/mingcute/arrow-left-line';
 import TaskCard from '../TaskCard';
+import TaskDetailLayout from '../TaskDetailLayout/TaskDetailLayout';
 import PlantDetailLayout from '../PlantDetailLayout/PlantDetailLayout';
 import { useLocations } from '../../context/LocationsContext';
 import { useMapPanelDetail } from '../../context/MapPanelDetailContext';
-import { createTask, updateLocation } from '../../api/notionApi';
+import { createTask, updateLocation, updateTask } from '../../api/notionApi';
 import { TASK_TYPE_KEYS, TASK_TYPE_LABEL_KO } from '../../pages/Tasks/notionSchema';
 import searchLine from '@iconify-icons/mingcute/search-line';
 import './MapPanelDetailViews.css';
-
-function toCardStatus(status) {
-  if (status === 'completed') return '완료';
-  if (status === 'progress') return '진행 중';
-  return '시작 전';
-}
 
 /** @param {{ location: object, onBack: () => void }} props */
 export function MapPanelLocationDetail({ location, onBack }) {
@@ -201,11 +196,16 @@ const DIFFICULTY_ORDER = ['Easy', 'Medium', 'Hard'];
 
 /** 할 일 생성(상세와 동일 툴바·폼 레이아웃) */
 export function MapPanelTaskCreate({ onBack }) {
-  const { plants, reload } = useLocations();
+  const { locations, plants, reload } = useLocations();
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
   const [taskType, setTaskType] = useState('Observation');
   const [difficultyIdx, setDifficultyIdx] = useState(0);
+  const [estimatedDuration, setEstimatedDuration] = useState('');
+  const [scheduledDate, setScheduledDate] = useState('');
+  const [locationQuery, setLocationQuery] = useState('');
+  const [locationMenuOpen, setLocationMenuOpen] = useState(false);
+  const [selectedLocationIds, setSelectedLocationIds] = useState([]);
   const [plantQuery, setPlantQuery] = useState('');
   const [plantMenuOpen, setPlantMenuOpen] = useState(false);
   const [selectedPlantIds, setSelectedPlantIds] = useState([]);
@@ -220,6 +220,12 @@ export function MapPanelTaskCreate({ onBack }) {
       .filter(Boolean);
   }, [plants, selectedPlantIds]);
 
+  const selectedLocations = useMemo(() => {
+    return selectedLocationIds
+      .map((id) => locations.find((l) => l.id === id))
+      .filter(Boolean);
+  }, [locations, selectedLocationIds]);
+
   const plantSuggestions = useMemo(() => {
     const q = plantQuery.trim().toLowerCase();
     const taken = new Set(selectedPlantIds);
@@ -228,6 +234,25 @@ export function MapPanelTaskCreate({ onBack }) {
       .filter((p) => !q || String(p.name || '').toLowerCase().includes(q))
       .slice(0, 8);
   }, [plants, plantQuery, selectedPlantIds]);
+
+  const locationSuggestions = useMemo(() => {
+    const q = locationQuery.trim().toLowerCase();
+    const taken = new Set(selectedLocationIds);
+    return locations
+      .filter((l) => !taken.has(l.id))
+      .filter((l) => !q || String(l.name || '').toLowerCase().includes(q))
+      .slice(0, 8);
+  }, [locations, locationQuery, selectedLocationIds]);
+
+  const addLocation = (id) => {
+    setSelectedLocationIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    setLocationQuery('');
+    setLocationMenuOpen(false);
+  };
+
+  const removeLocation = (id) => {
+    setSelectedLocationIds((prev) => prev.filter((x) => x !== id));
+  };
 
   const addPlant = (id) => {
     setSelectedPlantIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
@@ -250,6 +275,9 @@ export function MapPanelTaskCreate({ onBack }) {
         notes: notes.trim(),
         task_type: taskType,
         difficulty,
+        estimated_duration: estimatedDuration.trim(),
+        scheduled_date: scheduledDate || '',
+        target_location_ids: selectedLocationIds,
         target_plant_ids: selectedPlantIds,
       });
       await reload();
@@ -301,6 +329,33 @@ export function MapPanelTaskCreate({ onBack }) {
           </div>
 
           <div className="location-edit__field">
+            <label className="location-edit__label" htmlFor="task-create-estimated-duration">
+              Estimated Duration
+            </label>
+            <input
+              id="task-create-estimated-duration"
+              className="location-edit__input"
+              value={estimatedDuration}
+              onChange={(e) => setEstimatedDuration(e.target.value)}
+              autoComplete="off"
+              placeholder="예: 15분 / 1시간 30분"
+            />
+          </div>
+
+          <div className="location-edit__field">
+            <label className="location-edit__label" htmlFor="task-create-scheduled-date">
+              Schedule Date
+            </label>
+            <input
+              id="task-create-scheduled-date"
+              type="date"
+              className="location-edit__input"
+              value={scheduledDate}
+              onChange={(e) => setScheduledDate(e.target.value)}
+            />
+          </div>
+
+          <div className="location-edit__field">
             <span className="location-edit__label">Task Type</span>
             <div className="task-create__chips" role="group" aria-label="작업 유형">
               {TASK_TYPE_KEYS.map((key) => (
@@ -314,6 +369,62 @@ export function MapPanelTaskCreate({ onBack }) {
                 </button>
               ))}
             </div>
+          </div>
+
+          <div className="location-edit__field task-create__plant-field">
+            <span className="location-edit__label">Target Location</span>
+            {selectedLocations.length > 0 && (
+              <ul className="task-create__picked" aria-label="선택한 구역">
+                {selectedLocations.map((l) => (
+                  <li key={l.id}>
+                    <button
+                      type="button"
+                      className="task-create__picked-chip"
+                      onClick={() => removeLocation(l.id)}
+                      aria-label={`${l.name} 제거`}
+                    >
+                      {l.name}
+                      <span aria-hidden> ×</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="task-create__search-wrap">
+              <input
+                type="search"
+                className="task-create__search-input location-edit__input"
+                value={locationQuery}
+                onChange={(e) => {
+                  setLocationQuery(e.target.value);
+                  setLocationMenuOpen(true);
+                }}
+                onFocus={() => setLocationMenuOpen(true)}
+                onBlur={() => {
+                  window.setTimeout(() => setLocationMenuOpen(false), 150);
+                }}
+                placeholder="구역 이름 검색"
+                autoComplete="off"
+              />
+              <Icon
+                icon={searchLine}
+                width={20}
+                height={20}
+                className="task-create__search-icon"
+                aria-hidden
+              />
+            </div>
+            {locationMenuOpen && locationSuggestions.length > 0 ? (
+              <ul className="task-create__suggest" role="listbox">
+                {locationSuggestions.map((l) => (
+                  <li key={l.id} role="option">
+                    <button type="button" className="task-create__suggest-btn" onMouseDown={() => addLocation(l.id)}>
+                      {l.name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
           </div>
 
           <div className="location-edit__field task-create__plant-field">
@@ -417,18 +528,49 @@ export function MapPanelTaskCreate({ onBack }) {
 
 /** @param {{ task: object, onBack: () => void, locationMap: Record<string, object>, plantMap: Record<string, object>, taskTitleMap: Record<string, string> }} props */
 export function MapPanelTaskDetail({ task, onBack, locationMap, plantMap, taskTitleMap: _taskTitleMap }) {
-  const { tasks: allTasks } = useLocations();
+  const { tasks: allTasks, locations, plants, reload } = useLocations();
   const { openLocationDetail, openPlantDetail, openTaskDetail } = useMapPanelDetail();
+
   const location = task.section_id ? locationMap[task.section_id] : null;
-  const targetPlantNames = (task.target_plant_ids || [])
-    .map((pid) => plantMap[pid]?.name)
-    .filter(Boolean);
-  const prereqTitles = (task.prereq_task_ids || [])
-    .map((id) => _taskTitleMap[id] || '(제목 없음)')
-    .filter(Boolean);
-  const followupTitles = (task.followup_task_ids || [])
-    .map((id) => _taskTitleMap[id] || '(제목 없음)')
-    .filter(Boolean);
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [draftTitle, setDraftTitle] = useState(task.title || '');
+  const [draftNotes, setDraftNotes] = useState(task.notes || '');
+  const [draftTaskType, setDraftTaskType] = useState(task.task_type ?? 'Observation');
+
+  const initialDifficultyIdx = Math.max(0, DIFFICULTY_ORDER.indexOf(task.difficulty ?? 'Easy'));
+  const [draftDifficultyIdx, setDraftDifficultyIdx] = useState(initialDifficultyIdx);
+
+  const [draftEstimatedDuration, setDraftEstimatedDuration] = useState(task.estimated_duration || '');
+  const [draftScheduledDate, setDraftScheduledDate] = useState(
+    task.scheduled_date || task.due_date || ''
+  );
+
+  const [selectedLocationIds, setSelectedLocationIds] = useState(() => (task.section_id ? [task.section_id] : []));
+  const [locationQuery, setLocationQuery] = useState('');
+  const [locationMenuOpen, setLocationMenuOpen] = useState(false);
+
+  const [selectedPlantIds, setSelectedPlantIds] = useState(() => (task.target_plant_ids || []));
+  const [plantQuery, setPlantQuery] = useState('');
+  const [plantMenuOpen, setPlantMenuOpen] = useState(false);
+
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+
+  useEffect(() => {
+    if (!isEditing) {
+      setDraftTitle(task.title || '');
+      setDraftNotes(task.notes || '');
+      setDraftTaskType(task.task_type ?? 'Observation');
+      const idx = Math.max(0, DIFFICULTY_ORDER.indexOf(task.difficulty ?? 'Easy'));
+      setDraftDifficultyIdx(idx);
+      setDraftEstimatedDuration(task.estimated_duration || '');
+      setDraftScheduledDate(task.scheduled_date || task.due_date || '');
+      setSelectedLocationIds(task.section_id ? [task.section_id] : []);
+      setSelectedPlantIds(task.target_plant_ids || []);
+      setSaveError(null);
+    }
+  }, [task.id, isEditing, task.title, task.notes, task.task_type, task.difficulty, task.estimated_duration, task.scheduled_date, task.due_date, task.section_id, task.target_plant_ids]);
 
   const plantNavLinks = useMemo(() => {
     return (task.target_plant_ids || [])
@@ -445,38 +587,101 @@ export function MapPanelTaskDetail({ task, onBack, locationMap, plantMap, taskTi
       .map((id) => {
         const t = allTasks.find((x) => x.id === id);
         if (!t) return null;
-        return { label: t.title || '(제목 없음)', onNavigate: () => openTaskDetail(t, { push: true }) };
+        return {
+          label: t.title || _taskTitleMap[id] || '(제목 없음)',
+          onNavigate: () => openTaskDetail(t, { push: true }),
+        };
       })
       .filter(Boolean);
-  }, [task.prereq_task_ids, allTasks, openTaskDetail]);
+  }, [task.prereq_task_ids, allTasks, openTaskDetail, _taskTitleMap]);
 
   const followupNavLinks = useMemo(() => {
     return (task.followup_task_ids || [])
       .map((id) => {
         const t = allTasks.find((x) => x.id === id);
         if (!t) return null;
-        return { label: t.title || '(제목 없음)', onNavigate: () => openTaskDetail(t, { push: true }) };
+        return {
+          label: t.title || _taskTitleMap[id] || '(제목 없음)',
+          onNavigate: () => openTaskDetail(t, { push: true }),
+        };
       })
       .filter(Boolean);
-  }, [task.followup_task_ids, allTasks, openTaskDetail]);
+  }, [task.followup_task_ids, allTasks, openTaskDetail, _taskTitleMap]);
 
-  const locationLink = location
-    ? { label: location.name, onNavigate: () => openLocationDetail(location, { push: true }) }
-    : undefined;
+  const onLocationNavigate =
+    location ? () => openLocationDetail(location, { push: true }) : null;
 
-  const cardTask = {
-    Title: task.title,
-    Task_Type: task.task_type ?? 'Observation',
-    Status: toCardStatus(task.status),
-    Difficulty: task.difficulty ?? 'Easy',
-    Scheduled_Date: task.scheduled_date || task.due_date,
-    Estimated_Duration: task.estimated_duration || '–',
-    Target_Plant: targetPlantNames,
-    Prerequisites: prerequisiteNavLinks.length ? [] : prereqTitles,
-    Followups: followupNavLinks.length ? [] : followupTitles,
-    Notes:
-      task.notes?.trim() ||
-      (locationLink ? '' : location ? `구역: ${location.name}` : ''),
+  const notionStatusName = (() => {
+    if (task.status === 'completed') return '완료';
+    if (task.status === 'progress') return '진행중';
+    return '시작 전';
+  })();
+
+  const selectedPlantsForEdit = useMemo(() => {
+    return selectedPlantIds.map((id) => plants.find((p) => p.id === id)).filter(Boolean);
+  }, [plants, selectedPlantIds]);
+
+  const locationSuggestions = useMemo(() => {
+    const q = locationQuery.trim().toLowerCase();
+    const taken = new Set(selectedLocationIds);
+    return locations
+      .filter((l) => !taken.has(l.id))
+      .filter((l) => !q || String(l.name || '').toLowerCase().includes(q))
+      .slice(0, 8);
+  }, [locations, locationQuery, selectedLocationIds]);
+
+  const plantSuggestionsForEdit = useMemo(() => {
+    const q = plantQuery.trim().toLowerCase();
+    const taken = new Set(selectedPlantIds);
+    return plants
+      .filter((p) => !taken.has(p.id))
+      .filter((p) => !q || String(p.name || '').toLowerCase().includes(q))
+      .slice(0, 8);
+  }, [plants, plantQuery, selectedPlantIds]);
+
+  const addLocation = (id) => {
+    setSelectedLocationIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    setLocationQuery('');
+    setLocationMenuOpen(false);
+  };
+
+  const removeLocation = (id) => setSelectedLocationIds((prev) => prev.filter((x) => x !== id));
+
+  const addPlant = (id) => {
+    setSelectedPlantIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    setPlantQuery('');
+    setPlantMenuOpen(false);
+  };
+
+  const removePlant = (id) => setSelectedPlantIds((prev) => prev.filter((x) => x !== id));
+
+  const handleSaveEdit = async () => {
+    if (saving) return;
+    const t = draftTitle.trim();
+    if (!t) return;
+
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const difficulty = DIFFICULTY_ORDER[draftDifficultyIdx] ?? 'Easy';
+      await updateTask(task.id, {
+        title: t,
+        notes: draftNotes,
+        task_type: draftTaskType,
+        difficulty,
+        estimated_duration: draftEstimatedDuration.trim(),
+        scheduled_date: draftScheduledDate || '',
+        target_location_ids: selectedLocationIds,
+        target_plant_ids: selectedPlantIds,
+        status_name: notionStatusName,
+      });
+      await reload();
+      setIsEditing(false);
+    } catch (e) {
+      setSaveError(e.message || '저장 실패');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -486,21 +691,250 @@ export function MapPanelTaskDetail({ task, onBack, locationMap, plantMap, taskTi
           <Icon icon={arrowLeftLine} width={22} height={22} />
         </button>
         <span className="map-panel-detail__toolbar-title">할 일</span>
-        <span className="map-panel-detail__toolbar-spacer" aria-hidden />
+        {isEditing ? (
+          <span className="map-panel-detail__toolbar-spacer" aria-hidden />
+        ) : (
+          <button
+            type="button"
+            className="map-panel-detail__icon-btn"
+            onClick={() => setIsEditing(true)}
+            aria-label="편집"
+            title="편집"
+          >
+            ✎
+          </button>
+        )}
       </header>
-      <div className="map-panel-detail__scroll map-panel-detail__scroll--single-card">
-        <div className="map-panel-detail__card-wrap">
-          <TaskCard
-            task={cardTask}
-            unconstrained
-            locationLink={locationLink}
-            plantLinks={plantNavLinks.length ? plantNavLinks : undefined}
+
+      <div className="map-panel-detail__scroll map-panel-detail__scroll--task-detail">
+        {!isEditing ? (
+          <TaskDetailLayout
+            task={task}
+            locationName={location?.name ?? null}
+            onLocationNavigate={onLocationNavigate}
+            plantLinks={plantNavLinks}
             taskLinkGroups={{
-              prerequisites: prerequisiteNavLinks.length ? prerequisiteNavLinks : undefined,
-              followups: followupNavLinks.length ? followupNavLinks : undefined,
+              prerequisites: prerequisiteNavLinks,
+              followups: followupNavLinks,
             }}
           />
-        </div>
+        ) : (
+          <div className="task-create">
+            <div className="location-edit__field">
+              <label className="location-edit__label" htmlFor="task-edit-title">
+                Name
+              </label>
+              <input
+                id="task-edit-title"
+                className="location-edit__input"
+                value={draftTitle}
+                onChange={(e) => setDraftTitle(e.target.value)}
+                autoComplete="off"
+              />
+            </div>
+
+            <div className="location-edit__field">
+              <label className="location-edit__label" htmlFor="task-edit-notes">
+                Description
+              </label>
+              <textarea
+                id="task-edit-notes"
+                className="location-edit__textarea location-edit__textarea--compact"
+                value={draftNotes}
+                onChange={(e) => setDraftNotes(e.target.value)}
+                rows={4}
+              />
+            </div>
+
+            <div className="location-edit__field">
+              <label className="location-edit__label" htmlFor="task-edit-estimated-duration">
+                Estimated Duration
+              </label>
+              <input
+                id="task-edit-estimated-duration"
+                className="location-edit__input"
+                value={draftEstimatedDuration}
+                onChange={(e) => setDraftEstimatedDuration(e.target.value)}
+                autoComplete="off"
+              />
+            </div>
+
+            <div className="location-edit__field">
+              <label className="location-edit__label" htmlFor="task-edit-scheduled-date">
+                Schedule Date
+              </label>
+              <input
+                id="task-edit-scheduled-date"
+                type="date"
+                className="location-edit__input"
+                value={draftScheduledDate}
+                onChange={(e) => setDraftScheduledDate(e.target.value)}
+              />
+            </div>
+
+            <div className="location-edit__field">
+              <span className="location-edit__label">Task Type</span>
+              <div className="task-create__chips" role="group" aria-label="작업 유형">
+                {TASK_TYPE_KEYS.map((key) => (
+                  <button
+                    key={key}
+                    type="button"
+                    className={`task-create__chip ${draftTaskType === key ? 'task-create__chip--active' : ''}`}
+                    onClick={() => setDraftTaskType(key)}
+                  >
+                    {TASK_TYPE_LABEL_KO[key] || key}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="location-edit__field task-create__plant-field">
+              <span className="location-edit__label">Target Location</span>
+              {selectedLocationIds.length > 0 && (
+                <ul className="task-create__picked" aria-label="선택한 구역">
+                  {selectedLocationIds.map((id) => {
+                    const l = locations.find((x) => x.id === id);
+                    if (!l) return null;
+                    return (
+                      <li key={id}>
+                        <button
+                          type="button"
+                          className="task-create__picked-chip"
+                          onClick={() => removeLocation(id)}
+                          aria-label={`${l.name} 제거`}
+                        >
+                          {l.name}
+                          <span aria-hidden> ×</span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+
+              <div className="task-create__search-wrap">
+                <input
+                  type="search"
+                  className="task-create__search-input location-edit__input"
+                  value={locationQuery}
+                  onChange={(e) => {
+                    setLocationQuery(e.target.value);
+                    setLocationMenuOpen(true);
+                  }}
+                  onFocus={() => setLocationMenuOpen(true)}
+                  onBlur={() => {
+                    window.setTimeout(() => setLocationMenuOpen(false), 150);
+                  }}
+                  placeholder="구역 이름 검색"
+                  autoComplete="off"
+                />
+                <Icon icon={searchLine} width={20} height={20} className="task-create__search-icon" aria-hidden />
+              </div>
+
+              {locationMenuOpen && locationSuggestions.length > 0 ? (
+                <ul className="task-create__suggest" role="listbox">
+                  {locationSuggestions.map((l) => (
+                    <li key={l.id} role="option">
+                      <button type="button" className="task-create__suggest-btn" onMouseDown={() => addLocation(l.id)}>
+                        {l.name}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+
+            <div className="location-edit__field">
+              <div className="task-create__diff-head">
+                <span className="location-edit__label">Difficulty</span>
+                <span className="task-create__diff-value">{DIFFICULTY_ORDER[draftDifficultyIdx] ?? 'Easy'}</span>
+              </div>
+              <input
+                type="range"
+                className="task-create__slider"
+                min={0}
+                max={2}
+                step={1}
+                value={draftDifficultyIdx}
+                onChange={(e) => setDraftDifficultyIdx(Number(e.target.value))}
+                aria-valuemin={0}
+                aria-valuemax={2}
+                aria-valuenow={draftDifficultyIdx}
+                aria-label={`난이도 ${DIFFICULTY_ORDER[draftDifficultyIdx] ?? 'Easy'}`}
+              />
+              <div className="task-create__diff-ticks" aria-hidden>
+                <span>Easy</span>
+                <span>Medium</span>
+                <span>Hard</span>
+              </div>
+            </div>
+
+            <div className="location-edit__field task-create__plant-field">
+              <span className="location-edit__label">Related Plants</span>
+              {selectedPlantsForEdit.length > 0 && (
+                <ul className="task-create__picked" aria-label="선택한 식물">
+                  {selectedPlantsForEdit.map((p) => (
+                    <li key={p.id}>
+                      <button
+                        type="button"
+                        className="task-create__picked-chip"
+                        onClick={() => removePlant(p.id)}
+                        aria-label={`${p.name} 제거`}
+                      >
+                        {p.name}
+                        <span aria-hidden> ×</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <div className="task-create__search-wrap">
+                <input
+                  type="search"
+                  className="task-create__search-input location-edit__input"
+                  value={plantQuery}
+                  onChange={(e) => {
+                    setPlantQuery(e.target.value);
+                    setPlantMenuOpen(true);
+                  }}
+                  onFocus={() => setPlantMenuOpen(true)}
+                  onBlur={() => {
+                    window.setTimeout(() => setPlantMenuOpen(false), 150);
+                  }}
+                  placeholder="식물 이름 검색"
+                  autoComplete="off"
+                />
+                <Icon icon={searchLine} width={20} height={20} className="task-create__search-icon" aria-hidden />
+              </div>
+
+              {plantMenuOpen && plantSuggestionsForEdit.length > 0 ? (
+                <ul className="task-create__suggest" role="listbox">
+                  {plantSuggestionsForEdit.map((p) => (
+                    <li key={p.id} role="option">
+                      <button type="button" className="task-create__suggest-btn" onMouseDown={() => addPlant(p.id)}>
+                        {p.name}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+
+            {saveError ? <p className="location-edit__error">{saveError}</p> : null}
+
+            <div className="location-edit__actions">
+              <button
+                type="button"
+                className="location-edit__save-btn"
+                onClick={handleSaveEdit}
+                disabled={saving || !draftTitle.trim()}
+              >
+                {saving ? 'Saving...' : 'Save'}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

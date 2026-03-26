@@ -110,11 +110,23 @@ export async function updateLocation(id, updates) {
 
 /**
  * Tasks DB: 안전 필드로 새 할 일 생성
- * - Title, Notes, Task_Type, Difficulty, Target_Plant, Status(예정)
+ * - Title, Notes, Task_Type, Difficulty
+ * - Estimated_Duration, Scheduled_Date
+ * - Target_Plant, Target_Location, Status(시작 전)
  */
 export async function createTask(payload) {
   return mutateApi('/notion-tasks-create', 'Tasks create', {
     method: 'POST',
     body: payload,
+  });
+}
+
+/**
+ * Tasks DB: 할 일 업데이트
+ */
+export async function updateTask(id, updates) {
+  return mutateApi('/notion-tasks-update', 'Tasks update', {
+    method: 'POST',
+    body: { id, ...updates },
   });
 }
