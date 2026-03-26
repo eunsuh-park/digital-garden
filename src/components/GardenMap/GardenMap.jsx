@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { Icon } from '@iconify/react';
 import refresh2Line from '@iconify-icons/mingcute/refresh-2-line';
 import { useMapPanelLayout } from '../../context/MapPanelLayoutContext';
-import Drawer from '../Drawer/Drawer';
+import { useMapPanelDetail } from '../../context/MapPanelDetailContext';
 import Popover from '../Popover/Popover';
 import './GardenMap.css';
 import gardenMapSvg from '../../gardenMap.svg?raw';
@@ -17,9 +17,9 @@ import gardenMapSvg from '../../gardenMap.svg?raw';
  */
 export default function GardenMap({ locations = [], getTasksByLocation, getPlantsByLocation, getLocationById }) {
   const { stackedLayout } = useMapPanelLayout();
+  const { openLocationDetail } = useMapPanelDetail();
   const [activeLocationId, setActiveLocationId] = useState(null);
   const [hoverLocationId, setHoverLocationId] = useState(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [mapBase, setMapBase] = useState('road'); // road | house
   const [mapDirection, setMapDirection] = useState('horizontal'); // vertical | horizontal
   const [zoom, setZoom] = useState(1); // 1 = 100% (최소)
@@ -44,20 +44,17 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
 
   const handleLocationClick = useCallback((e, locationId) => {
     setActiveLocationId(locationId);
-    setDrawerOpen(true);
+    const loc = getLocationById ? getLocationById(locationId) : null;
+    if (loc) openLocationDetail(loc);
     // 섹션 클릭 시 hover 상태 팝오버는 닫기
     setHoverLocationId(null);
-  }, []);
+  }, [getLocationById, openLocationDetail]);
 
   const handleLocationHover = useCallback((e, locationId, isEnter) => {
     setHoverLocationId(isEnter ? locationId : null);
     if (isEnter) {
       setPopoverPos({ x: e.clientX, y: e.clientY });
     }
-  }, []);
-
-  const handleCloseDrawer = useCallback(() => {
-    setDrawerOpen(false);
   }, []);
 
   const clampZoom = useCallback((v) => {
@@ -265,7 +262,6 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
     const cls = 'map-only-mode';
     document.body.classList.toggle(cls, mapOnlyMode);
     if (mapOnlyMode) {
-      setDrawerOpen(false);
       setHoverLocationId(null);
       setPopoverPos({ x: 0, y: 0 });
     }
@@ -476,18 +472,10 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
           position={popoverPos}
           onOpenDrawer={() => {
             setActiveLocationId(hoverLocation.id);
-            setDrawerOpen(true);
+            const loc = getLocationById ? getLocationById(hoverLocation.id) : null;
+            if (loc) openLocationDetail(loc);
             setHoverLocationId(null);
           }}
-        />
-      ) : null}
-
-      {!mapOnlyMode ? (
-        <Drawer
-          section={selectedLocation}
-          tasks={selectedLocation ? getTasks(selectedLocation.id) : []}
-          isOpen={drawerOpen}
-          onClose={handleCloseDrawer}
         />
       ) : null}
     </div>
