@@ -197,6 +197,7 @@ const PLANT_STATUS_OPTIONS = [
   { value: 'planned', label: '식재 예정' },
   { value: 'needs_care', label: '관리 필요' },
 ];
+const PLANT_SPECIES_OPTIONS = ['나무', '풀', '꽃'];
 
 /** 할 일 생성(상세와 동일 툴바·폼 레이아웃) */
 export function MapPanelTaskCreate({ onBack }) {
@@ -534,7 +535,7 @@ export function MapPanelTaskCreate({ onBack }) {
 export function MapPanelPlantCreate({ onBack }) {
   const { locations, reload } = useLocations();
   const [name, setName] = useState('');
-  const [species, setSpecies] = useState('');
+  const [species, setSpecies] = useState('나무');
   const [category, setCategory] = useState('');
   const [status, setStatus] = useState('planted');
   const [bloomSeason, setBloomSeason] = useState('');
@@ -621,17 +622,19 @@ export function MapPanelPlantCreate({ onBack }) {
           </div>
 
           <div className="location-edit__field">
-            <label className="location-edit__label" htmlFor="plant-create-species">
-              Species
-            </label>
-            <input
-              id="plant-create-species"
-              className="location-edit__input"
-              value={species}
-              onChange={(e) => setSpecies(e.target.value)}
-              autoComplete="off"
-              placeholder="예: 나무, 꽃, 풀"
-            />
+            <span className="location-edit__label">Species</span>
+            <div className="task-create__chips" role="group" aria-label="식물 종">
+              {PLANT_SPECIES_OPTIONS.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  className={`task-create__chip ${species === s ? 'task-create__chip--active' : ''}`}
+                  onClick={() => setSpecies(s)}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="location-edit__field">
