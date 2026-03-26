@@ -2,7 +2,7 @@
  * <1024px: 본문 아래 하단 시트(상하 분할) / ≥1024px: 본문 우측 세로 패널 */
 
 .map-side-panel {
-  --map-panel-accent: #6d28d9;
+  --map-panel-accent: var(--color-info-accent);
   --map-panel-handle-w: 26px;
 
   position: relative;
@@ -136,7 +136,7 @@
   border: 1px solid var(--color-border);
   border-bottom: none;
   border-radius: 16px 16px 0 0;
-  box-shadow: 0 -8px 24px rgba(17, 24, 39, 0.08);
+  box-shadow: var(--shadow-lg);
   outline: none;
 }
 
@@ -148,8 +148,7 @@
     border-left: 1px solid var(--color-border);
     border-radius: 16px 0 0 16px;
     box-shadow:
-      -14px 0 30px rgba(15, 23, 42, 0.08),
-      -2px 0 8px rgba(15, 23, 42, 0.05);
+      var(--shadow-side-panel);
   }
 }
 
@@ -256,7 +255,7 @@
 }
 
 .map-side-panel__row:hover {
-  background: rgba(0, 0, 0, 0.04);
+  background: var(--color-hover-soft);
 }
 
 button.map-side-panel__row {
@@ -307,7 +306,7 @@ div.map-side-panel__row {
   padding: 0;
   margin: 0;
   font-size: 0.85rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid var(--color-hover-soft);
 }
 
 .map-side-panel__subitem:last-child {
@@ -332,7 +331,7 @@ div.map-side-panel__row {
 }
 
 .map-side-panel__subitem-btn:hover {
-  background: rgba(0, 0, 0, 0.04);
+  background: var(--color-hover-soft);
 }
 
 .map-side-panel__subitem-name {
@@ -351,7 +350,7 @@ div.map-side-panel__row {
 }
 
 .map-side-panel__hint--error {
-  color: #b91c1c;
+  color: var(--color-danger-text);
 }
 
 .map-side-panel__placeholder {

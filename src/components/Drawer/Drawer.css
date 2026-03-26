@@ -23,7 +23,7 @@
   height: auto;
   margin-left: auto;
   background: var(--color-surface);
-  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+  box-shadow: -4px 0 20px var(--color-black-12);
   transform: translateX(calc(100% + 24px));
   opacity: 0;
   visibility: hidden;
@@ -31,7 +31,7 @@
   transition: transform 0.3s ease, opacity 0.2s ease, visibility 0.2s ease;
   z-index: 301;
   overflow-y: auto;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
 }
 
 @media (min-width: 480px) {
@@ -106,7 +106,7 @@
 }
 
 .drawer__chip--muted {
-  background: rgba(0, 0, 0, 0.04);
+  background: var(--color-hover-soft);
   color: var(--color-text-muted);
 }
 
@@ -172,18 +172,18 @@
 .drawer__task-status {
   flex-shrink: 0;
   padding: 0.2rem 0.5rem;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   font-size: 0.75rem;
 }
 
 .drawer__task-status--progress {
-  background: rgba(45, 90, 39, 0.15);
+  background: var(--color-success-bg-hover);
   color: var(--color-primary);
 }
 
 .drawer__task-status--pending {
-  background: rgba(253, 174, 97, 0.3);
-  color: #b85c00;
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
 }
 
 .drawer__task-meta {

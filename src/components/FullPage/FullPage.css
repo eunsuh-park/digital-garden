@@ -163,7 +163,7 @@
 
 .full-page__group {
   background: var(--color-surface);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   padding: 1rem 1.25rem;
   box-shadow: var(--shadow-sm);
 }
@@ -180,13 +180,13 @@
 .full-page__group-color {
   width: 12px;
   height: 12px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .full-page__group-color--large {
   width: 40px;
   height: 40px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
 }
 
 /* 카드 (Locations) */
@@ -196,7 +196,7 @@
   gap: 1rem;
   padding: 1rem 1.25rem;
   background: var(--color-surface);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   text-decoration: none;
   color: inherit;
@@ -275,16 +275,16 @@
 .full-page__status {
   flex-shrink: 0;
   padding: 0.2rem 0.5rem;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   font-size: 0.75rem;
 }
 
 .full-page__status--progress {
-  background: rgba(45, 90, 39, 0.15);
+  background: var(--color-success-bg-hover);
   color: var(--color-primary);
 }
 
 .full-page__status--pending {
-  background: rgba(253, 174, 97, 0.3);
-  color: #b85c00;
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
 }

@@ -14,7 +14,7 @@
   font-weight: 700;
   color: var(--color-text);
   line-height: 1.2;
-  font-family: 'Noto Serif KR', serif;
+  font-family: var(--font-serif);
 }
 
 .task-detail__badges {
@@ -28,14 +28,14 @@
   font-size: 0.72rem;
   font-weight: 700;
   padding: 0.28rem 0.6rem;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   letter-spacing: 0.02em;
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--color-hover-soft);
 }
 
 .task-detail__badge--kind {
-  background: rgba(109, 40, 217, 0.1);
-  color: #6d28d9;
+  background: color-mix(in srgb, var(--color-info-accent) 10%, transparent);
+  color: var(--color-info-accent);
 }
 
 .task-detail__dl {
@@ -69,7 +69,7 @@
   background: none;
   font: inherit;
   font-weight: 700;
-  color: #2d5a27;
+  color: var(--color-primary);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   text-decoration: underline;

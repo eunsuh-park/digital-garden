@@ -9,7 +9,7 @@
 }
 
 .switch:focus-visible {
-  outline: 2px solid var(--color-primary, #2d5a27);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: 999px;
 }
@@ -18,21 +18,21 @@
   position: relative;
   width: 40px;
   height: 24px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.12);
+  border-radius: var(--radius-full);
+  background: var(--color-black-12);
   transition: background 0.2s ease;
 }
 
 .switch:hover .switch__track {
-  background: rgba(0, 0, 0, 0.18);
+  background: var(--color-black-18);
 }
 
 .switch[aria-checked="true"] .switch__track {
-  background: var(--color-primary, #2d5a27);
+  background: var(--color-primary);
 }
 
 .switch[aria-checked="true"]:hover .switch__track {
-  background: var(--color-primary-light, #4a7c43);
+  background: var(--color-primary-light);
 }
 
 .switch__thumb {
@@ -42,8 +42,8 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  background: var(--color-surface);
+  box-shadow: 0 1px 3px var(--color-black-18);
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 

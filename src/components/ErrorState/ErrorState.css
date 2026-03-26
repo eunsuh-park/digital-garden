@@ -40,10 +40,10 @@
   text-decoration: none;
   padding: 0.5rem 1rem;
   border: 1px solid var(--color-primary);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   transition: background 0.2s, color 0.2s;
 }
 
 .error-state__link:hover {
-  background: rgba(45, 90, 39, 0.08);
+  background: var(--color-hover-strong);
 }

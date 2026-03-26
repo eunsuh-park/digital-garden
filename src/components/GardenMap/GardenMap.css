@@ -96,8 +96,8 @@
   align-items: center;
   gap: 10px;
   padding: 8px;
-  border-radius: 14px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-hover-strong);
   background: rgba(255, 255, 255, 0.78);
   backdrop-filter: blur(10px);
 }
@@ -120,9 +120,9 @@
   min-width: min(58vw, 340px);
   padding: 0 36px 0 12px;
   border-radius: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.14);
-  background: #fff;
-  color: #1f2937;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text-strong);
   font-size: 0.95rem;
   line-height: 1;
   background-image: linear-gradient(45deg, transparent 50%, #9ca3af 50%), linear-gradient(135deg, #9ca3af 50%, transparent 50%);
@@ -136,9 +136,9 @@
 .garden-map__icon-btn {
   width: 40px;
   height: 40px;
-  border: 1px solid rgba(0, 0, 0, 0.14);
-  border-radius: 8px;
-  background: #fff;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
   color: #5b4ba2;
   font-size: 1.15rem;
   line-height: 1;
@@ -165,7 +165,7 @@
 
 .garden-map__toolbar-label {
   font-size: 11px;
-  color: rgba(0, 0, 0, 0.55);
+  color: var(--color-text-muted);
   letter-spacing: 0.02em;
   user-select: none;
 }
@@ -175,9 +175,9 @@
   min-width: 44px;
   padding: 0 10px;
   border-radius: 999px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  background: rgba(255, 255, 255, 0.9);
-  color: rgba(0, 0, 0, 0.82);
+  border: 1px solid var(--color-black-12);
+  background: var(--color-white-90);
+  color: var(--color-text);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -186,19 +186,19 @@
 
 .garden-map__toolbar-btn:hover {
   transform: translateY(-1px);
-  border-color: rgba(0, 0, 0, 0.22);
+  border-color: var(--color-black-18);
 }
 
 .garden-map__toolbar-btn--active {
-  background: rgba(0, 0, 0, 0.86);
-  border-color: rgba(0, 0, 0, 0.86);
-  color: rgba(255, 255, 255, 0.95);
+  background: color-mix(in srgb, var(--color-text) 86%, transparent);
+  border-color: color-mix(in srgb, var(--color-text) 86%, transparent);
+  color: var(--color-white-95);
 }
 
 .garden-map__toolbar-divider {
   width: 1px;
   height: 22px;
-  background: rgba(0, 0, 0, 0.12);
+  background: var(--color-black-12);
 }
 
 .garden-map__svg-wrapper {

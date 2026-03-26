@@ -5,7 +5,7 @@
 }
 
 .plants-page__hint--error {
-  color: #b91c1c;
+  color: var(--color-danger-text);
   font-size: 0.88rem;
   padding: 0.75rem 0.25rem;
   margin: 0;
@@ -26,7 +26,7 @@
 }
 
 .plants-embedded__group {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid var(--color-border-weak);
 }
 
 .plants-embedded__group:last-child {
@@ -48,8 +48,8 @@
 }
 
 .plants-embedded__group-header:hover {
-  background: rgba(0, 0, 0, 0.03);
-  border-radius: 8px;
+  background: var(--color-hover-soft);
+  border-radius: var(--radius-md);
 }
 
 .plants-embedded__group-title {
@@ -90,9 +90,9 @@
   width: 100%;
   height: 100%;
   min-height: 0;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 12px;
-  background: rgba(45, 90, 39, 0.12);
+  border: 1px solid var(--color-hover-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-success-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -105,8 +105,8 @@
 }
 
 .plants-embedded__tile:hover {
-  background: rgba(45, 90, 39, 0.18);
-  border-color: rgba(0, 0, 0, 0.12);
+  background: var(--color-success-bg-hover);
+  border-color: var(--color-black-12);
 }
 
 .plants-embedded__tile-dot {
@@ -116,7 +116,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #e74c3c;
+  background: var(--color-danger-dot);
 }
 
 .plants-embedded__tile-name {
@@ -133,16 +133,16 @@
 
 .plants-embedded__tile--add {
   cursor: pointer;
-  background: rgba(0, 0, 0, 0.04);
+  background: var(--color-hover-soft);
   color: var(--color-text-muted);
   font-size: 1.35rem;
   font-weight: 300;
   line-height: 1;
-  border: 1px dashed rgba(0, 0, 0, 0.16);
+  border: 1px dashed var(--color-black-18);
 }
 
 .plants-embedded__tile--add:hover {
-  background: rgba(0, 0, 0, 0.06);
+  background: var(--color-hover-muted);
 }
 
 .plants-page__controls {

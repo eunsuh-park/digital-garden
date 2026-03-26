@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--color-overlay);
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.2s ease, visibility 0.2s ease;
@@ -24,7 +24,7 @@
   max-width: 100%;
   height: 100%;
   background: var(--color-surface);
-  box-shadow: 8px 0 24px rgba(0, 0, 0, 0.12);
+  box-shadow: 8px 0 24px var(--color-black-12);
   transform: translateX(-100%);
   transition: transform 0.24s ease;
   display: flex;
@@ -62,7 +62,7 @@
   width: 40px;
   height: 40px;
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background: transparent;
   font-size: 1.5rem;
   line-height: 1;
@@ -71,7 +71,7 @@
 }
 
 .nav-drawer__close:hover {
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--color-hover-soft);
 }
 
 .nav-drawer__scroll {
@@ -105,14 +105,14 @@
   align-items: center;
   gap: 0.6rem;
   padding: 0.55rem 0.65rem;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   background: var(--color-bg);
 }
 
 .nav-drawer__project--active {
   outline: 2px solid var(--color-primary);
   outline-offset: 0;
-  background: rgba(45, 90, 39, 0.08);
+  background: var(--color-hover-strong);
 }
 
 .nav-drawer__project--empty {
@@ -140,7 +140,7 @@
   align-items: center;
   gap: 0.55rem;
   padding: 0.65rem 0.75rem;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   text-decoration: none;
   color: var(--color-text);
   font-weight: 600;
@@ -149,11 +149,11 @@
 }
 
 .nav-drawer__link:hover {
-  background: rgba(45, 90, 39, 0.08);
+  background: var(--color-hover-strong);
 }
 
 .nav-drawer__link--active {
-  background: rgba(45, 90, 39, 0.14);
+  background: var(--color-success-bg-hover);
   color: var(--color-primary);
 }
 
@@ -172,7 +172,7 @@
   gap: 0.55rem;
   padding: 0.6rem 0.75rem;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   background: transparent;
   font-size: 0.95rem;
   font-weight: 600;
@@ -183,7 +183,7 @@
 }
 
 .nav-drawer__footer-btn:hover {
-  background: rgba(45, 90, 39, 0.08);
+  background: var(--color-hover-strong);
   color: var(--color-text);
 }
 

@@ -6,9 +6,9 @@
 
 .plant-detail__media {
   width: 100%;
-  border-radius: 0 0 16px 16px;
+  border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
   overflow: hidden;
-  background: var(--color-bg, #f5f0e8);
+  background: var(--color-bg);
   aspect-ratio: 16 / 10;
   max-height: min(42vh, 280px);
 }
@@ -29,7 +29,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
-  background: linear-gradient(165deg, rgba(45, 90, 39, 0.1), rgba(232, 224, 208, 0.5));
+  background: linear-gradient(165deg, color-mix(in srgb, var(--color-primary) 10%, transparent), color-mix(in srgb, var(--color-border) 50%, transparent));
   color: var(--color-text-muted);
 }
 
@@ -67,18 +67,18 @@
   font-size: 0.72rem;
   font-weight: 600;
   padding: 0.28rem 0.6rem;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   letter-spacing: 0.02em;
 }
 
 .plant-detail__badge--status {
-  background: rgba(45, 90, 39, 0.12);
-  color: #2d5a27;
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
 }
 
 .plant-detail__badge--kind {
-  background: rgba(109, 40, 217, 0.1);
-  color: #6d28d9;
+  background: color-mix(in srgb, var(--color-info-accent) 10%, transparent);
+  color: var(--color-info-accent);
 }
 
 .plant-detail__dl {
@@ -108,7 +108,7 @@
   background: none;
   font: inherit;
   font-weight: 600;
-  color: #2d5a27;
+  color: var(--color-primary);
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -116,7 +116,7 @@
 }
 
 .plant-detail__link:hover {
-  color: #1a3616;
+  color: var(--brand-primary-strong);
 }
 
 .plant-detail__dl--compact {

@@ -24,12 +24,12 @@
   align-items: center;
   justify-content: center;
   padding: 0.35rem;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   transition: background 0.2s;
 }
 
 .navigation-rail__logo:hover {
-  background: rgba(45, 90, 39, 0.08);
+  background: var(--color-hover-strong);
 }
 
 .navigation-rail__logo img {
@@ -79,7 +79,7 @@
   width: 48px;
   height: 48px;
   border: none;
-  border-radius: 14px;
+  border-radius: var(--radius-xl);
   cursor: pointer;
   background: var(--color-surface);
   color: var(--color-primary);
@@ -89,7 +89,7 @@
 
 .navigation-rail__project--active .navigation-rail__project-btn {
   background: var(--color-primary);
-  color: #fff;
+  color: var(--color-surface);
   box-shadow: none;
 }
 
@@ -127,7 +127,7 @@
   width: 44px;
   height: 44px;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   background: transparent;
   color: var(--color-text-muted);
   cursor: pointer;
@@ -135,6 +135,6 @@
 }
 
 .navigation-rail__icon-btn:hover {
-  background: rgba(45, 90, 39, 0.08);
+  background: var(--color-hover-strong);
   color: var(--color-text);
 }
