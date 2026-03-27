@@ -4,6 +4,12 @@
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  height: 100%;
+}
+
 body {
   font-family: var(--font-sans);
   background: var(--color-bg);
@@ -15,6 +21,16 @@ body {
 
 #root {
   min-height: 100vh;
+}
+
+@media (max-width: 1023px) {
+  html,
+  body,
+  #root {
+    height: 100dvh;
+    min-height: 100dvh;
+    overflow: hidden;
+  }
 }
 
 /* 반응형 브레이크포인트 (참고용)
