@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Icon } from '@iconify/react';
 import arrowUpLine from '@iconify-icons/mingcute/arrow-up-line';
 import arrowDownLine from '@iconify-icons/mingcute/arrow-down-line';
-import { fetchLocations, fetchPlants } from '../../api/notionApi';
+import { fetchLocations, fetchPlants } from '../../lib/notionApi';
 import { parseLocationsResponse } from '../Locations/notionSchema';
 import { parsePlantsResponse } from './notionSchema';
 import FullPage from '../../components/FullPage/FullPage';

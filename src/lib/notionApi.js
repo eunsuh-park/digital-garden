@@ -101,9 +101,9 @@ export async function fetchPlants() {
  * - relation(color/svg_id 등)은 update payload에서 제외
  */
 export async function updateLocation(id, updates) {
-  return mutateApi('/notion-locations-update', 'Locations(구역) update', {
+  return mutateApi('/notion-locations', 'Locations(구역) update', {
     method: 'POST',
-    body: { id, ...updates },
+    body: { action: 'update', id, ...updates },
   });
 }
 
@@ -111,9 +111,9 @@ export async function updateLocation(id, updates) {
  * Locations DB: 새 구역 생성 (Name, Description, Color)
  */
 export async function createLocation(payload) {
-  return mutateApi('/notion-locations-create', 'Locations create', {
+  return mutateApi('/notion-locations', 'Locations create', {
     method: 'POST',
-    body: payload,
+    body: { action: 'create', ...payload },
   });
 }
 
@@ -121,9 +121,9 @@ export async function createLocation(payload) {
  * Locations DB: 구역 삭제(archive)
  */
 export async function deleteLocation(id) {
-  return mutateApi('/notion-locations-delete', 'Locations delete', {
+  return mutateApi('/notion-locations', 'Locations delete', {
     method: 'POST',
-    body: { id },
+    body: { action: 'delete', id },
   });
 }
 
@@ -134,9 +134,9 @@ export async function deleteLocation(id) {
  * - Target_Plant, Target_Location, Status(시작 전)
  */
 export async function createTask(payload) {
-  return mutateApi('/notion-tasks-create', 'Tasks create', {
+  return mutateApi('/notion-tasks', 'Tasks create', {
     method: 'POST',
-    body: payload,
+    body: { action: 'create', ...payload },
   });
 }
 
@@ -144,9 +144,9 @@ export async function createTask(payload) {
  * Tasks DB: 할 일 업데이트
  */
 export async function updateTask(id, updates) {
-  return mutateApi('/notion-tasks-update', 'Tasks update', {
+  return mutateApi('/notion-tasks', 'Tasks update', {
     method: 'POST',
-    body: { id, ...updates },
+    body: { action: 'update', id, ...updates },
   });
 }
 
@@ -154,9 +154,9 @@ export async function updateTask(id, updates) {
  * Tasks DB: 할 일 삭제(archive)
  */
 export async function deleteTask(id) {
-  return mutateApi('/notion-tasks-delete', 'Tasks delete', {
+  return mutateApi('/notion-tasks', 'Tasks delete', {
     method: 'POST',
-    body: { id },
+    body: { action: 'delete', id },
   });
 }
 
@@ -164,9 +164,9 @@ export async function deleteTask(id) {
  * Plants DB: 새 식물 생성
  */
 export async function createPlant(payload) {
-  return mutateApi('/notion-plants-create', 'Plants create', {
+  return mutateApi('/notion-plants', 'Plants create', {
     method: 'POST',
-    body: payload,
+    body: { action: 'create', ...payload },
   });
 }
 
@@ -174,9 +174,9 @@ export async function createPlant(payload) {
  * Plants DB: 식물 업데이트
  */
 export async function updatePlant(id, updates) {
-  return mutateApi('/notion-plants-update', 'Plants update', {
+  return mutateApi('/notion-plants', 'Plants update', {
     method: 'POST',
-    body: { id, ...updates },
+    body: { action: 'update', id, ...updates },
   });
 }
 
@@ -184,8 +184,8 @@ export async function updatePlant(id, updates) {
  * Plants DB: 식물 삭제(archive)
  */
 export async function deletePlant(id) {
-  return mutateApi('/notion-plants-delete', 'Plants delete', {
+  return mutateApi('/notion-plants', 'Plants delete', {
     method: 'POST',
-    body: { id },
+    body: { action: 'delete', id },
   });
 }

@@ -15,7 +15,7 @@ import {
   deletePlant,
   deleteTask,
   deleteLocation,
-} from '../../api/notionApi';
+} from '../../lib/notionApi';
 import { useToast } from '../../context/ToastContext';
 import { TASK_TYPE_KEYS, TASK_TYPE_LABEL_KO } from '../../pages/Tasks/notionSchema';
 import searchLine from '@iconify-icons/mingcute/search-line';

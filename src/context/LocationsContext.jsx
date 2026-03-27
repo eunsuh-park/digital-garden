@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { fetchLocations, fetchTasks, fetchPlants } from '../api/notionApi';
+import { fetchLocations, fetchTasks, fetchPlants } from '../lib/notionApi';
 import { parseLocationsResponse } from '../pages/Locations/notionSchema';
 import { parseTasksResponse } from '../pages/Tasks/notionSchema';
 import { parsePlantsResponse } from '../pages/Plants/notionSchema';

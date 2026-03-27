@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { fetchLocations, fetchTasks, fetchPlants } from '../../api/notionApi';
+import { fetchLocations, fetchTasks, fetchPlants } from '../../lib/notionApi';
 import { parseLocationsResponse } from './notionSchema';
 import { parseTasksResponse } from '../Tasks/notionSchema';
 import { parsePlantsResponse } from '../Plants/notionSchema';
