@@ -28,11 +28,11 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: 0.5rem;
+  bottom: 0.5rem;
   width: 100%;
   z-index: 30;
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   justify-content: center;
   gap: 8px;
   padding: 0 0.5rem;
@@ -68,7 +68,7 @@
     padding: 1rem;
   }
   .garden-map:not(.garden-map--stacked) .garden-map__controls {
-    top: 1rem;
+    bottom: 1rem;
     gap: 10px;
     padding: 0 1rem;
   }
