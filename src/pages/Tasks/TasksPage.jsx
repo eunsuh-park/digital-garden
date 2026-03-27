@@ -2,18 +2,18 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Icon } from '@iconify/react';
 import arrowUpLine from '@iconify-icons/mingcute/arrow-up-line';
 import arrowDownLine from '@iconify-icons/mingcute/arrow-down-line';
-import { fetchLocations, fetchTasks, updateTask } from '../../lib/notionApi';
-import { parseLocationsResponse } from '../Locations/notionSchema';
-import { parseTasksResponse, TASK_TYPE_LABEL_KO } from './notionSchema';
-import FullPage from '../../components/FullPage/FullPage';
-import FullPageFilter from '../../components/FullPage/FullPageFilter';
-import FullPageSorter from '../../components/FullPage/FullPageSorter';
-import ErrorState from '../../components/ErrorState/ErrorState';
-import TaskCard from '../../components/TaskCard';
-import { useLocations } from '../../context/LocationsContext';
-import { useMapPanelDetail } from '../../context/MapPanelDetailContext';
-import { useTasksPanelUi, TASKS_PANEL_DEFAULT_SORT } from '../../context/TasksPanelUiContext';
-import { isTaskOverdue } from '../../lib/taskDates';
+import { fetchLocations, fetchTasks, updateTask } from '@/shared/api/notionApi';
+import { parseLocationsResponse } from '@/entities/location/lib/notion-schema';
+import { parseTasksResponse, TASK_TYPE_LABEL_KO } from '@/entities/task/lib/notion-schema';
+import FullPage from '@/shared/ui/full-page/FullPage';
+import FullPageFilter from '@/shared/ui/full-page/FullPageFilter';
+import FullPageSorter from '@/shared/ui/full-page/FullPageSorter';
+import ErrorState from '@/shared/ui/error-state/ErrorState';
+import TaskCard from '@/shared/ui/task-card/TaskCard';
+import { useLocations } from '@/app/providers/LocationsContext';
+import { useMapPanelDetail } from '@/app/providers/MapPanelDetailContext';
+import { useTasksPanelUi, TASKS_PANEL_DEFAULT_SORT } from '@/app/providers/TasksPanelUiContext';
+import { isTaskOverdue } from '@/shared/lib/taskDates';
 import './TasksPage.css';
 
 const TASKS_FILTERS = [
@@ -143,9 +143,12 @@ export default function TasksPage({ variant = 'default' }) {
   const [completingId, setCompletingId] = useState(null);
   const [hiddenIds, setHiddenIds] = useState(() => new Set());
 
-  const loadStandalone = useCallback(async () => {
+  const loadStandalone = useCallback(async (options = {}) => {
+    const silent = options.silent === true;
     try {
-      setLoading(true);
+      if (!silent) {
+        setLoading(true);
+      }
       setError(null);
       const [locationsRes, tasksRes] = await Promise.all([fetchLocations(), fetchTasks()]);
 
@@ -156,7 +159,9 @@ export default function TasksPage({ variant = 'default' }) {
     } catch (e) {
       setError(e.message);
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   }, []);
 
@@ -223,7 +228,7 @@ export default function TasksPage({ variant = 'default' }) {
     try {
       await updateTask(t.id, { status_name: '완료' });
       if (isEmbedded) await ctx.reload();
-      else await loadStandalone();
+      else await loadStandalone({ silent: true });
       setHiddenIds((prev) => {
         const n = new Set(prev);
         n.delete(t.id);

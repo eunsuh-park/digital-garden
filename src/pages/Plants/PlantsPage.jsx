@@ -2,18 +2,18 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Icon } from '@iconify/react';
 import arrowUpLine from '@iconify-icons/mingcute/arrow-up-line';
 import arrowDownLine from '@iconify-icons/mingcute/arrow-down-line';
-import { fetchLocations, fetchPlants } from '../../lib/notionApi';
-import { parseLocationsResponse } from '../Locations/notionSchema';
-import { parsePlantsResponse } from './notionSchema';
-import FullPage from '../../components/FullPage/FullPage';
-import FullPageFilter from '../../components/FullPage/FullPageFilter';
-import FullPageSorter from '../../components/FullPage/FullPageSorter';
-import ErrorState from '../../components/ErrorState/ErrorState';
-import PlantCard from '../../components/PlantCard';
-import { useLocations } from '../../context/LocationsContext';
-import { useMapPanelDetail } from '../../context/MapPanelDetailContext';
-import { usePlantsPanelUi, PLANTS_PANEL_DEFAULT_SORT } from '../../context/PlantsPanelUiContext';
-import { getPlantSpeciesKind } from '../../lib/plantSpeciesKind';
+import { fetchLocations, fetchPlants } from '@/shared/api/notionApi';
+import { parseLocationsResponse } from '@/entities/location/lib/notion-schema';
+import { parsePlantsResponse } from '@/entities/plant/lib/notion-schema';
+import FullPage from '@/shared/ui/full-page/FullPage';
+import FullPageFilter from '@/shared/ui/full-page/FullPageFilter';
+import FullPageSorter from '@/shared/ui/full-page/FullPageSorter';
+import ErrorState from '@/shared/ui/error-state/ErrorState';
+import PlantCard from '@/shared/ui/plant-card/PlantCard';
+import { useLocations } from '@/app/providers/LocationsContext';
+import { useMapPanelDetail } from '@/app/providers/MapPanelDetailContext';
+import { usePlantsPanelUi, PLANTS_PANEL_DEFAULT_SORT } from '@/app/providers/PlantsPanelUiContext';
+import { getPlantSpeciesKind } from '@/shared/lib/plantSpeciesKind';
 import './PlantsPage.css';
 
 const PLANTS_SORT_OPTIONS = [
@@ -120,7 +120,7 @@ function PlantsEmbeddedAccordion({ plantsList }) {
 
 /**
  * PG-07: Plants 전체 페이지 - 식물 DB 전체 조회
- * variant="embedded": 하단 시트 — 종(species)별 아코디언 + 타일 (상세는 PlantDetailLayout)
+ * variant="embedded": 하단 시트 — 종(species)별 아코디언 + 타일 (상세는 layouts/PanelDocLayouts)
  */
 export default function PlantsPage({ variant = 'default' }) {
   const { openPlantCreate } = useMapPanelDetail();
@@ -144,9 +144,12 @@ export default function PlantsPage({ variant = 'default' }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const loadStandalone = useCallback(async () => {
+  const loadStandalone = useCallback(async (options = {}) => {
+    const silent = options.silent === true;
     try {
-      setLoading(true);
+      if (!silent) {
+        setLoading(true);
+      }
       setError(null);
       const [locationsRes, plantsRes] = await Promise.all([fetchLocations(), fetchPlants()]);
 
@@ -157,7 +160,9 @@ export default function PlantsPage({ variant = 'default' }) {
     } catch (e) {
       setError(e.message);
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   }, []);
 

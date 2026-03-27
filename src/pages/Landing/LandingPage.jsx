@@ -1,6 +1,6 @@
-import { useLocations } from '../../context/LocationsContext';
-import GardenMap from '../../components/GardenMap/GardenMap';
-import ErrorState from '../../components/ErrorState/ErrorState';
+import { useLocations } from '@/app/providers/LocationsContext';
+import GardenMap from '@/features/garden-map/GardenMap';
+import ErrorState from '@/shared/ui/error-state/ErrorState';
 import './LandingPage.css';
 
 /**
