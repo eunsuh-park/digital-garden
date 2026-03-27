@@ -9,6 +9,7 @@ import addLine from '@iconify-icons/mingcute/add-line';
 import settings3Line from '@iconify-icons/mingcute/settings-3-line';
 import user3Line from '@iconify-icons/mingcute/user-3-line';
 import exitDoorLine from '@iconify-icons/mingcute/exit-door-line';
+import closeLine from '@iconify-icons/mingcute/close-line';
 import logoSymbol from '@/asset/logo/symbol.svg';
 import './NavDrawer.css';
 
@@ -55,7 +56,7 @@ export default function NavDrawer({ isOpen, onClose }) {
             <span className="nav-drawer__brand-text">디지털 가든</span>
           </Link>
           <button type="button" className="nav-drawer__close" onClick={onClose} aria-label="메뉴 닫기">
-            ×
+            <Icon icon={closeLine} width={22} height={22} />
           </button>
         </div>
 

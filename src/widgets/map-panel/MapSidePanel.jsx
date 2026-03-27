@@ -3,6 +3,9 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import arrowUpLine from '@iconify-icons/mingcute/arrow-up-line';
 import arrowDownLine from '@iconify-icons/mingcute/arrow-down-line';
+import arrowLeftLine from '@iconify-icons/mingcute/arrow-left-line';
+import arrowRightLine from '@iconify-icons/mingcute/arrow-right-line';
+import addLine from '@iconify-icons/mingcute/add-line';
 import { useLocations } from '@/app/providers/LocationsContext';
 import { useMapPanelDetail } from '@/app/providers/MapPanelDetailContext';
 import { groupLocationsByColor, labelForColorGroup } from '@/shared/lib/locationsGroup';
@@ -143,10 +146,10 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
         >
           <span className="map-side-panel__handle-icons" aria-hidden>
             <span className="map-side-panel__handle-icon map-side-panel__handle-icon--desktop">
-              {collapsed ? '›' : '‹'}
+              <Icon icon={collapsed ? arrowRightLine : arrowLeftLine} width={14} height={14} />
             </span>
             <span className="map-side-panel__handle-icon map-side-panel__handle-icon--mobile">
-              {collapsed ? '▴' : '▾'}
+              <Icon icon={collapsed ? arrowUpLine : arrowDownLine} width={14} height={14} />
             </span>
           </span>
         </button>
@@ -231,7 +234,7 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
                   onClick={() => openLocationCreate()}
                 >
                   <span className="map-side-panel__add-btn-icon" aria-hidden>
-                    +
+                    <Icon icon={addLine} width={18} height={18} />
                   </span>
                   구역 추가
                 </button>

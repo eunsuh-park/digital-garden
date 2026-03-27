@@ -1,7 +1,11 @@
 import { useState } from "react";
+import { Icon } from "@iconify/react";
+import leaf3Fill from "@iconify-icons/mingcute/leaf-3-fill";
+import mapLine from "@iconify-icons/mingcute/map-line";
+import arrowRightLine from "@iconify-icons/mingcute/arrow-right-line";
 import "./PlantCard.css";
 
-const speciesIcon = { 꽃: "✿", 나무: "⌇", 풀: "∿" };
+const speciesIcon = { 꽃: leaf3Fill, 나무: leaf3Fill, 풀: leaf3Fill };
 const colorDot = {
   노랑: "#F5C842", 빨강: "#D94F4F", 보라: "#9B72CF",
   분홍: "#E8889A", 하양: "#E8E4DC", "짙은 녹색": "#2D5016",
@@ -124,7 +128,7 @@ export function PlantCard({ plant, onOpenDetail }) {
           {/* Top row */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
             <div className="plant-card__species-icon" aria-hidden>
-              {speciesIcon[plant.Species] || "○"}
+              <Icon icon={speciesIcon[plant.Species] || leaf3Fill} width={24} height={24} />
             </div>
             <div
               style={{
@@ -221,7 +225,7 @@ export function PlantCard({ plant, onOpenDetail }) {
                   fontFamily: "'DM Mono', monospace",
                 }}
               >
-                📍 {loc}
+                <Icon icon={mapLine} width={12} height={12} aria-hidden /> {loc}
               </span>
             ))}
           </div>
@@ -240,7 +244,7 @@ export function PlantCard({ plant, onOpenDetail }) {
               수량 {plant.Quantity || "–"}
             </span>
             <span style={{ fontSize: 10, color: "#C8B090", fontFamily: "'DM Mono', monospace" }}>
-              tap for seasons →
+              tap for seasons <Icon icon={arrowRightLine} width={12} height={12} aria-hidden />
             </span>
           </div>
         </div>

@@ -1,5 +1,8 @@
 import { Icon } from '@iconify/react';
 import imageAddLine from '@iconify-icons/mingcute/pic-line';
+import checkLine from '@iconify-icons/mingcute/check-line';
+import leaf3Fill from '@iconify-icons/mingcute/leaf-3-fill';
+import mapLine from '@iconify-icons/mingcute/map-line';
 import { TASK_TYPE_LABEL_KO } from '@/entities/task/lib/notion-schema';
 
 function taskStatusLabel(status) {
@@ -58,7 +61,9 @@ export function TaskDetailLayout({
     <article className="panel-doc">
       <div className="panel-doc__cover panel-doc__cover--task" aria-hidden>
         <div className="panel-doc__cover-inner">
-          <span className="panel-doc__icon">✓</span>
+          <span className="panel-doc__icon" aria-hidden>
+            <Icon icon={checkLine} width={28} height={28} />
+          </span>
           <span className="panel-doc__cap">할 일</span>
         </div>
       </div>
@@ -84,10 +89,12 @@ export function TaskDetailLayout({
                 <dd>
                   {onLocationNavigate ? (
                     <button type="button" className="panel-doc__link" onClick={onLocationNavigate}>
-                      📍 {locationName}
+                      <Icon icon={mapLine} width={14} height={14} aria-hidden /> {locationName}
                     </button>
                   ) : (
-                    <>📍 {locationName}</>
+                    <>
+                      <Icon icon={mapLine} width={14} height={14} aria-hidden /> {locationName}
+                    </>
                   )}
                 </dd>
               </>
@@ -113,7 +120,7 @@ export function TaskDetailLayout({
             <div className="panel-doc__chips">
               {plantLinks.map((item) => (
                 <button key={item.label} type="button" className="panel-doc__chip" onClick={item.onNavigate}>
-                  🌿 {item.label}
+                  <Icon icon={leaf3Fill} width={14} height={14} aria-hidden /> {item.label}
                 </button>
               ))}
             </div>
@@ -178,7 +185,9 @@ export function PlantDetailLayout({ plant, locationName, imageUrl = null, onLoca
             <img className="panel-doc__img" src={imageUrl} alt="" />
           ) : (
             <div className="panel-doc__empty" aria-hidden>
-              <span className="panel-doc__icon">🌿</span>
+              <span className="panel-doc__icon">
+                <Icon icon={leaf3Fill} width={28} height={28} />
+              </span>
               <span className="panel-doc__empty-cap">이미지 없음</span>
             </div>
           )}
@@ -222,10 +231,12 @@ export function PlantDetailLayout({ plant, locationName, imageUrl = null, onLoca
               <dd>
                 {onLocationNavigate ? (
                   <button type="button" className="panel-doc__link" onClick={onLocationNavigate}>
-                    📍 {locationName}
+                    <Icon icon={mapLine} width={14} height={14} aria-hidden /> {locationName}
                   </button>
                 ) : (
-                  <>📍 {locationName}</>
+                  <>
+                    <Icon icon={mapLine} width={14} height={14} aria-hidden /> {locationName}
+                  </>
                 )}
               </dd>
             </>

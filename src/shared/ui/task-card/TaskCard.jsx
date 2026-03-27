@@ -1,4 +1,10 @@
 import { useState } from "react";
+import { Icon } from "@iconify/react";
+import task2Line from "@iconify-icons/mingcute/task-2-line";
+import leaf3Fill from "@iconify-icons/mingcute/leaf-3-fill";
+import mapLine from "@iconify-icons/mingcute/map-line";
+import bookmarkFill from "@iconify-icons/mingcute/bookmark-fill";
+import addLine from "@iconify-icons/mingcute/add-line";
 import "./TaskCard.css";
 
 /** 카드·섹션별 표시 상한 */
@@ -8,15 +14,15 @@ export const TASK_CARD_LIMITS = {
 
 /** Tasks 테이블 Task_Type 값 → 프론트 한글 라벨 + 아이콘/색상 */
 const taskTypeConfig = {
-  Pruning: { icon: "✂", label: "전정", color: "#4A90C4", bg: "#E8F2FA" },
-  Fertilizing: { icon: "⬡", label: "비료", color: "#B8860B", bg: "#FDF6DC" },
-  Propagation: { icon: "⊕", label: "번식", color: "#3E7B27", bg: "#EAF2E3" },
-  Watering: { icon: "◎", label: "물주기", color: "#1E90A8", bg: "#E3F4F8" },
-  Transplanting: { icon: "⟳", label: "이식", color: "#8B5E3C", bg: "#F5EDE4" },
-  Observation: { icon: "◉", label: "관찰", color: "#7A7A7A", bg: "#F0EFEB" },
-  Cleaning: { icon: "▣", label: "청소", color: "#C0392B", bg: "#FDEDED" },
-  Decorating: { icon: "◈", label: "꾸미기", color: "#8E44AD", bg: "#F4E8FA" },
-  Construction: { icon: "⌖", label: "시공", color: "#E67E22", bg: "#FEF0E4" },
+  Pruning: { icon: leaf3Fill, label: "전정", color: "#4A90C4", bg: "#E8F2FA" },
+  Fertilizing: { icon: bookmarkFill, label: "비료", color: "#B8860B", bg: "#FDF6DC" },
+  Propagation: { icon: addLine, label: "번식", color: "#3E7B27", bg: "#EAF2E3" },
+  Watering: { icon: mapLine, label: "물주기", color: "#1E90A8", bg: "#E3F4F8" },
+  Transplanting: { icon: task2Line, label: "이식", color: "#8B5E3C", bg: "#F5EDE4" },
+  Observation: { icon: bookmarkFill, label: "관찰", color: "#7A7A7A", bg: "#F0EFEB" },
+  Cleaning: { icon: task2Line, label: "청소", color: "#C0392B", bg: "#FDEDED" },
+  Decorating: { icon: leaf3Fill, label: "꾸미기", color: "#8E44AD", bg: "#F4E8FA" },
+  Construction: { icon: task2Line, label: "시공", color: "#E67E22", bg: "#FEF0E4" },
 };
 
 const statusConfig = {
@@ -57,7 +63,7 @@ export function TaskCard({
   overdue = false,
 }) {
   const [hovered, setHovered] = useState(false);
-  const type = taskTypeConfig[task.Task_Type] || { icon: "○", label: task.Task_Type, color: "#999", bg: "#F5F4F0" };
+  const type = taskTypeConfig[task.Task_Type] || { icon: task2Line, label: task.Task_Type, color: "#999", bg: "#F5F4F0" };
   const status = statusConfig[task.Status] || statusConfig["시작 전"];
   const isComplete = task.Status === "완료";
   const showCompleteToggle = Boolean(onToggleComplete) && !isComplete;
@@ -135,7 +141,7 @@ export function TaskCard({
               className="task-card__type-pill"
               style={{ background: type.bg, color: type.color }}
             >
-              <span aria-hidden>{type.icon}</span>
+              <Icon icon={type.icon} width={13} height={13} aria-hidden />
               <span>{type.label}</span>
             </span>
             <span className="task-card__status-pill" style={{ color: status.color, background: status.bg }}>
@@ -157,7 +163,9 @@ export function TaskCard({
           </div>
 
           <div className="task-card__row-meta">
-            <span className="task-card__meta-date">🗓 {dateStr}</span>
+            <span className="task-card__meta-date">
+              <Icon icon={task2Line} width={13} height={13} aria-hidden /> {dateStr}
+            </span>
           </div>
         </div>
       </div>

@@ -19,6 +19,8 @@ import { useToast } from '@/app/providers/ToastContext';
 import { TASK_TYPE_KEYS, TASK_TYPE_LABEL_KO } from '@/entities/task/lib/notion-schema';
 import searchLine from '@iconify-icons/mingcute/search-line';
 import trashLine from '@iconify-icons/mingcute/delete-2-line';
+import edit2Line from '@iconify-icons/mingcute/edit-2-line';
+import closeLine from '@iconify-icons/mingcute/close-line';
 import './panel-view.css';
 
 function ConfirmDeleteDialog({
@@ -146,7 +148,7 @@ export function MapPanelLocationDetail({ location, onBack }) {
             aria-label="편집"
             title="편집"
           >
-            ✎
+            <Icon icon={edit2Line} width={20} height={20} />
           </button>
         )}
       </header>
@@ -588,7 +590,7 @@ export function MapPanelTaskCreate({ onBack }) {
                       aria-label={`${l.name} 제거`}
                     >
                       {l.name}
-                      <span aria-hidden> ×</span>
+                      <Icon icon={closeLine} width={12} height={12} aria-hidden />
                     </button>
                   </li>
                 ))}
@@ -644,7 +646,7 @@ export function MapPanelTaskCreate({ onBack }) {
                       aria-label={`${p.name} 제거`}
                     >
                       {p.name}
-                      <span aria-hidden> ×</span>
+                      <Icon icon={closeLine} width={12} height={12} aria-hidden />
                     </button>
                   </li>
                 ))}
@@ -878,7 +880,7 @@ export function MapPanelPlantCreate({ onBack }) {
                       aria-label={`${l.name} 제거`}
                     >
                       {l.name}
-                      <span aria-hidden> ×</span>
+                      <Icon icon={closeLine} width={12} height={12} aria-hidden />
                     </button>
                   </li>
                 ))}
@@ -1150,7 +1152,7 @@ export function MapPanelTaskDetail({ task, onBack, locationMap, plantMap, taskTi
             aria-label="편집"
             title="편집"
           >
-            ✎
+            <Icon icon={edit2Line} width={20} height={20} />
           </button>
         )}
       </header>
@@ -1267,7 +1269,7 @@ export function MapPanelTaskDetail({ task, onBack, locationMap, plantMap, taskTi
                           aria-label={`${l.name} 제거`}
                         >
                           {l.name}
-                          <span aria-hidden> ×</span>
+                          <Icon icon={closeLine} width={12} height={12} aria-hidden />
                         </button>
                       </li>
                     );
@@ -1345,7 +1347,7 @@ export function MapPanelTaskDetail({ task, onBack, locationMap, plantMap, taskTi
                         aria-label={`${p.name} 제거`}
                       >
                         {p.name}
-                        <span aria-hidden> ×</span>
+                        <Icon icon={closeLine} width={12} height={12} aria-hidden />
                       </button>
                     </li>
                   ))}
@@ -1535,7 +1537,7 @@ export function MapPanelPlantDetail({ plant, onBack, locationMap }) {
             aria-label="편집"
             title="편집"
           >
-            ✎
+            <Icon icon={edit2Line} width={20} height={20} />
           </button>
         )}
       </header>
@@ -1622,7 +1624,7 @@ export function MapPanelPlantDetail({ plant, onBack, locationMap }) {
                         aria-label={`${l.name} 제거`}
                       >
                         {l.name}
-                        <span aria-hidden> ×</span>
+                        <Icon icon={closeLine} width={12} height={12} aria-hidden />
                       </button>
                     </li>
                   ))}

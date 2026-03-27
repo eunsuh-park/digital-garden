@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { Icon } from '@iconify/react';
 import refresh2Line from '@iconify-icons/mingcute/refresh-2-line';
+import eye2Line from '@iconify-icons/mingcute/eye-2-line';
+import fullscreenLine from '@iconify-icons/mingcute/fullscreen-line';
+import closeLine from '@iconify-icons/mingcute/close-line';
 import { useMapPanelLayout } from '@/app/providers/MapPanelLayoutContext';
 import { useMapPanelDetail } from '@/app/providers/MapPanelDetailContext';
 import Popover from './Popover';
@@ -465,7 +468,7 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
                   aria-label="툴박스 펼치기"
                   title="툴박스 펼치기"
                 >
-                  👁
+                  <Icon icon={eye2Line} width={18} height={18} />
                 </button>
               ) : (
                 <>
@@ -505,7 +508,7 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
                     aria-label={mapOnlyMode ? '전체 UI 다시 표시' : '맵만 보기'}
                     title={mapOnlyMode ? '전체 UI 다시 표시' : '맵만 보기'}
                   >
-                    ⛶
+                    <Icon icon={fullscreenLine} width={18} height={18} />
                   </button>
                   <button
                     type="button"
@@ -514,7 +517,7 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
                     aria-label="툴박스 접기"
                     title="툴박스 접기"
                   >
-                    ×
+                    <Icon icon={closeLine} width={18} height={18} />
                   </button>
                 </>
               )}
@@ -557,7 +560,7 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
                 aria-label={mapOnlyMode ? '전체 UI 다시 표시' : '맵만 보기'}
                 title={mapOnlyMode ? '전체 UI 다시 표시' : '맵만 보기'}
               >
-                ⛶
+                <Icon icon={fullscreenLine} width={18} height={18} />
               </button>
             </div>
           )}
