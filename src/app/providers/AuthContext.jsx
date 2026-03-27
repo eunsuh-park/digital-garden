@@ -1,7 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import {
   clearSession,
-  getSessionUser,
   hasStoredCredentials,
   setupCredentials as setupStoredCredentials,
   verifyAndLogin,
@@ -10,7 +9,7 @@ import {
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [currentUser, setCurrentUser] = useState(() => getSessionUser());
+  const [currentUser, setCurrentUser] = useState(null);
   const [credentialsConfigured, setCredentialsConfigured] = useState(() => hasStoredCredentials());
 
   const login = useCallback(async (username, password) => {
