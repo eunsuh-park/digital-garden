@@ -2,9 +2,9 @@ import { HashRouter, Routes, Route } from 'react-router-dom';
 import AppShell from '@/widgets/app-shell/AppShell';
 import ErrorState from '@/shared/ui/error-state/ErrorState';
 import LandingPage from '@/pages/Landing/LandingPage';
-import LoginPage from '@/pages/login/LoginPage';
-import DashboardPage from '@/pages/dashboard/DashboardPage';
-import ProjectPage from '@/pages/project/ProjectPage';
+import LoginPage from '@/pages/Login/LoginPage';
+import DashboardPage from '@/pages/Dashboard/DashboardPage';
+import ProjectPage from '@/pages/Project/ProjectPage';
 import './App.css';
 
 function App() {
