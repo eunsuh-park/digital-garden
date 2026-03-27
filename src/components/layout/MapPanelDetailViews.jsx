@@ -8,12 +8,15 @@ import { useMapPanelDetail } from '../../context/MapPanelDetailContext';
 import {
   createPlant,
   createTask,
+  createLocation,
   updateLocation,
   updatePlant,
   updateTask,
   deletePlant,
   deleteTask,
+  deleteLocation,
 } from '../../api/notionApi';
+import { useToast } from '../../context/ToastContext';
 import { TASK_TYPE_KEYS, TASK_TYPE_LABEL_KO } from '../../pages/Tasks/notionSchema';
 import searchLine from '@iconify-icons/mingcute/search-line';
 import trashLine from '@iconify-icons/mingcute/delete-2-line';
@@ -70,6 +73,7 @@ function ConfirmDeleteDialog({
 export function MapPanelLocationDetail({ location, onBack }) {
   const { locations, tasks, plants, reload } = useLocations();
   const { openPlantDetail, openTaskDetail } = useMapPanelDetail();
+  const { showToast } = useToast();
 
   const currentLocation = useMemo(() => {
     return locations.find((l) => l.id === location?.id) || location;
@@ -80,6 +84,8 @@ export function MapPanelLocationDetail({ location, onBack }) {
   const [draftDescription, setDraftDescription] = useState(currentLocation?.description || '');
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const { sectionTasks, sectionPlants } = useMemo(() => {
     const sid = currentLocation?.id;
@@ -201,6 +207,19 @@ export function MapPanelLocationDetail({ location, onBack }) {
                 </ul>
               )}
             </section>
+
+            <div className="detail-delete-footer">
+              <button
+                type="button"
+                className="detail-delete-btn"
+                onClick={() => setDeleteOpen(true)}
+                aria-label="구역 삭제"
+                title="삭제"
+                disabled={deleting}
+              >
+                <Icon icon={trashLine} width={22} height={22} aria-hidden />
+              </button>
+            </div>
           </>
         ) : (
           <div className="location-edit">
@@ -242,6 +261,131 @@ export function MapPanelLocationDetail({ location, onBack }) {
             </div>
           </div>
         )}
+      </div>
+
+      <ConfirmDeleteDialog
+        open={deleteOpen}
+        title="삭제 확인"
+        message={`구역 "${currentLocation?.name}"을(를) 삭제할까요? (Notion에서도 삭제됩니다)`}
+        confirmLabel="삭제"
+        cancelLabel="취소"
+        deleting={deleting}
+        onClose={() => {
+          if (!deleting) setDeleteOpen(false);
+        }}
+        onConfirm={async () => {
+          if (deleting) return;
+          setDeleting(true);
+          try {
+            await deleteLocation(currentLocation.id);
+            await reload();
+            showToast('구역이 삭제되었습니다.');
+            setDeleteOpen(false);
+            onBack();
+          } catch (e) {
+            // 유지
+          } finally {
+            setDeleting(false);
+          }
+        }}
+      />
+    </div>
+  );
+}
+
+const LOCATION_CREATE_COLORS = ['초록', '연두', '노랑', '파랑', '보라', '주황', '빨강', '회색'];
+
+/** @param {{ onBack: () => void }} props */
+export function MapPanelLocationCreate({ onBack }) {
+  const { reload } = useLocations();
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [color, setColor] = useState('초록');
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+
+  const handleSave = async () => {
+    const trimmed = name.trim();
+    if (!trimmed || saving) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await createLocation({
+        name: trimmed,
+        description: description.trim(),
+        color,
+      });
+      await reload();
+      onBack();
+    } catch (e) {
+      setSaveError(e.message || '저장 실패');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="map-panel-detail">
+      <header className="map-panel-detail__toolbar">
+        <button type="button" className="map-panel-detail__icon-btn" onClick={onBack} aria-label="뒤로">
+          <Icon icon={arrowLeftLine} width={22} height={22} />
+        </button>
+        <span className="map-panel-detail__toolbar-title">구역 추가</span>
+        <span className="map-panel-detail__toolbar-spacer" aria-hidden />
+      </header>
+      <div className="map-panel-detail__scroll">
+        <div className="location-edit">
+          <div className="location-edit__field">
+            <label className="location-edit__label" htmlFor="location-create-name">
+              이름
+            </label>
+            <input
+              id="location-create-name"
+              className="location-edit__input"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoComplete="off"
+            />
+          </div>
+          <div className="location-edit__field">
+            <label className="location-edit__label" htmlFor="location-create-description">
+              설명
+            </label>
+            <textarea
+              id="location-create-description"
+              className="location-edit__textarea location-edit__textarea--compact"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+            />
+          </div>
+          <div className="location-edit__field">
+            <span className="location-edit__label">색상 그룹</span>
+            <div className="task-create__chips" role="group" aria-label="구역 색상">
+              {LOCATION_CREATE_COLORS.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  className={`task-create__chip ${color === c ? 'task-create__chip--active' : ''}`}
+                  onClick={() => setColor(c)}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+          {saveError ? <p className="location-edit__error">{saveError}</p> : null}
+          <div className="location-edit__actions">
+            <button
+              type="button"
+              className="location-edit__save-btn"
+              onClick={handleSave}
+              disabled={saving || !name.trim()}
+            >
+              {saving ? '저장 중…' : '저장'}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -833,6 +977,7 @@ export function MapPanelPlantCreate({ onBack }) {
 export function MapPanelTaskDetail({ task, onBack, locationMap, plantMap, taskTitleMap: _taskTitleMap }) {
   const { tasks: allTasks, locations, plants, reload } = useLocations();
   const { openLocationDetail, openPlantDetail, openTaskDetail } = useMapPanelDetail();
+  const { showToast } = useToast();
 
   const location = task.section_id ? locationMap[task.section_id] : null;
 
@@ -1272,6 +1417,7 @@ export function MapPanelTaskDetail({ task, onBack, locationMap, plantMap, taskTi
           try {
             await deleteTask(task.id);
             await reload();
+            showToast('할 일이 삭제되었습니다.');
             setDeleteOpen(false);
             onBack();
           } catch (e) {
@@ -1288,6 +1434,7 @@ export function MapPanelTaskDetail({ task, onBack, locationMap, plantMap, taskTi
 /** @param {{ plant: object, onBack: () => void, locationMap: Record<string, object> }} props */
 export function MapPanelPlantDetail({ plant, onBack, locationMap }) {
   const { locations, reload } = useLocations();
+  const { showToast } = useToast();
   const { openLocationDetail } = useMapPanelDetail();
   const location = plant.section_id ? locationMap[plant.section_id] : null;
 
@@ -1599,6 +1746,7 @@ export function MapPanelPlantDetail({ plant, onBack, locationMap }) {
           try {
             await deletePlant(plant.id);
             await reload();
+            showToast('식물이 삭제되었습니다.');
             setDeleteOpen(false);
             onBack();
           } catch (e) {

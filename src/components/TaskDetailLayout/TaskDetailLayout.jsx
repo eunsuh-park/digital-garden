@@ -55,6 +55,13 @@ export default function TaskDetailLayout({
 
   return (
     <article className="task-detail">
+      <div className="task-detail__hero" aria-hidden>
+        <div className="task-detail__hero-inner">
+          <span className="task-detail__hero-icon">✓</span>
+          <span className="task-detail__hero-caption">할 일</span>
+        </div>
+      </div>
+
       <div className="task-detail__body">
         <h1 className="task-detail__title">{task.title}</h1>
 

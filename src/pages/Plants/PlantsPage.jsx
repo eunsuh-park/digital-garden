@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Icon } from '@iconify/react';
 import arrowUpLine from '@iconify-icons/mingcute/arrow-up-line';
 import arrowDownLine from '@iconify-icons/mingcute/arrow-down-line';
@@ -10,6 +10,7 @@ import FullPageFilter from '../../components/FullPage/FullPageFilter';
 import FullPageSorter from '../../components/FullPage/FullPageSorter';
 import ErrorState from '../../components/ErrorState/ErrorState';
 import PlantCard from '../../components/PlantCard';
+import { useLocations } from '../../context/LocationsContext';
 import { useMapPanelDetail } from '../../context/MapPanelDetailContext';
 import { getPlantSpeciesKind } from '../../lib/plantSpeciesKind';
 import './PlantsPage.css';
@@ -31,7 +32,7 @@ function speciesGroupKey(species) {
  * 하단 시트 전용: 종(species)별 아코디언 + 타일 그리드
  */
 function PlantsEmbeddedAccordion({ plantsList }) {
-  const { openPlantDetail, openPlantCreate } = useMapPanelDetail();
+  const { openPlantDetail } = useMapPanelDetail();
   const [expanded, setExpanded] = useState(() => new Set());
 
   const { sortedKeys, groupMap } = useMemo(() => {
@@ -107,16 +108,6 @@ function PlantsEmbeddedAccordion({ plantsList }) {
                     </button>
                   </li>
                 ))}
-                <li className="plants-embedded__cell">
-                  <button
-                    type="button"
-                    className="plants-embedded__tile plants-embedded__tile--add"
-                    onClick={() => openPlantCreate()}
-                    aria-label="식물 추가"
-                  >
-                    +
-                  </button>
-                </li>
               </ul>
             )}
           </section>
@@ -131,6 +122,9 @@ function PlantsEmbeddedAccordion({ plantsList }) {
  * variant="embedded": 하단 시트 — 종(species)별 아코디언 + 타일 (상세는 PlantDetailLayout)
  */
 export default function PlantsPage({ variant = 'default' }) {
+  const { openPlantCreate } = useMapPanelDetail();
+  const ctx = useLocations();
+  const isEmbedded = variant === 'embedded';
   const [locations, setLocations] = useState([]);
   const [plants, setPlants] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -139,52 +133,61 @@ export default function PlantsPage({ variant = 'default' }) {
   const defaultSort = { field: 'name', dir: 'asc' };
   const [sortValue, setSortValue] = useState(defaultSort);
 
-  useEffect(() => {
-    let cancelled = false;
+  const loadStandalone = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const [locationsRes, plantsRes] = await Promise.all([fetchLocations(), fetchPlants()]);
 
-    async function load() {
-      try {
-        setLoading(true);
-        setError(null);
-        const [locationsRes, plantsRes] = await Promise.all([
-          fetchLocations(),
-          fetchPlants(),
-        ]);
-        if (cancelled) return;
-
-        const plantsList = parsePlantsResponse(plantsRes);
-        const locationsList = parseLocationsResponse(locationsRes);
-        setPlants(plantsList);
-        setLocations(locationsList);
-      } catch (e) {
-        if (!cancelled) setError(e.message);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+      const plantsList = parsePlantsResponse(plantsRes);
+      const locationsList = parseLocationsResponse(locationsRes);
+      setPlants(plantsList);
+      setLocations(locationsList);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
     }
-
-    load();
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
-  const locationMap = useMemo(() => Object.fromEntries(locations.map((l) => [l.id, l])), [locations]);
+  useEffect(() => {
+    if (isEmbedded) return undefined;
+    loadStandalone();
+    return undefined;
+  }, [isEmbedded, loadStandalone]);
+
+  const plantsData = isEmbedded ? ctx.plants : plants;
+  const locationsData = isEmbedded ? ctx.locations : locations;
+  const loadingData = isEmbedded ? ctx.loading : loading;
+  const errorData = isEmbedded ? ctx.error : error;
+
+  const locationMap = useMemo(
+    () => Object.fromEntries(locationsData.map((l) => [l.id, l])),
+    [locationsData]
+  );
+
   const plantsFilters = useMemo(() => {
-    const speciesKinds = [...new Set(plants.map((p) => getPlantSpeciesKind(p)).filter(Boolean))]
-      .sort()
-      .map((s) => ({ value: s, label: s }));
-    const locationOptions = locations.map((l) => ({ value: l.id, label: l.name }));
-    return [
-      { key: 'status', label: '상태', options: [{ value: 'planted', label: '확인됨' }, { value: 'planned', label: '식재 예정' }, { value: 'needs_care', label: '관리 필요' }] },
-      { key: 'species_kind', label: '종류', options: speciesKinds },
-      { key: 'section_id', label: '위치', options: locationOptions },
-    ].filter((f) => f.options.length > 0 || f.key === 'status');
-  }, [plants, locations]);
+    const locationOptions = locationsData.map((l) => ({ value: l.id, label: l.name }));
+    const filters = [
+      {
+        key: 'status',
+        label: '상태',
+        options: [
+          { value: 'planted', label: '확인됨' },
+          { value: 'planned', label: '식재 예정' },
+          { value: 'needs_care', label: '관리 필요' },
+        ],
+      },
+    ];
+    if (locationOptions.length > 0) {
+      filters.push({ key: 'section_id', label: '구역', options: locationOptions });
+    }
+    return filters;
+  }, [locationsData]);
+
   const filteredAndSortedPlants = useMemo(() => {
-    let list = plants;
+    let list = plantsData;
     if (filterValues.status) list = list.filter((p) => (p.status || '') === filterValues.status);
-    if (filterValues.species_kind) list = list.filter((p) => getPlantSpeciesKind(p) === filterValues.species_kind);
     if (filterValues.section_id) list = list.filter((p) => (p.section_id || '') === filterValues.section_id);
     const field = sortValue.field || 'name';
     const dir = sortValue.dir === 'desc' ? -1 : 1;
@@ -195,8 +198,9 @@ export default function PlantsPage({ variant = 'default' }) {
       return 0;
     });
     return list;
-  }, [plants, filterValues, sortValue]);
-  const hasContent = plants.length > 0;
+  }, [plantsData, filterValues, sortValue]);
+
+  const hasContent = plantsData.length > 0;
 
   function toCardStatus(status) {
     if (status === 'needs_care') return '관리 필요';
@@ -209,19 +213,7 @@ export default function PlantsPage({ variant = 'default' }) {
     return getPlantSpeciesKind(plant);
   }
 
-  if (variant === 'embedded' && loading) {
-    return <p className="plants-page__loading">데이터를 불러오는 중입니다.</p>;
-  }
-
-  if (variant === 'embedded' && error) {
-    return <p className="plants-page__hint--error">{error}</p>;
-  }
-
-  if (variant === 'embedded' && !loading && !error) {
-    return <PlantsEmbeddedAccordion plantsList={filteredAndSortedPlants} />;
-  }
-
-  if (loading) {
+  if (loadingData) {
     return (
       <FullPage variant={variant} title="식물" subtitle="로딩 중...">
         <p className="plants-page__loading">데이터를 불러오는 중입니다.</p>
@@ -229,10 +221,47 @@ export default function PlantsPage({ variant = 'default' }) {
     );
   }
 
-  if (error) {
+  if (errorData) {
     return (
       <FullPage variant={variant} title="식물">
-        <ErrorState variant="error" message={error} showHomeLink />
+        <ErrorState variant="error" message={errorData} showHomeLink />
+      </FullPage>
+    );
+  }
+
+  if (isEmbedded) {
+    return (
+      <FullPage variant="embedded" title="식물" subtitle={`${filteredAndSortedPlants.length}종`}>
+        <div className="plants-page plants-page--embedded-with-footer">
+          <div className="plants-page__scroll">
+            <div className="plants-page__controls plants-page__controls--embedded">
+              <FullPageFilter
+                filters={plantsFilters}
+                values={filterValues}
+                onChange={(key, value) => setFilterValues((prev) => ({ ...prev, [key]: value || undefined }))}
+                onReset={() => {
+                  setFilterValues({});
+                  setSortValue(defaultSort);
+                }}
+              />
+              <FullPageSorter
+                options={PLANTS_SORT_OPTIONS}
+                value={sortValue}
+                active={sortValue.field !== defaultSort.field || sortValue.dir !== defaultSort.dir}
+                onChange={(field, dir) => setSortValue({ field, dir })}
+              />
+            </div>
+            <PlantsEmbeddedAccordion plantsList={filteredAndSortedPlants} />
+          </div>
+          <div className="plants-page__footer">
+            <button type="button" className="plants-page__add-plant-btn" onClick={() => openPlantCreate()}>
+              <span className="plants-page__add-plant-icon" aria-hidden>
+                +
+              </span>
+              식물 추가
+            </button>
+          </div>
+        </div>
       </FullPage>
     );
   }
@@ -241,14 +270,12 @@ export default function PlantsPage({ variant = 'default' }) {
     <FullPage
       variant={variant}
       title="식물"
-      subtitle={`식재된 식물 ${plants.length}종`}
+      subtitle={`식재된 식물 ${plantsData.length}종`}
       emptyMessage={!hasContent ? '등록된 식물이 없습니다.' : undefined}
     >
-      {variant !== 'embedded' && (
-        <p className="notion-db-badge" aria-label="연동된 Notion DB">
-          Notion DB: Locations(구역) · 식물
-        </p>
-      )}
+      <p className="notion-db-badge" aria-label="연동된 Notion DB">
+        Notion DB: Locations(구역) · 식물
+      </p>
       <div className="plants-page__controls">
         <FullPageFilter
           filters={plantsFilters}

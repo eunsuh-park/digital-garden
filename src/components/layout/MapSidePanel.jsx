@@ -10,6 +10,7 @@ import TasksPage from '../../pages/Tasks/TasksPage';
 import PlantsPage from '../../pages/Plants/PlantsPage';
 import {
   MapPanelLocationDetail,
+  MapPanelLocationCreate,
   MapPanelPlantDetail,
   MapPanelPlantCreate,
   MapPanelTaskCreate,
@@ -99,7 +100,7 @@ function LocationTabContent() {
 export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
   const { pathname } = useLocation();
   const { locations, tasks, plants, loading } = useLocations();
-  const { detail, closeDetail, closeAllDetail } = useMapPanelDetail();
+  const { detail, closeDetail, closeAllDetail, openLocationCreate } = useMapPanelDetail();
 
   useEffect(() => {
     closeAllDetail();
@@ -199,6 +200,7 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
           {detail?.type === 'location' && (
             <MapPanelLocationDetail location={detail.location} onBack={closeDetail} />
           )}
+          {detail?.type === 'location-create' && <MapPanelLocationCreate onBack={closeDetail} />}
           {detail?.type === 'task-create' && <MapPanelTaskCreate onBack={closeDetail} />}
           {detail?.type === 'plant-create' && <MapPanelPlantCreate onBack={closeDetail} />}
           {detail?.type === 'task' && (
@@ -217,7 +219,25 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
               locationMap={locationMap}
             />
           )}
-          {!detail && tabFromPath === 'location' && <LocationTabContent />}
+          {!detail && tabFromPath === 'location' && (
+            <div className="map-side-panel__location-host">
+              <div className="map-side-panel__location-scroll">
+                <LocationTabContent />
+              </div>
+              <div className="map-side-panel__location-footer">
+                <button
+                  type="button"
+                  className="map-side-panel__add-btn"
+                  onClick={() => openLocationCreate()}
+                >
+                  <span className="map-side-panel__add-btn-icon" aria-hidden>
+                    +
+                  </span>
+                  구역 추가
+                </button>
+              </div>
+            </div>
+          )}
           {!detail && tabFromPath === 'tasks' && (
             <div className="map-side-panel__page-host">
               <TasksPage variant="embedded" />

@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
-import { fetchLocations, fetchPlants, fetchTasks } from '../../api/notionApi';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { fetchLocations, fetchTasks, updateTask } from '../../api/notionApi';
 import { parseLocationsResponse } from '../Locations/notionSchema';
 import { parseTasksResponse } from './notionSchema';
-import { parsePlantsResponse } from '../Plants/notionSchema';
 import FullPage from '../../components/FullPage/FullPage';
 import FullPageFilter from '../../components/FullPage/FullPageFilter';
 import FullPageSorter from '../../components/FullPage/FullPageSorter';
@@ -13,23 +12,7 @@ import { useMapPanelDetail } from '../../context/MapPanelDetailContext';
 import './TasksPage.css';
 
 const TASKS_FILTERS = [
-  { key: 'status', label: '상태', options: [{ value: 'progress', label: '진행 중' }, { value: 'pending', label: '예정' }] },
-  {
-    key: 'task_type',
-    label: '작업 유형',
-    options: [
-      { value: 'Pruning', label: '전정' },
-      { value: 'Fertilizing', label: '비료' },
-      { value: 'Propagation', label: '번식' },
-      { value: 'Watering', label: '물주기' },
-      { value: 'Transplanting', label: '이식' },
-      { value: 'Observation', label: '관찰' },
-      { value: 'Cleaning', label: '청소' },
-      { value: 'Decorating', label: '꾸미기' },
-      { value: 'Construction', label: '시공' },
-    ],
-  },
-  { key: 'difficulty', label: '난이도', options: [{ value: 'Easy', label: 'Easy' }, { value: 'Medium', label: 'Medium' }, { value: 'Hard', label: 'Hard' }] },
+  { key: 'status', label: '상태', options: [{ value: 'progress', label: '진행 중' }, { value: 'pending', label: '시작 전' }] },
 ];
 
 const TASKS_SORT_OPTIONS = [
@@ -43,63 +26,60 @@ const TASKS_SORT_OPTIONS = [
  * variant="embedded": 하단 시트에 동일 UI로 삽입
  */
 export default function TasksPage({ variant = 'default' }) {
-  const { openTaskDetail, openTaskCreate } = useMapPanelDetail();
+  const { openTaskDetail, openTaskCreate, openLocationDetail } = useMapPanelDetail();
   const ctx = useLocations();
   const isEmbedded = variant === 'embedded';
   const [locations, setLocations] = useState([]);
   const [tasks, setTasks] = useState([]);
-  const [plants, setPlants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filterValues, setFilterValues] = useState({});
   const defaultSort = { field: 'due_date', dir: 'asc' };
   const [sortValue, setSortValue] = useState(defaultSort);
+  const [completingId, setCompletingId] = useState(null);
+
+  const loadStandalone = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const [locationsRes, tasksRes] = await Promise.all([fetchLocations(), fetchTasks()]);
+
+      const tasksList = parseTasksResponse(tasksRes);
+      const locationsList = parseLocationsResponse(locationsRes);
+      setTasks(tasksList);
+      setLocations(locationsList);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (isEmbedded) return undefined;
-    let cancelled = false;
+    loadStandalone();
+    return undefined;
+  }, [isEmbedded, loadStandalone]);
 
-    async function load() {
-      try {
-        setLoading(true);
-        setError(null);
-        const [locationsRes, tasksRes, plantsRes] = await Promise.all([
-          fetchLocations(),
-          fetchTasks(),
-          fetchPlants(),
-        ]);
-        if (cancelled) return;
-
-        const tasksList = parseTasksResponse(tasksRes);
-        const locationsList = parseLocationsResponse(locationsRes);
-        const plantsList = parsePlantsResponse(plantsRes);
-        setTasks(tasksList);
-        setLocations(locationsList);
-        setPlants(plantsList);
-      } catch (e) {
-        if (!cancelled) setError(e.message);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+  const handleCompleteTask = async (t) => {
+    setCompletingId(t.id);
+    try {
+      await updateTask(t.id, { status_name: '완료' });
+      if (isEmbedded) await ctx.reload();
+      else await loadStandalone();
+    } finally {
+      setCompletingId(null);
     }
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, [isEmbedded]);
+  };
 
   const tasksData = isEmbedded ? ctx.tasks : tasks;
   const locationsData = isEmbedded ? ctx.locations : locations;
-  const plantsData = isEmbedded ? ctx.plants : plants;
   const loadingData = isEmbedded ? ctx.loading : loading;
   const errorData = isEmbedded ? ctx.error : error;
 
   const pendingTasks = useMemo(() => {
     let list = tasksData.filter((t) => t.status !== 'completed');
     if (filterValues.status) list = list.filter((t) => t.status === filterValues.status);
-    if (filterValues.task_type) list = list.filter((t) => (t.task_type ?? '') === filterValues.task_type);
-    if (filterValues.difficulty) list = list.filter((t) => (t.difficulty ?? '') === filterValues.difficulty);
     const field = sortValue.field || 'due_date';
     const dir = sortValue.dir === 'desc' ? -1 : 1;
     list = [...list].sort((a, b) => {
@@ -122,8 +102,6 @@ export default function TasksPage({ variant = 'default' }) {
     () => Object.fromEntries(locationsData.map((l) => [l.id, l])),
     [locationsData]
   );
-  const plantMap = useMemo(() => Object.fromEntries(plantsData.map((p) => [p.id, p])), [plantsData]);
-  const taskTitleMap = useMemo(() => Object.fromEntries(tasksData.map((t) => [t.id, t.title])), [tasksData]);
   const hasContent = pendingTasks.length > 0;
 
   function toCardStatus(status) {
@@ -184,26 +162,11 @@ export default function TasksPage({ variant = 'default' }) {
             <div className="tasks-page__cards">
               {pendingTasks.map((t) => {
                 const location = t.section_id ? locationMap[t.section_id] : null;
-                const targetPlantNames = (t.target_plant_ids || [])
-                  .map((pid) => plantMap[pid]?.name)
-                  .filter(Boolean);
-                const prereqTitles = (t.prereq_task_ids || [])
-                  .map((id) => taskTitleMap[id] || '(제목 없음)')
-                  .filter(Boolean);
-                const followupTitles = (t.followup_task_ids || [])
-                  .map((id) => taskTitleMap[id] || '(제목 없음)')
-                  .filter(Boolean);
                 const cardTask = {
                   Title: t.title,
                   Task_Type: t.task_type ?? 'Observation',
                   Status: toCardStatus(t.status),
-                  Difficulty: t.difficulty ?? 'Easy',
                   Scheduled_Date: t.scheduled_date || t.due_date,
-                  Estimated_Duration: t.estimated_duration || '–',
-                  Target_Plant: targetPlantNames,
-                  Prerequisites: prereqTitles,
-                  Followups: followupTitles,
-                  Notes: t.notes || (location ? `구역: ${location.name}` : ''),
                 };
 
                 return (
@@ -211,6 +174,16 @@ export default function TasksPage({ variant = 'default' }) {
                     key={t.id}
                     task={cardTask}
                     onOpenDetail={variant === 'embedded' ? () => openTaskDetail(t) : undefined}
+                    onToggleComplete={variant === 'embedded' ? () => handleCompleteTask(t) : undefined}
+                    completingToggle={completingId === t.id}
+                    locationLink={
+                      location && variant === 'embedded'
+                        ? {
+                            label: location.name,
+                            onNavigate: () => openLocationDetail(location),
+                          }
+                        : undefined
+                    }
                   />
                 );
               })}

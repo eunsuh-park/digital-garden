@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { LocationsProvider } from '../../context/LocationsContext';
+import { ToastProvider } from '../../context/ToastContext';
 import { MapPanelLayoutProvider } from '../../context/MapPanelLayoutContext';
 import { MapPanelDetailProvider, useMapPanelDetail } from '../../context/MapPanelDetailContext';
 import NavigationRail from './NavigationRail';
@@ -44,11 +45,13 @@ function AppShellWithDetailSync() {
 export default function AppShell() {
   return (
     <LocationsProvider>
-      <MapPanelLayoutProvider>
-        <MapPanelDetailProvider>
-          <AppShellWithDetailSync />
-        </MapPanelDetailProvider>
-      </MapPanelLayoutProvider>
+      <ToastProvider>
+        <MapPanelLayoutProvider>
+          <MapPanelDetailProvider>
+            <AppShellWithDetailSync />
+          </MapPanelDetailProvider>
+        </MapPanelLayoutProvider>
+      </ToastProvider>
     </LocationsProvider>
   );
 }
