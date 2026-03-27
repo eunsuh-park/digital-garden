@@ -59,9 +59,11 @@
 }
 
 .map-panel-detail__scroll--plant-detail {
-  padding: 0;
+  /* 툴바와 겹치지 않도록 상단 여유 (헤더 높이에 가깝게) */
+  padding: 52px 0 0;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
 }
 
 /* Task 상세 전용: 상세 컴포넌트 내부에서 패딩 처리 */
@@ -69,6 +71,24 @@
   padding: 0;
   display: flex;
   flex-direction: column;
+}
+
+/* 타블렛: 패널 상세 본문 너비 활용 */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .map-panel-detail .plant-detail,
+  .map-panel-detail .task-detail {
+    max-width: none;
+    width: 100%;
+    margin: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .map-panel-detail .plant-detail__body,
+  .map-panel-detail .task-detail__body {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
 }
 
 /* 상세 하단 삭제 버튼 */

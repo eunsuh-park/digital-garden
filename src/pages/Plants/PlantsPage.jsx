@@ -12,6 +12,7 @@ import ErrorState from '../../components/ErrorState/ErrorState';
 import PlantCard from '../../components/PlantCard';
 import { useLocations } from '../../context/LocationsContext';
 import { useMapPanelDetail } from '../../context/MapPanelDetailContext';
+import { usePlantsPanelUi, PLANTS_PANEL_DEFAULT_SORT } from '../../context/PlantsPanelUiContext';
 import { getPlantSpeciesKind } from '../../lib/plantSpeciesKind';
 import './PlantsPage.css';
 
@@ -123,15 +124,25 @@ function PlantsEmbeddedAccordion({ plantsList }) {
  */
 export default function PlantsPage({ variant = 'default' }) {
   const { openPlantCreate } = useMapPanelDetail();
+  const panelUi = usePlantsPanelUi();
   const ctx = useLocations();
   const isEmbedded = variant === 'embedded';
+
+  const [localFilter, setLocalFilter] = useState({});
+  const [localSort, setLocalSort] = useState(PLANTS_PANEL_DEFAULT_SORT);
+
+  const filterValues = isEmbedded && panelUi ? panelUi.filterValues : localFilter;
+  const setFilterValues = isEmbedded && panelUi ? panelUi.setFilterValues : setLocalFilter;
+  const sortValue = isEmbedded && panelUi ? panelUi.sortValue : localSort;
+  const setSortValue = isEmbedded && panelUi ? panelUi.setSortValue : setLocalSort;
+  const resetPanelFilters = isEmbedded && panelUi ? panelUi.resetFilters : null;
+
+  const defaultSort = PLANTS_PANEL_DEFAULT_SORT;
+
   const [locations, setLocations] = useState([]);
   const [plants, setPlants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filterValues, setFilterValues] = useState({});
-  const defaultSort = { field: 'name', dir: 'asc' };
-  const [sortValue, setSortValue] = useState(defaultSort);
 
   const loadStandalone = useCallback(async () => {
     try {
@@ -234,22 +245,27 @@ export default function PlantsPage({ variant = 'default' }) {
       <FullPage variant="embedded" title="식물" subtitle={`${filteredAndSortedPlants.length}종`}>
         <div className="plants-page plants-page--embedded-with-footer">
           <div className="plants-page__scroll">
-            <div className="plants-page__controls plants-page__controls--embedded">
-              <FullPageFilter
-                filters={plantsFilters}
-                values={filterValues}
-                onChange={(key, value) => setFilterValues((prev) => ({ ...prev, [key]: value || undefined }))}
-                onReset={() => {
-                  setFilterValues({});
-                  setSortValue(defaultSort);
-                }}
-              />
-              <FullPageSorter
-                options={PLANTS_SORT_OPTIONS}
-                value={sortValue}
-                active={sortValue.field !== defaultSort.field || sortValue.dir !== defaultSort.dir}
-                onChange={(field, dir) => setSortValue({ field, dir })}
-              />
+            <div className="plants-page__sticky-top">
+              <div className="plants-page__controls plants-page__controls--embedded">
+                <FullPageFilter
+                  filters={plantsFilters}
+                  values={filterValues}
+                  onChange={(key, value) => setFilterValues((prev) => ({ ...prev, [key]: value || undefined }))}
+                  onReset={() => {
+                    if (resetPanelFilters) resetPanelFilters();
+                    else {
+                      setLocalFilter({});
+                      setLocalSort(PLANTS_PANEL_DEFAULT_SORT);
+                    }
+                  }}
+                />
+                <FullPageSorter
+                  options={PLANTS_SORT_OPTIONS}
+                  value={sortValue}
+                  active={sortValue.field !== defaultSort.field || sortValue.dir !== defaultSort.dir}
+                  onChange={(field, dir) => setSortValue({ field, dir })}
+                />
+              </div>
             </div>
             <PlantsEmbeddedAccordion plantsList={filteredAndSortedPlants} />
           </div>
@@ -273,27 +289,31 @@ export default function PlantsPage({ variant = 'default' }) {
       subtitle={`식재된 식물 ${plantsData.length}종`}
       emptyMessage={!hasContent ? '등록된 식물이 없습니다.' : undefined}
     >
-      <p className="notion-db-badge" aria-label="연동된 Notion DB">
-        Notion DB: Locations(구역) · 식물
-      </p>
-      <div className="plants-page__controls">
-        <FullPageFilter
-          filters={plantsFilters}
-          values={filterValues}
-          onChange={(key, value) => setFilterValues((prev) => ({ ...prev, [key]: value || undefined }))}
-          onReset={() => {
-            setFilterValues({});
-            setSortValue(defaultSort);
-          }}
-        />
-        <FullPageSorter
-          options={PLANTS_SORT_OPTIONS}
-          value={sortValue}
-          active={sortValue.field !== defaultSort.field || sortValue.dir !== defaultSort.dir}
-          onChange={(field, dir) => setSortValue({ field, dir })}
-        />
-      </div>
-      <div className="plants-page__cards">
+      <div className="plants-page plants-page--standalone">
+        <div className="plants-page__scroll plants-page__scroll--standalone">
+        <p className="notion-db-badge" aria-label="연동된 Notion DB">
+          Notion DB: Locations(구역) · 식물
+        </p>
+        <div className="plants-page__sticky-top">
+          <div className="plants-page__controls">
+            <FullPageFilter
+              filters={plantsFilters}
+              values={filterValues}
+              onChange={(key, value) => setFilterValues((prev) => ({ ...prev, [key]: value || undefined }))}
+              onReset={() => {
+                setLocalFilter({});
+                setLocalSort(PLANTS_PANEL_DEFAULT_SORT);
+              }}
+            />
+            <FullPageSorter
+              options={PLANTS_SORT_OPTIONS}
+              value={sortValue}
+              active={sortValue.field !== defaultSort.field || sortValue.dir !== defaultSort.dir}
+              onChange={(field, dir) => setSortValue({ field, dir })}
+            />
+          </div>
+        </div>
+        <div className="plants-page__cards">
         {filteredAndSortedPlants.map((p) => {
           const location = p.section_id ? locationMap[p.section_id] : null;
           const cardPlant = {
@@ -320,6 +340,8 @@ export default function PlantsPage({ variant = 'default' }) {
 
           return <PlantCard key={p.id} plant={cardPlant} />;
         })}
+        </div>
+        </div>
       </div>
     </FullPage>
   );

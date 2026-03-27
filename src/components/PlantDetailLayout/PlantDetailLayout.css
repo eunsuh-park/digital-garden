@@ -6,11 +6,39 @@
 
 .plant-detail__media {
   width: 100%;
+}
+
+.plant-detail__media-inner {
+  position: relative;
+  width: 100%;
   border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
   overflow: hidden;
   background: var(--color-bg);
   aspect-ratio: 16 / 10;
   max-height: min(42vh, 280px);
+}
+
+.plant-detail__media-upload-btn {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+  color: var(--color-text);
+  cursor: not-allowed;
+  box-shadow: var(--shadow-sm);
+  opacity: 0.95;
+}
+
+.plant-detail__media-upload-btn:disabled {
+  pointer-events: none;
 }
 
 .plant-detail__img {

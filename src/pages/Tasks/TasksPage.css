@@ -2,6 +2,14 @@
   display: contents;
 }
 
+.tasks-page--standalone {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
 .tasks-page--embedded-with-footer {
   display: flex;
   flex-direction: column;
@@ -14,6 +22,53 @@
   min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+.tasks-page__sticky-top {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background: var(--color-surface);
+  padding-top: 0.15rem;
+  padding-bottom: 0.35rem;
+  margin-bottom: 0.35rem;
+  border-bottom: 1px solid var(--color-border-weak);
+}
+
+.tasks-page__overdue-chip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  width: 100%;
+  margin: 0 0 0.45rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--color-danger-text, #c0392b) 35%, transparent);
+  background: color-mix(in srgb, var(--color-danger-soft, #fde8e8) 80%, transparent);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.tasks-page__overdue-chip strong {
+  color: var(--color-danger-text, #c0392b);
+  font-weight: 800;
+}
+
+.tasks-page__overdue-chip--active {
+  border-color: var(--color-danger-text, #c0392b);
+  background: color-mix(in srgb, var(--color-danger-text, #c0392b) 12%, transparent);
+}
+
+.tasks-page__overdue-chip-hint {
+  font-weight: 500;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
 }
 
 .tasks-page__footer {
@@ -75,7 +130,7 @@
   justify-content: space-between;
   gap: 0.75rem;
   flex-wrap: wrap;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0;
 }
 
 /* 하단 시트: 필터+정렬 한 줄(가로 스크롤) */
@@ -84,7 +139,6 @@
   align-items: center;
   justify-content: flex-start;
   gap: 0.35rem;
-  margin-bottom: 0.5rem;
   overflow-x: auto;
   overscroll-behavior-x: contain;
   padding-bottom: 0.1rem;
@@ -102,7 +156,81 @@
   justify-items: stretch;
 }
 
-/* 태블릿·모바일: 열 최소폭↓ · 균등 gap · 카드가 셀 너비를 채움 */
+/* Task_Type 그룹 (기본 정렬·필터 단순 시) */
+.tasks-embedded {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.tasks-embedded__empty {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+  padding: 0.5rem 0.15rem;
+}
+
+.tasks-embedded__group {
+  border-bottom: 1px solid var(--color-border-weak);
+}
+
+.tasks-embedded__group:last-child {
+  border-bottom: none;
+}
+
+.tasks-embedded__group-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.55rem 0.15rem;
+  border: none;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  color: var(--color-text);
+  text-align: left;
+}
+
+.tasks-embedded__group-header:hover {
+  background: var(--color-hover-soft);
+  border-radius: var(--radius-md);
+}
+
+.tasks-embedded__group-title {
+  flex: 1;
+  font-size: 0.92rem;
+  font-weight: 600;
+  min-width: 0;
+}
+
+.tasks-embedded__group-count {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.tasks-embedded__group-chevron {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+.tasks-embedded__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(148px, 100%), 1fr));
+  gap: 0.5rem;
+  padding: 0 0 0.65rem 0.15rem;
+}
+
+@media (min-width: 1024px) {
+  .tasks-embedded__grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+    gap: 1rem;
+  }
+}
+
+/* 태블릿·모바일: 열 최소폭↓ */
 @media (max-width: 1023px) {
   .tasks-page__cards {
     grid-template-columns: repeat(auto-fill, minmax(min(148px, 100%), 1fr));

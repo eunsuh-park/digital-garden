@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { LocationsProvider } from '../../context/LocationsContext';
 import { ToastProvider } from '../../context/ToastContext';
+import { TasksPanelUiProvider } from '../../context/TasksPanelUiContext';
+import { PlantsPanelUiProvider } from '../../context/PlantsPanelUiContext';
 import { MapPanelLayoutProvider } from '../../context/MapPanelLayoutContext';
 import { MapPanelDetailProvider, useMapPanelDetail } from '../../context/MapPanelDetailContext';
 import NavigationRail from './NavigationRail';
@@ -46,11 +48,15 @@ export default function AppShell() {
   return (
     <LocationsProvider>
       <ToastProvider>
-        <MapPanelLayoutProvider>
-          <MapPanelDetailProvider>
-            <AppShellWithDetailSync />
-          </MapPanelDetailProvider>
-        </MapPanelLayoutProvider>
+        <TasksPanelUiProvider>
+          <PlantsPanelUiProvider>
+            <MapPanelLayoutProvider>
+              <MapPanelDetailProvider>
+                <AppShellWithDetailSync />
+              </MapPanelDetailProvider>
+            </MapPanelLayoutProvider>
+          </PlantsPanelUiProvider>
+        </TasksPanelUiProvider>
       </ToastProvider>
     </LocationsProvider>
   );

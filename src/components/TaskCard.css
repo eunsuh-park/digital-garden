@@ -9,6 +9,22 @@
   box-sizing: border-box;
 }
 
+.task-card__overdue-badge {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  z-index: 2;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.45rem;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-danger-text, #c0392b) 92%, transparent);
+  color: #fff;
+  line-height: 1.2;
+  pointer-events: none;
+}
+
 .task-card__row-main {
   display: flex;
   flex-direction: row;

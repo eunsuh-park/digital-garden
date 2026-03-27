@@ -46,7 +46,7 @@ const SAMPLE_TASKS = [
  *   onOpenDetail?: () => void,
  *   onToggleComplete?: () => void,
  *   completingToggle?: boolean,
- *   locationLink?: { label: string, onNavigate: () => void },
+ *   overdue?: boolean,
  * }} props
  */
 export function TaskCard({
@@ -54,7 +54,7 @@ export function TaskCard({
   onOpenDetail,
   onToggleComplete,
   completingToggle = false,
-  locationLink,
+  overdue = false,
 }) {
   const [hovered, setHovered] = useState(false);
   const type = taskTypeConfig[task.Task_Type] || { icon: "○", label: task.Task_Type, color: "#999", bg: "#F5F4F0" };
@@ -94,6 +94,11 @@ export function TaskCard({
         position: "relative",
       }}
     >
+      {overdue && !isComplete ? (
+        <span className="task-card__overdue-badge" aria-label="예정일 지남">
+          지연
+        </span>
+      ) : null}
       <div
         style={{
           position: "absolute",
@@ -154,19 +159,6 @@ export function TaskCard({
           <div className="task-card__row-meta">
             <span className="task-card__meta-date">🗓 {dateStr}</span>
           </div>
-
-          {locationLink ? (
-            <button
-              type="button"
-              className="task-card__location-link"
-              onClick={(e) => {
-                e.stopPropagation();
-                locationLink.onNavigate();
-              }}
-            >
-              📍 {locationLink.label}
-            </button>
-          ) : null}
         </div>
       </div>
     </div>

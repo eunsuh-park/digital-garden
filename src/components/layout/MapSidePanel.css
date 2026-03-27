@@ -230,6 +230,10 @@
   overflow: hidden;
 }
 
+.map-side-panel__page-host--hidden {
+  display: none !important;
+}
+
 .map-side-panel__location-host {
   flex: 1;
   min-height: 0;

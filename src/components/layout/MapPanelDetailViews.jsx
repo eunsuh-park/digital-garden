@@ -1441,7 +1441,6 @@ export function MapPanelPlantDetail({ plant, onBack, locationMap }) {
   const [isEditing, setIsEditing] = useState(false);
   const [draftName, setDraftName] = useState(plant.name || '');
   const [draftSpecies, setDraftSpecies] = useState(plant.species && plant.species !== '-' ? plant.species : '나무');
-  const [draftCategory, setDraftCategory] = useState(plant.category && plant.category !== '-' ? plant.category : '');
   const [draftStatus, setDraftStatus] = useState(plant.status || 'planted');
   const [draftBloomSeason, setDraftBloomSeason] = useState(
     plant.bloom_season && plant.bloom_season !== '-' ? plant.bloom_season : ''
@@ -1464,14 +1463,13 @@ export function MapPanelPlantDetail({ plant, onBack, locationMap }) {
     if (isEditing) return;
     setDraftName(plant.name || '');
     setDraftSpecies(plant.species && plant.species !== '-' ? plant.species : '나무');
-    setDraftCategory(plant.category && plant.category !== '-' ? plant.category : '');
     setDraftStatus(plant.status || 'planted');
     setDraftBloomSeason(plant.bloom_season && plant.bloom_season !== '-' ? plant.bloom_season : '');
     setDraftQuantity(plant.quantity == null ? '' : String(plant.quantity));
     setDraftNotes(plant.notes || '');
     setSelectedLocationIds(plant.section_id ? [plant.section_id] : []);
     setSaveError(null);
-  }, [plant.id, isEditing, plant.name, plant.species, plant.category, plant.status, plant.bloom_season, plant.quantity, plant.notes, plant.section_id]);
+  }, [plant.id, isEditing, plant.name, plant.species, plant.status, plant.bloom_season, plant.quantity, plant.notes, plant.section_id]);
 
   const selectedLocations = useMemo(
     () => selectedLocationIds.map((id) => locations.find((l) => l.id === id)).filter(Boolean),
@@ -1506,7 +1504,6 @@ export function MapPanelPlantDetail({ plant, onBack, locationMap }) {
       await updatePlant(plant.id, {
         name: v,
         species: draftSpecies,
-        category: draftCategory.trim(),
         status: draftStatus,
         bloom_season: draftBloomSeason.trim(),
         quantity: draftQuantity,
@@ -1595,19 +1592,6 @@ export function MapPanelPlantDetail({ plant, onBack, locationMap }) {
                   </button>
                 ))}
               </div>
-            </div>
-
-            <div className="location-edit__field">
-              <label className="location-edit__label" htmlFor="plant-edit-category">
-                Category
-              </label>
-              <input
-                id="plant-edit-category"
-                className="location-edit__input"
-                value={draftCategory}
-                onChange={(e) => setDraftCategory(e.target.value)}
-                autoComplete="off"
-              />
             </div>
 
             <div className="location-edit__field">

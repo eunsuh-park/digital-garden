@@ -1,3 +1,5 @@
+import { Icon } from '@iconify/react';
+import imageAddLine from '@iconify-icons/mingcute/pic-line';
 import './PlantDetailLayout.css';
 
 function plantStatusLabel(status) {
@@ -24,14 +26,25 @@ export default function PlantDetailLayout({ plant, locationName, imageUrl = null
   return (
     <article className="plant-detail">
       <div className="plant-detail__media">
-        {imageUrl ? (
-          <img className="plant-detail__img" src={imageUrl} alt="" />
-        ) : (
-          <div className="plant-detail__media-placeholder" aria-hidden>
-            <span className="plant-detail__media-icon">🌿</span>
-            <span className="plant-detail__media-caption">이미지 없음</span>
-          </div>
-        )}
+        <div className="plant-detail__media-inner">
+          {imageUrl ? (
+            <img className="plant-detail__img" src={imageUrl} alt="" />
+          ) : (
+            <div className="plant-detail__media-placeholder" aria-hidden>
+              <span className="plant-detail__media-icon">🌿</span>
+              <span className="plant-detail__media-caption">이미지 없음</span>
+            </div>
+          )}
+          <button
+            type="button"
+            className="plant-detail__media-upload-btn"
+            aria-label="사진 업로드"
+            disabled
+            title="사진 업로드"
+          >
+            <Icon icon={imageAddLine} width={22} height={22} aria-hidden />
+          </button>
+        </div>
       </div>
 
       <div className="plant-detail__body">

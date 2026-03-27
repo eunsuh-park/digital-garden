@@ -238,13 +238,25 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
               </div>
             </div>
           )}
-          {!detail && tabFromPath === 'tasks' && (
-            <div className="map-side-panel__page-host">
+          {tabFromPath === 'tasks' && (
+            <div
+              className={
+                detail
+                  ? 'map-side-panel__page-host map-side-panel__page-host--hidden'
+                  : 'map-side-panel__page-host'
+              }
+            >
               <TasksPage variant="embedded" />
             </div>
           )}
-          {!detail && tabFromPath === 'plants' && (
-            <div className="map-side-panel__page-host">
+          {tabFromPath === 'plants' && (
+            <div
+              className={
+                detail
+                  ? 'map-side-panel__page-host map-side-panel__page-host--hidden'
+                  : 'map-side-panel__page-host'
+              }
+            >
               <PlantsPage variant="embedded" />
             </div>
           )}

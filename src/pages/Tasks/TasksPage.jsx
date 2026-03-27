@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Icon } from '@iconify/react';
+import arrowUpLine from '@iconify-icons/mingcute/arrow-up-line';
+import arrowDownLine from '@iconify-icons/mingcute/arrow-down-line';
 import { fetchLocations, fetchTasks, updateTask } from '../../api/notionApi';
 import { parseLocationsResponse } from '../Locations/notionSchema';
-import { parseTasksResponse } from './notionSchema';
+import { parseTasksResponse, TASK_TYPE_LABEL_KO } from './notionSchema';
 import FullPage from '../../components/FullPage/FullPage';
 import FullPageFilter from '../../components/FullPage/FullPageFilter';
 import FullPageSorter from '../../components/FullPage/FullPageSorter';
@@ -9,6 +12,8 @@ import ErrorState from '../../components/ErrorState/ErrorState';
 import TaskCard from '../../components/TaskCard';
 import { useLocations } from '../../context/LocationsContext';
 import { useMapPanelDetail } from '../../context/MapPanelDetailContext';
+import { useTasksPanelUi, TASKS_PANEL_DEFAULT_SORT } from '../../context/TasksPanelUiContext';
+import { isTaskOverdue } from '../../lib/taskDates';
 import './TasksPage.css';
 
 const TASKS_FILTERS = [
@@ -20,23 +25,123 @@ const TASKS_SORT_OPTIONS = [
   { value: 'task_type', label: '작업 유형' },
 ];
 
+function taskTypeGroupKey(task) {
+  const k = task.task_type && String(task.task_type).trim();
+  if (!k) return 'Observation';
+  return k;
+}
+
+function taskTypeGroupLabel(typeKey) {
+  return TASK_TYPE_LABEL_KO[typeKey] || typeKey;
+}
+
 /**
- * PG-02, PG-08: 할 일 전체 페이지 - 금주 할 일 조회와 관리
- * FN-09: 기본 조회 (완료 제외, 예정일 임박순, 섹션 그룹)
- * variant="embedded": 하단 시트에 동일 UI로 삽입
+ * Task_Type별 아코디언 — 그룹은 task 개수 많은 순, 0건 타입은 미표시
+ */
+function TasksTypeAccordion({ tasks, renderCard }) {
+  const [expanded, setExpanded] = useState(() => new Set());
+
+  const { sortedKeys, groupMap } = useMemo(() => {
+    const m = new Map();
+    for (const t of tasks) {
+      const k = taskTypeGroupKey(t);
+      if (!m.has(k)) m.set(k, []);
+      m.get(k).push(t);
+    }
+    const keys = [...m.keys()].sort((a, b) => {
+      const ca = m.get(a)?.length ?? 0;
+      const cb = m.get(b)?.length ?? 0;
+      if (cb !== ca) return cb - ca;
+      return taskTypeGroupLabel(a).localeCompare(taskTypeGroupLabel(b), 'ko');
+    });
+    return { sortedKeys: keys, groupMap: m };
+  }, [tasks]);
+
+  useEffect(() => {
+    setExpanded(new Set(sortedKeys));
+  }, [sortedKeys]);
+
+  const toggle = (key) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  if (tasks.length === 0) {
+    return <p className="tasks-embedded__empty">이번 주 할 일이 없습니다.</p>;
+  }
+
+  return (
+    <div className="tasks-embedded">
+      {sortedKeys.map((key) => {
+        const items = groupMap.get(key) || [];
+        if (items.length === 0) return null;
+        const label = taskTypeGroupLabel(key);
+        const isOpen = expanded.has(key);
+
+        return (
+          <section key={key} className="tasks-embedded__group">
+            <button
+              type="button"
+              className="tasks-embedded__group-header"
+              onClick={() => toggle(key)}
+              aria-expanded={isOpen}
+            >
+              <span className="tasks-embedded__group-title">{label}</span>
+              <span className="tasks-embedded__group-count">{items.length}</span>
+              <Icon
+                icon={isOpen ? arrowUpLine : arrowDownLine}
+                width={18}
+                height={18}
+                className="tasks-embedded__group-chevron"
+                aria-hidden
+              />
+            </button>
+            {isOpen && (
+              <div className="tasks-embedded__grid" aria-label={`${label} 할 일`}>
+                {items.map((t) => renderCard(t))}
+              </div>
+            )}
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
+ * PG-02, PG-08: 할 일 전체 페이지
+ * variant="embedded": 하단 시트
  */
 export default function TasksPage({ variant = 'default' }) {
-  const { openTaskDetail, openTaskCreate, openLocationDetail } = useMapPanelDetail();
+  const { openTaskDetail, openTaskCreate } = useMapPanelDetail();
+  const panelUi = useTasksPanelUi();
   const ctx = useLocations();
   const isEmbedded = variant === 'embedded';
+
+  const [localFilter, setLocalFilter] = useState({});
+  const [localSort, setLocalSort] = useState(TASKS_PANEL_DEFAULT_SORT);
+  const [localOverdueOnly, setLocalOverdueOnly] = useState(false);
+
+  const filterValues = isEmbedded && panelUi ? panelUi.filterValues : localFilter;
+  const setFilterValues = isEmbedded && panelUi ? panelUi.setFilterValues : setLocalFilter;
+  const sortValue = isEmbedded && panelUi ? panelUi.sortValue : localSort;
+  const setSortValue = isEmbedded && panelUi ? panelUi.setSortValue : setLocalSort;
+  const overdueOnly = isEmbedded && panelUi ? panelUi.overdueOnly : localOverdueOnly;
+  const setOverdueOnly = isEmbedded && panelUi ? panelUi.setOverdueOnly : setLocalOverdueOnly;
+  const resetPanelFilters = isEmbedded && panelUi ? panelUi.resetFilters : null;
+
+  const defaultSort = isEmbedded && panelUi ? panelUi.defaultSort : TASKS_PANEL_DEFAULT_SORT;
+
   const [locations, setLocations] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filterValues, setFilterValues] = useState({});
-  const defaultSort = { field: 'due_date', dir: 'asc' };
-  const [sortValue, setSortValue] = useState(defaultSort);
   const [completingId, setCompletingId] = useState(null);
+  const [hiddenIds, setHiddenIds] = useState(() => new Set());
 
   const loadStandalone = useCallback(async () => {
     try {
@@ -61,25 +166,16 @@ export default function TasksPage({ variant = 'default' }) {
     return undefined;
   }, [isEmbedded, loadStandalone]);
 
-  const handleCompleteTask = async (t) => {
-    setCompletingId(t.id);
-    try {
-      await updateTask(t.id, { status_name: '완료' });
-      if (isEmbedded) await ctx.reload();
-      else await loadStandalone();
-    } finally {
-      setCompletingId(null);
-    }
-  };
-
   const tasksData = isEmbedded ? ctx.tasks : tasks;
-  const locationsData = isEmbedded ? ctx.locations : locations;
   const loadingData = isEmbedded ? ctx.loading : loading;
   const errorData = isEmbedded ? ctx.error : error;
 
   const pendingTasks = useMemo(() => {
     let list = tasksData.filter((t) => t.status !== 'completed');
+    list = list.filter((t) => !hiddenIds.has(t.id));
     if (filterValues.status) list = list.filter((t) => t.status === filterValues.status);
+    if (overdueOnly) list = list.filter((t) => isTaskOverdue(t));
+
     const field = sortValue.field || 'due_date';
     const dir = sortValue.dir === 'desc' ? -1 : 1;
     list = [...list].sort((a, b) => {
@@ -97,11 +193,22 @@ export default function TasksPage({ variant = 'default' }) {
       return 0;
     });
     return list;
-  }, [tasksData, filterValues, sortValue]);
-  const locationMap = useMemo(
-    () => Object.fromEntries(locationsData.map((l) => [l.id, l])),
-    [locationsData]
-  );
+  }, [tasksData, filterValues, sortValue, overdueOnly, hiddenIds]);
+
+  const overdueCount = useMemo(() => {
+    let list = tasksData.filter((t) => t.status !== 'completed');
+    list = list.filter((t) => !hiddenIds.has(t.id));
+    if (filterValues.status) list = list.filter((t) => t.status === filterValues.status);
+    return list.filter((t) => isTaskOverdue(t)).length;
+  }, [tasksData, filterValues.status, hiddenIds]);
+
+  const showTypeGroups = useMemo(() => {
+    if (overdueOnly) return false;
+    if (filterValues.status) return false;
+    if (sortValue.field !== 'due_date' || sortValue.dir !== 'asc') return false;
+    return true;
+  }, [overdueOnly, filterValues.status, sortValue.field, sortValue.dir]);
+
   const hasContent = pendingTasks.length > 0;
 
   function toCardStatus(status) {
@@ -109,6 +216,50 @@ export default function TasksPage({ variant = 'default' }) {
     if (status === 'progress') return '진행 중';
     return '시작 전';
   }
+
+  const handleCompleteTask = async (t) => {
+    setCompletingId(t.id);
+    setHiddenIds((prev) => new Set(prev).add(t.id));
+    try {
+      await updateTask(t.id, { status_name: '완료' });
+      if (isEmbedded) await ctx.reload();
+      else await loadStandalone();
+      setHiddenIds((prev) => {
+        const n = new Set(prev);
+        n.delete(t.id);
+        return n;
+      });
+    } catch (e) {
+      setHiddenIds((prev) => {
+        const n = new Set(prev);
+        n.delete(t.id);
+        return n;
+      });
+    } finally {
+      setCompletingId(null);
+    }
+  };
+
+  const renderTaskCard = (t) => {
+    const cardTask = {
+      Title: t.title,
+      Task_Type: t.task_type ?? 'Observation',
+      Status: toCardStatus(t.status),
+      Scheduled_Date: t.scheduled_date || t.due_date,
+    };
+    const overdue = isTaskOverdue(t);
+
+    return (
+      <TaskCard
+        key={t.id}
+        task={cardTask}
+        overdue={overdue}
+        onOpenDetail={variant === 'embedded' ? () => openTaskDetail(t) : undefined}
+        onToggleComplete={variant === 'embedded' ? () => handleCompleteTask(t) : undefined}
+        completingToggle={completingId === t.id}
+      />
+    );
+  };
 
   if (loadingData) {
     return (
@@ -128,66 +279,60 @@ export default function TasksPage({ variant = 'default' }) {
 
   return (
     <FullPage variant={variant} title="이번 주 할 일" subtitle="완료 제외, 예정일 순">
-      <div className={variant === 'embedded' ? 'tasks-page tasks-page--embedded-with-footer' : 'tasks-page'}>
+      <div className={variant === 'embedded' ? 'tasks-page tasks-page--embedded-with-footer' : 'tasks-page tasks-page--standalone'}>
         <div className="tasks-page__scroll">
           {variant !== 'embedded' && (
             <p className="notion-db-badge" aria-label="연동된 Notion DB">
               Notion DB: Locations(구역) · 할 일 · 식물
             </p>
           )}
-          <div
-            className={
-              variant === 'embedded' ? 'tasks-page__controls tasks-page__controls--embedded' : 'tasks-page__controls'
-            }
-          >
-            <FullPageFilter
-              filters={TASKS_FILTERS}
-              values={filterValues}
-              onChange={(key, value) => setFilterValues((prev) => ({ ...prev, [key]: value || undefined }))}
-              onReset={() => {
-                setFilterValues({});
-                setSortValue(defaultSort);
-              }}
-            />
-            <FullPageSorter
-              options={TASKS_SORT_OPTIONS}
-              value={sortValue}
-              active={sortValue.field !== defaultSort.field || sortValue.dir !== defaultSort.dir}
-              onChange={(field, dir) => setSortValue({ field, dir })}
-            />
+
+          <div className="tasks-page__sticky-top">
+            {overdueCount > 0 ? (
+              <button
+                type="button"
+                className={`tasks-page__overdue-chip ${overdueOnly ? 'tasks-page__overdue-chip--active' : ''}`}
+                onClick={() => setOverdueOnly((v) => !v)}
+                aria-pressed={overdueOnly}
+              >
+                예정일 지남 <strong>{overdueCount}</strong>건
+                {overdueOnly ? <span className="tasks-page__overdue-chip-hint"> (탭하여 전체)</span> : null}
+              </button>
+            ) : null}
+
+            <div
+              className={
+                variant === 'embedded' ? 'tasks-page__controls tasks-page__controls--embedded' : 'tasks-page__controls'
+              }
+            >
+              <FullPageFilter
+                filters={TASKS_FILTERS}
+                values={filterValues}
+                onChange={(key, value) => setFilterValues((prev) => ({ ...prev, [key]: value || undefined }))}
+                onReset={() => {
+                  if (resetPanelFilters) resetPanelFilters();
+                  else {
+                    setLocalFilter({});
+                    setLocalSort(TASKS_PANEL_DEFAULT_SORT);
+                    setLocalOverdueOnly(false);
+                  }
+                }}
+              />
+              <FullPageSorter
+                options={TASKS_SORT_OPTIONS}
+                value={sortValue}
+                active={sortValue.field !== defaultSort.field || sortValue.dir !== defaultSort.dir}
+                onChange={(field, dir) => setSortValue({ field, dir })}
+              />
+            </div>
           </div>
+
           {!hasContent ? (
             <p className="tasks-page__empty-inline">이번 주 할 일이 없습니다.</p>
+          ) : showTypeGroups ? (
+            <TasksTypeAccordion tasks={pendingTasks} renderCard={renderTaskCard} />
           ) : (
-            <div className="tasks-page__cards">
-              {pendingTasks.map((t) => {
-                const location = t.section_id ? locationMap[t.section_id] : null;
-                const cardTask = {
-                  Title: t.title,
-                  Task_Type: t.task_type ?? 'Observation',
-                  Status: toCardStatus(t.status),
-                  Scheduled_Date: t.scheduled_date || t.due_date,
-                };
-
-                return (
-                  <TaskCard
-                    key={t.id}
-                    task={cardTask}
-                    onOpenDetail={variant === 'embedded' ? () => openTaskDetail(t) : undefined}
-                    onToggleComplete={variant === 'embedded' ? () => handleCompleteTask(t) : undefined}
-                    completingToggle={completingId === t.id}
-                    locationLink={
-                      location && variant === 'embedded'
-                        ? {
-                            label: location.name,
-                            onNavigate: () => openLocationDetail(location),
-                          }
-                        : undefined
-                    }
-                  />
-                );
-              })}
-            </div>
+            <div className="tasks-page__cards">{pendingTasks.map((t) => renderTaskCard(t))}</div>
           )}
         </div>
         {variant === 'embedded' && (
