@@ -28,11 +28,11 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0.5rem;
+  top: 0.5rem;
   width: 100%;
   z-index: 30;
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: center;
   gap: 8px;
   padding: 0 0.5rem;
@@ -47,22 +47,14 @@
   pointer-events: auto;
 }
 
-/* 모바일·태블릿: 툴바를 맵과 동일 flex 열의 아래쪽에 두어 바로 위가 하단 시트 */
+/* 모바일·태블릿: 툴바를 상단에 고정 배치 */
 .garden-map--stacked .garden-map__controls {
-  position: relative;
-  left: auto;
-  right: auto;
-  bottom: auto;
-  flex-shrink: 0;
+  position: absolute;
+  top: 0.75rem;
+  left: 0;
+  right: 0;
   z-index: 20;
-  margin: 0;
-  margin-bottom: 1rem;
   padding: 0;
-  padding-bottom: env(safe-area-inset-bottom, 0);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
 }
 
 .garden-map--stacked .garden-map__toolbar {
@@ -76,12 +68,9 @@
     padding: 1rem;
   }
   .garden-map:not(.garden-map--stacked) .garden-map__controls {
-    bottom: 1rem;
+    top: 1rem;
     gap: 10px;
     padding: 0 1rem;
-  }
-  .garden-map--stacked .garden-map__controls {
-    margin-bottom: 1.25rem;
   }
 }
 
@@ -100,6 +89,11 @@
   border: 1px solid var(--color-hover-strong);
   background: rgba(255, 255, 255, 0.78);
   backdrop-filter: blur(10px);
+}
+
+.garden-map__toolbar-inner--collapsed {
+  padding: 6px;
+  gap: 0;
 }
 
 @media (min-width: 640px) {
@@ -146,6 +140,10 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+}
+
+.garden-map__icon-btn--eye {
+  font-size: 1.2rem;
 }
 
 .garden-map__icon-btn:hover {

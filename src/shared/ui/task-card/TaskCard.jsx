@@ -107,7 +107,7 @@ export function TaskCard({
           width: 4,
           height: "100%",
           background: type.color,
-          borderRadius: "14px 0 0 14px",
+          borderRadius: "0",
           opacity: 0.7,
         }}
       />

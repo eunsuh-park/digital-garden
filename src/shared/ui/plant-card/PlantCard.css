@@ -9,7 +9,7 @@
 .plant-card--interactive:focus-visible {
   outline: 2px solid var(--color-primary, #2d5a27);
   outline-offset: 3px;
-  border-radius: 16px;
+  border-radius: 0;
 }
 
 .plant-card__face {

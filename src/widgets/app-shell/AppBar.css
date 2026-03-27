@@ -1,6 +1,8 @@
 .app-bar {
   display: none;
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 120;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;

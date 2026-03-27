@@ -86,7 +86,7 @@ export default function NavDrawer({ isOpen, onClose }) {
             </div>
           </section>
 
-          <section className="nav-drawer__section" aria-labelledby="nav-drawer-nav-heading">
+          <section className="nav-drawer__section nav-drawer__section--mobile-hide" aria-labelledby="nav-drawer-nav-heading">
             <h2 id="nav-drawer-nav-heading" className="nav-drawer__section-title">
               이동
             </h2>

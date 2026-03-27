@@ -26,13 +26,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 50px;
+  height: 50px;
   border: none;
   border-radius: 12px;
   background: transparent;
   color: var(--color-text);
   cursor: pointer;
+  font-size: 1.2rem;
+  font-weight: 700;
 }
 
 .panel-view__icon:hover {
@@ -46,7 +48,7 @@
 }
 
 .panel-view__bar-spacer {
-  width: 44px;
+  width: 50px;
   flex-shrink: 0;
 }
 
@@ -55,6 +57,7 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 0.85rem var(--panel-pad-x) 1.25rem;
   -webkit-overflow-scrolling: touch;
 }
@@ -213,12 +216,12 @@
 
 .panel-view__footer {
   margin-top: auto;
-  padding: 0.65rem 0 1.05rem;
+  padding: 0.65rem 0 calc(1.05rem + env(safe-area-inset-bottom, 0));
   display: flex;
   justify-content: flex-end;
   position: sticky;
   bottom: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0), var(--color-surface) 60%);
+  background: var(--color-surface);
   z-index: 1;
 }
 
@@ -258,7 +261,7 @@
   margin-right: calc(-1 * var(--panel-pad-x, 1rem));
   margin-top: -0.85rem;
   width: calc(100% + 2 * var(--panel-pad-x, 1rem));
-  border-radius: 14px;
+  border-radius: 0;
   overflow: hidden;
   background: var(--color-bg);
   aspect-ratio: 16 / 10;
@@ -266,7 +269,7 @@
 }
 
 .panel-doc__cover--task {
-  border-radius: 14px;
+  border-radius: 0;
 }
 
 .panel-doc__cover-inner {
@@ -294,7 +297,7 @@
   position: relative;
   padding: 0;
   overflow: hidden;
-  border-radius: 14px;
+  border-radius: 0;
   min-height: 140px;
 }
 
@@ -527,6 +530,8 @@
 
 .panel-form__input {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: 0.7rem 0.8rem;
   border-radius: 12px;
   border: 1px solid var(--color-border);
@@ -537,6 +542,8 @@
 
 .panel-form__textarea {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   min-height: 120px;
   padding: 0.7rem 0.8rem;
   border-radius: 12px;
@@ -561,7 +568,7 @@
   position: sticky;
   bottom: 0;
   padding-top: 12px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), var(--color-surface) 55%);
+  background: var(--color-surface);
   margin-top: 8px;
 }
 

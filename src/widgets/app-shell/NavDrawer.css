@@ -189,7 +189,17 @@
 
 /* 태블릿: App Bar 우측에 동일 아이콘이 있으므로 드로어 하단 계정 영역 숨김 */
 @media (min-width: 768px) and (max-width: 1023px) {
+  .nav-drawer__section--mobile-hide {
+    display: none;
+  }
+
   .nav-drawer__footer {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .nav-drawer__section--mobile-hide {
     display: none;
   }
 }
