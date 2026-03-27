@@ -35,6 +35,15 @@
   padding-bottom: 0;
 }
 
+@media (max-width: 1023px) {
+  .map-side-panel--collapsed {
+    /* 전역 안전 여백만큼 추가 높이를 확보해 접힌 핸들이 시스템 UI에 가려지지 않게 함 */
+    max-height: calc(40px + var(--mobile-safe-bottom-gap, 0px));
+    min-height: calc(40px + var(--mobile-safe-bottom-gap, 0px));
+    padding-bottom: var(--mobile-safe-bottom-gap, 0px);
+  }
+}
+
 @media (min-width: 1024px) {
   .map-side-panel--collapsed {
     width: 0;

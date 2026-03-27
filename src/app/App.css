@@ -1,9 +1,18 @@
 .app {
-  height: 100vh;
-  min-height: 100vh;
+  height: 100dvh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1023px) {
+  .app {
+    /* 모바일 브라우저 하단 시스템 UI(주소/링크 바)와 겹치지 않도록 전역 안전 여백 확보 */
+    --mobile-safe-bottom-gap: max(20px, env(safe-area-inset-bottom, 0px));
+    padding-bottom: var(--mobile-safe-bottom-gap);
+  }
 }
 
 /* 페이지별 Notion 연동 DB 표시 (콘솔에서 [Notion API] 로그로 확인) */
