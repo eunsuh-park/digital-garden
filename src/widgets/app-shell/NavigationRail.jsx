@@ -9,7 +9,7 @@ import logoSymbol from '@/asset/logo/symbol.svg';
 import './NavigationRail.css';
 
 /** 데스크톱(≥1024px) 좌측 고정 네비게이션 레일 — 프로젝트 슬롯 + 하단 액션(플레이스홀더) */
-export default function NavigationRail() {
+export default function NavigationRail({ onLogout }) {
   return (
     <aside className="navigation-rail" aria-label="프로젝트 및 계정">
       <div className="navigation-rail__top">
@@ -44,7 +44,7 @@ export default function NavigationRail() {
         <button type="button" className="navigation-rail__icon-btn" aria-label="프로필 (준비 중)">
           <Icon icon={user3Line} width={22} height={22} />
         </button>
-        <button type="button" className="navigation-rail__icon-btn" aria-label="로그아웃 (준비 중)">
+        <button type="button" className="navigation-rail__icon-btn" aria-label="로그아웃" onClick={onLogout}>
           <Icon icon={exitDoorLine} width={22} height={22} />
         </button>
       </div>

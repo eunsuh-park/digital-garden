@@ -5,26 +5,32 @@ import LandingPage from '@/pages/Landing/LandingPage';
 import LoginPage from '@/pages/Login/LoginPage';
 import DashboardPage from '@/pages/Dashboard/DashboardPage';
 import ProjectPage from '@/pages/Project/ProjectPage';
+import { AuthProvider } from '@/app/providers/AuthContext';
+import RequireAuth from '@/app/providers/RequireAuth';
 import './App.css';
 
 function App() {
   return (
-    <HashRouter>
-      <div className="app">
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route element={<AppShell />}>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/project" element={<ProjectPage />} />
-            {/* Tasks/Plants UI는 MapSidePanel(하단 시트)에 표시, 본문은 지도 유지 */}
-            <Route path="/tasks" element={<LandingPage />} />
-            <Route path="/plants" element={<LandingPage />} />
-            <Route path="*" element={<ErrorState variant="404" />} />
-          </Route>
-        </Routes>
-      </div>
-    </HashRouter>
+    <AuthProvider>
+      <HashRouter>
+        <div className="app">
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route element={<RequireAuth />}>
+              <Route element={<AppShell />}>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/project" element={<ProjectPage />} />
+                {/* Tasks/Plants UI는 MapSidePanel(하단 시트)에 표시, 본문은 지도 유지 */}
+                <Route path="/tasks" element={<LandingPage />} />
+                <Route path="/plants" element={<LandingPage />} />
+                <Route path="*" element={<ErrorState variant="404" />} />
+              </Route>
+            </Route>
+          </Routes>
+        </div>
+      </HashRouter>
+    </AuthProvider>
   );
 }
 

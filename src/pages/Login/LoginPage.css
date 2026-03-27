@@ -121,6 +121,11 @@
   transition: background 0.2s ease, transform 0.2s ease;
 }
 
+.login-page__btn:disabled {
+  background: #8a7260;
+  cursor: not-allowed;
+}
+
 .login-page__btn:hover {
   background: #2D5016;
 }
@@ -158,6 +163,24 @@
 .login-page__link:hover {
   color: #2D5016;
   text-decoration: underline;
+}
+
+.login-page__link-btn {
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.login-page__message {
+  margin: -2px 0 0;
+  font-size: 12px;
+  color: #3E7B27;
+  font-family: 'DM Mono', monospace;
+}
+
+.login-page__message--error {
+  color: #B3261E;
 }
 
 @media (min-width: 640px) {

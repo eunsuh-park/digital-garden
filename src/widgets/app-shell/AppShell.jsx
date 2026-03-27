@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { LocationsProvider } from '@/app/providers/LocationsContext';
 import { ToastProvider } from '@/app/providers/ToastContext';
 import { TasksPanelUiProvider } from '@/app/providers/TasksPanelUiContext';
 import { PlantsPanelUiProvider } from '@/app/providers/PlantsPanelUiContext';
 import { MapPanelLayoutProvider } from '@/app/providers/MapPanelLayoutContext';
 import { MapPanelDetailProvider, useMapPanelDetail } from '@/app/providers/MapPanelDetailContext';
+import { useAuth } from '@/app/providers/AuthContext';
 import NavigationRail from './NavigationRail';
 import MapSidePanel from '@/widgets/map-panel/MapSidePanel';
 import AppBar from './AppBar';
@@ -13,6 +14,8 @@ import NavDrawer from './NavDrawer';
 import './AppShell.css';
 
 function AppShellWithDetailSync() {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [sectionNavCollapsed, setSectionNavCollapsed] = useState(true);
   const { detail } = useMapPanelDetail();
@@ -21,11 +24,17 @@ function AppShellWithDetailSync() {
     if (detail) setSectionNavCollapsed(false);
   }, [detail]);
 
+  function handleLogout() {
+    logout();
+    setDrawerOpen(false);
+    navigate('/login', { replace: true });
+  }
+
   return (
     <div className="app-shell">
-      <NavigationRail />
+      <NavigationRail onLogout={handleLogout} />
       <div className="app-shell__body">
-        <AppBar onOpenMenu={() => setDrawerOpen(true)} />
+        <AppBar onOpenMenu={() => setDrawerOpen(true)} onLogout={handleLogout} />
         <main className="app-shell__main">
           <Outlet />
         </main>
@@ -34,7 +43,7 @@ function AppShellWithDetailSync() {
         collapsed={sectionNavCollapsed}
         onToggleCollapsed={() => setSectionNavCollapsed((c) => !c)}
       />
-      <NavDrawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} />
+      <NavDrawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} onLogout={handleLogout} />
     </div>
   );
 }

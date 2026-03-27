@@ -11,7 +11,7 @@ import './AppBar.css';
  * 태블릿·모바일 상단 App Bar — 로고 중앙, 좌측 메뉴
  * 태블릿(768~1023): 우측에 설정·프로필·로그아웃
  */
-export default function AppBar({ onOpenMenu }) {
+export default function AppBar({ onOpenMenu, onLogout }) {
   return (
     <header className="app-bar">
       <button
@@ -34,7 +34,7 @@ export default function AppBar({ onOpenMenu }) {
         <button type="button" className="app-bar__icon-btn" aria-label="프로필 (준비 중)">
           <Icon icon={user3Line} width={22} height={22} />
         </button>
-        <button type="button" className="app-bar__icon-btn" aria-label="로그아웃 (준비 중)">
+        <button type="button" className="app-bar__icon-btn" aria-label="로그아웃" onClick={onLogout}>
           <Icon icon={exitDoorLine} width={22} height={22} />
         </button>
       </div>
