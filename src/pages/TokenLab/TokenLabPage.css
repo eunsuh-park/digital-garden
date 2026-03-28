@@ -116,6 +116,39 @@
   color: var(--color-text);
 }
 
+.token-lab__typo-scale {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.token-lab__typo-row {
+  border: 1px solid var(--color-border-weak);
+  border-radius: var(--radius-md);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.token-lab__typo-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.token-lab__typo-meta strong {
+  font-size: 12px;
+  color: var(--color-text);
+}
+
+.token-lab__typo-meta span {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+}
+
 .token-lab__space-list {
   display: flex;
   flex-direction: column;

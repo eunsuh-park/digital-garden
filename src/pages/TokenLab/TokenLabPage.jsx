@@ -62,6 +62,75 @@ const TYPOGRAPHY_ITEMS = [
   { label: 'Mono', token: '--font-mono', sample: 'TOKEN_VAR --color-primary 0123' },
 ];
 
+const TYPO_SCALE_ITEMS = [
+  {
+    className: 'typo-display-lg',
+    label: 'Display LG',
+    tokens: '--font-size-display-lg / --font-weight-bold / --line-height-tight',
+    sample: 'The quick brown fox jumps',
+  },
+  {
+    className: 'typo-display-md',
+    label: 'Display MD',
+    tokens: '--font-size-display-md / --font-weight-bold / --line-height-tight',
+    sample: 'The quick brown fox jumps',
+  },
+  {
+    className: 'typo-h1',
+    label: 'Heading 1',
+    tokens: '--font-size-heading-1 / --font-weight-bold',
+    sample: 'The quick brown fox jumps',
+  },
+  {
+    className: 'typo-h2',
+    label: 'Heading 2',
+    tokens: '--font-size-heading-2 / --font-weight-bold',
+    sample: 'The quick brown fox jumps',
+  },
+  {
+    className: 'typo-h3',
+    label: 'Heading 3',
+    tokens: '--font-size-heading-3 / --font-weight-semibold',
+    sample: 'The quick brown fox jumps',
+  },
+  {
+    className: 'typo-h4',
+    label: 'Heading 4',
+    tokens: '--font-size-heading-4 / --font-weight-semibold',
+    sample: 'The quick brown fox jumps',
+  },
+  {
+    className: 'typo-body-lg',
+    label: 'Body LG',
+    tokens: '--font-size-body-lg / --line-height-normal',
+    sample: 'The quick brown fox jumps over the lazy dog.',
+  },
+  {
+    className: 'typo-body-md',
+    label: 'Body MD',
+    tokens: '--font-size-body-md / --line-height-normal',
+    sample: 'The quick brown fox jumps over the lazy dog.',
+  },
+  {
+    className: 'typo-body-sm',
+    label: 'Body SM',
+    tokens: '--font-size-body-sm / --line-height-normal',
+    sample: 'The quick brown fox jumps over the lazy dog.',
+  },
+  {
+    className: 'typo-caption',
+    label: 'Caption',
+    tokens: '--font-size-caption / --font-weight-medium',
+    sample: 'The quick brown fox jumps over the lazy dog.',
+  },
+  {
+    className: 'typo-overline',
+    label: 'Overline',
+    tokens: '--font-size-overline / --letter-spacing-wide',
+    sample: 'The quick brown fox jumps',
+  },
+];
+
 const SPACE_ITEMS = [
   '--space-0',
   '--space-1',
@@ -128,6 +197,22 @@ export default function TokenLabPage() {
               </div>
               <p style={{ fontFamily: `var(${item.token})` }}>{item.sample}</p>
             </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="token-lab__section">
+        <h2>Typography Scale</h2>
+        <div className="token-lab__typo-scale">
+          {TYPO_SCALE_ITEMS.map((item) => (
+            <article key={item.label} className="token-lab__typo-row">
+              <div className="token-lab__typo-meta">
+                <strong>{item.label}</strong>
+                <span>{item.className}</span>
+                <span>{item.tokens}</span>
+              </div>
+              <p className={item.className}>{item.sample}</p>
+            </article>
           ))}
         </div>
       </section>

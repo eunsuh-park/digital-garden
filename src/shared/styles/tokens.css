@@ -115,6 +115,28 @@
   --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-serif: 'Noto Serif KR', serif;
   --font-mono: 'DM Mono', monospace;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --line-height-tight: 1.2;
+  --line-height-snug: 1.35;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.7;
+  --letter-spacing-tight: -0.01em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.02em;
+  --font-size-display-lg: 2.5rem;
+  --font-size-display-md: 2rem;
+  --font-size-heading-1: 1.75rem;
+  --font-size-heading-2: 1.5rem;
+  --font-size-heading-3: 1.25rem;
+  --font-size-heading-4: 1.125rem;
+  --font-size-body-lg: 1rem;
+  --font-size-body-md: 0.9375rem;
+  --font-size-body-sm: 0.875rem;
+  --font-size-caption: 0.75rem;
+  --font-size-overline: 0.6875rem;
 
   /* Compatibility Alias */
   --color-primary: var(--brand-primary);
