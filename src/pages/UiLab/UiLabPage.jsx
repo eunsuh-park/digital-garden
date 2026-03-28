@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import Badge from "@/shared/ui/badge/Badge";
 import DatePicker from "@/shared/ui/date-picker/DatePicker";
 import Select from "@/shared/ui/select/Select";
@@ -173,8 +174,15 @@ export default function UiLabPage() {
   return (
     <div className="ui-lab">
       <header className="ui-lab__header">
-        <h1>UI Components Lab</h1>
-        <p>현재까지 만든 UI 컴포넌트만 모아서 props와 인터랙션을 검증하는 페이지입니다.</p>
+        <div className="ui-lab__header-top">
+          <div>
+            <h1>UI Components Lab</h1>
+            <p>현재까지 만든 UI 컴포넌트만 모아서 props와 인터랙션을 검증하는 페이지입니다.</p>
+          </div>
+          <Link to="/token-lab" className="ui-lab__token-link">
+            Token Lab 이동
+          </Link>
+        </div>
       </header>
 
       <section className="ui-lab__section">

@@ -2,10 +2,9 @@ import { useState } from "react";
 import { Icon } from "@iconify/react";
 import searchLine from "@iconify-icons/mingcute/search-line";
 import closeLine from "@iconify-icons/mingcute/close-line";
-import upLine from "@iconify-icons/mingcute/up-line";
-import downLine from "@iconify-icons/mingcute/down-line";
+import arrowUpLine from "@iconify-icons/mingcute/arrow-up-line";
+import arrowDownLine from "@iconify-icons/mingcute/arrow-down-line";
 import checkLine from "@iconify-icons/mingcute/check-line";
-import closeCircleLine from "@iconify-icons/mingcute/close-circle-line";
 import "./TextField.css";
 
 /**
@@ -180,10 +179,10 @@ export function TextField({
         {normalizedVariant === "stepper" ? (
           <span className="text-field__stepper">
             <button type="button" onClick={increaseStepper} disabled={disabled} aria-label="증가">
-              <Icon icon={upLine} />
+              <Icon icon={arrowUpLine} />
             </button>
             <button type="button" onClick={decreaseStepper} disabled={disabled} aria-label="감소">
-              <Icon icon={downLine} />
+              <Icon icon={arrowDownLine} />
             </button>
           </span>
         ) : null}
@@ -197,7 +196,7 @@ export function TextField({
       {showFeedback ? (
         <span className={`text-field__feedback text-field__feedback--${visualState}`}>
           <span className="text-field__feedback-dot" aria-hidden="true">
-            <Icon icon={visualState === "valid-feedback" ? checkLine : closeCircleLine} />
+            <Icon icon={visualState === "valid-feedback" ? checkLine : closeLine} />
           </span>
           {visualState === "valid-feedback" ? "유효한 피드백" : "유효하지 않은 피드백"}
         </span>

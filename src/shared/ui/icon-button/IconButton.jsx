@@ -1,6 +1,6 @@
 import "./IconButton.css";
 import { Icon } from "@iconify/react";
-import bag3Line from "@iconify-icons/mingcute/bag-3-line";
+import bookmarkFill from "@iconify-icons/mingcute/bookmark-fill";
 
 /**
  * @param {{
@@ -34,7 +34,7 @@ export function IconButton({
 
   return (
     <button type="button" className={classes} disabled={isDisabled} onClick={onClick} aria-label={showLabel ? label : "아이콘 버튼"}>
-      <Icon icon={bag3Line} className="icon-button__icon" aria-hidden="true" />
+      <Icon icon={bookmarkFill} className="icon-button__icon" aria-hidden="true" />
       {showLabel ? <span className="icon-button__label">{label}</span> : null}
     </button>
   );

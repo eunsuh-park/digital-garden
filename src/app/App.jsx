@@ -6,6 +6,7 @@ import LoginPage from '@/pages/Login/LoginPage';
 import DashboardPage from '@/pages/Dashboard/DashboardPage';
 import ProjectPage from '@/pages/Project/ProjectPage';
 import UiLabPage from '@/pages/UiLab/UiLabPage';
+import TokenLabPage from '@/pages/TokenLab/TokenLabPage';
 import { AuthProvider } from '@/app/providers/AuthContext';
 import RequireAuth from '@/app/providers/RequireAuth';
 import './App.css';
@@ -23,6 +24,7 @@ function App() {
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/project" element={<ProjectPage />} />
                 <Route path="/ui-lab" element={<UiLabPage />} />
+                <Route path="/token-lab" element={<TokenLabPage />} />
                 {/* Tasks/Plants UI는 MapSidePanel(하단 시트)에 표시, 본문은 지도 유지 */}
                 <Route path="/tasks" element={<LandingPage />} />
                 <Route path="/plants" element={<LandingPage />} />

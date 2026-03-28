@@ -1,11 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
-import upLine from "@iconify-icons/mingcute/up-line";
-import downLine from "@iconify-icons/mingcute/down-line";
-import leftLine from "@iconify-icons/mingcute/left-line";
-import rightLine from "@iconify-icons/mingcute/right-line";
-import calendarLine from "@iconify-icons/mingcute/calendar-line";
+import arrowUpLine from "@iconify-icons/mingcute/arrow-up-line";
+import arrowDownLine from "@iconify-icons/mingcute/arrow-down-line";
+import arrowLeftLine from "@iconify-icons/mingcute/arrow-left-line";
+import arrowRightLine from "@iconify-icons/mingcute/arrow-right-line";
 import "./DatePicker.css";
+function CalendarIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="date-picker__calendar-icon">
+      <path d="M7 2.75a.75.75 0 0 1 .75.75V5h8.5V3.5a.75.75 0 0 1 1.5 0V5h1A2.25 2.25 0 0 1 21 7.25v12.5A2.25 2.25 0 0 1 18.75 22h-13.5A2.25 2.25 0 0 1 3 19.75V7.25A2.25 2.25 0 0 1 5.25 5h1V3.5A.75.75 0 0 1 7 2.75Zm11.75 8H5.25v9a.75.75 0 0 0 .75.75h12a.75.75 0 0 0 .75-.75v-9Zm-12.5-4.25h12a.75.75 0 0 1 .75.75v2h-13.5v-2a.75.75 0 0 1 .75-.75Z" />
+    </svg>
+  );
+}
+
 
 const WEEK_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 
@@ -160,7 +167,7 @@ export function DatePicker({
         <span className={`date-picker__text ${displayValue ? "date-picker__text--value" : ""}`}>
           {displayValue || placeholder}
         </span>
-        <Icon icon={calendarLine} aria-hidden="true" className="date-picker__calendar-icon" />
+        <CalendarIcon />
       </button>
 
       {open ? (
@@ -169,11 +176,11 @@ export function DatePicker({
             <div className="date-picker__wheel">
               <div className="date-picker__wheel-column">
                 <button type="button" onClick={() => setViewDate(new Date(wheelYear - 1, wheelMonth - 1, wheelDay))}>
-                  <Icon icon={upLine} />
+                  <Icon icon={arrowUpLine} />
                 </button>
                 <span>{wheelYear}</span>
                 <button type="button" onClick={() => setViewDate(new Date(wheelYear + 1, wheelMonth - 1, wheelDay))}>
-                  <Icon icon={downLine} />
+                  <Icon icon={arrowDownLine} />
                 </button>
               </div>
               <div className="date-picker__wheel-column">
@@ -181,23 +188,23 @@ export function DatePicker({
                   type="button"
                   onClick={() => setViewDate(new Date(wheelYear, Math.max(0, wheelMonth - 2), wheelDay))}
                 >
-                  <Icon icon={upLine} />
+                  <Icon icon={arrowUpLine} />
                 </button>
                 <span>{wheelMonth}</span>
                 <button
                   type="button"
                   onClick={() => setViewDate(new Date(wheelYear, Math.min(11, wheelMonth), wheelDay))}
                 >
-                  <Icon icon={downLine} />
+                  <Icon icon={arrowDownLine} />
                 </button>
               </div>
               <div className="date-picker__wheel-column">
                 <button type="button" onClick={() => setViewDate(new Date(wheelYear, wheelMonth - 1, wheelDay - 1))}>
-                  <Icon icon={upLine} />
+                  <Icon icon={arrowUpLine} />
                 </button>
                 <span>{wheelDay}</span>
                 <button type="button" onClick={() => setViewDate(new Date(wheelYear, wheelMonth - 1, wheelDay + 1))}>
-                  <Icon icon={downLine} />
+                  <Icon icon={arrowDownLine} />
                 </button>
               </div>
               <button type="button" className="date-picker__wheel-confirm" onClick={() => applyDate(viewDate)}>
@@ -216,13 +223,13 @@ export function DatePicker({
               </div>
               <div className="date-picker__month-header">
                 <button type="button" onClick={() => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1))}>
-                  <Icon icon={leftLine} />
+                  <Icon icon={arrowLeftLine} />
                 </button>
                 <strong>
                   {viewDate.getFullYear()}.{viewDate.getMonth() + 1}
                 </strong>
                 <button type="button" onClick={() => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1))}>
-                  <Icon icon={rightLine} />
+                  <Icon icon={arrowRightLine} />
                 </button>
               </div>
               <div className="date-picker__week-row">

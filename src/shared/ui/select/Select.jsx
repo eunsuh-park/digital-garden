@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import checkLine from "@iconify-icons/mingcute/check-line";
-import downLine from "@iconify-icons/mingcute/down-line";
+import arrowDownLine from "@iconify-icons/mingcute/arrow-down-line";
 import "./Select.css";
 
 /**
@@ -71,7 +71,7 @@ export function Select({
           {selectedOption?.label || placeholder}
         </span>
         <span className={`select__arrow ${open ? "select__arrow--open" : ""}`} aria-hidden="true">
-          <Icon icon={downLine} />
+          <Icon icon={arrowDownLine} />
         </span>
       </button>
 
