@@ -1,0 +1,127 @@
+.ui-lab {
+  width: 100%;
+  min-height: calc(100vh - 60px);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow: auto;
+}
+
+.ui-lab__header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ui-lab__header h1 {
+  font-size: 20px;
+  color: var(--color-text-strong);
+}
+
+.ui-lab__header p {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.ui-lab__section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ui-lab__section-title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.ui-lab__section-title h2 {
+  font-size: 17px;
+  color: var(--color-text-strong);
+}
+
+.ui-lab__section-title span {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.ui-lab__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.ui-lab__controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.ui-lab__controls select,
+.ui-lab__controls input,
+.ui-lab__controls button {
+  height: 34px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-strong);
+  padding: 0 10px;
+}
+
+.ui-lab__controls button {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.ui-lab__checkbox-label {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 2px;
+}
+
+.ui-lab__checkbox-label input {
+  width: 16px;
+  height: 16px;
+}
+
+.ui-lab__preview-card {
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--color-border);
+  background: var(--color-bg);
+  min-height: 96px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ui-lab__variant-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+@media (max-width: 1023px) {
+  .ui-lab {
+    padding: 12px;
+  }
+
+  .ui-lab__section {
+    padding: 12px;
+  }
+
+  .ui-lab__controls {
+    gap: 6px;
+  }
+}

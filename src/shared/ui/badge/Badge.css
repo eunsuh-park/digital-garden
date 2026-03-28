@@ -1,0 +1,70 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border-radius: var(--badge-radius);
+  min-width: var(--badge-min-width);
+  height: var(--badge-height);
+  padding: 0 var(--badge-padding-x);
+  background: var(--badge-bg, #ef2b2a);
+  color: var(--badge-fg, #ffffff);
+  font-family: var(--font-sans);
+  font-size: var(--badge-font-size);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.badge--size-m {
+  --badge-height: 12px;
+  --badge-radius: 6px;
+  --badge-font-size: 9px;
+}
+
+.badge--size-l {
+  --badge-height: 20px;
+  --badge-radius: 16px;
+  --badge-font-size: 12px;
+}
+
+.badge--none {
+  --badge-padding-x: 0px;
+}
+
+.badge--size-m.badge--none,
+.badge--size-m.badge--single {
+  --badge-min-width: 12px;
+  --badge-padding-x: 2px;
+}
+
+.badge--size-m.badge--double {
+  --badge-min-width: 16px;
+  --badge-padding-x: 2px;
+}
+
+.badge--size-m.badge--triple {
+  --badge-min-width: 22px;
+  --badge-padding-x: 2px;
+}
+
+.badge--size-l.badge--none {
+  --badge-min-width: 12px;
+  --badge-padding-x: 0px;
+}
+
+.badge--size-l.badge--single {
+  --badge-min-width: 20px;
+  --badge-padding-x: 4px;
+}
+
+.badge--size-l.badge--double {
+  --badge-min-width: 24px;
+  --badge-padding-x: 4px;
+}
+
+.badge--size-l.badge--triple {
+  --badge-min-width: 31px;
+  --badge-padding-x: 4px;
+}

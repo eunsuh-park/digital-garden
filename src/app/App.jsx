@@ -1,10 +1,11 @@
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import AppShell from '@/widgets/app-shell/AppShell';
 import ErrorState from '@/shared/ui/error-state/ErrorState';
 import LandingPage from '@/pages/Landing/LandingPage';
 import LoginPage from '@/pages/Login/LoginPage';
 import DashboardPage from '@/pages/Dashboard/DashboardPage';
 import ProjectPage from '@/pages/Project/ProjectPage';
+import UiLabPage from '@/pages/UiLab/UiLabPage';
 import { AuthProvider } from '@/app/providers/AuthContext';
 import RequireAuth from '@/app/providers/RequireAuth';
 import './App.css';
@@ -12,7 +13,7 @@ import './App.css';
 function App() {
   return (
     <AuthProvider>
-      <HashRouter>
+      <BrowserRouter>
         <div className="app">
           <Routes>
             <Route path="/login" element={<LoginPage />} />
@@ -21,6 +22,7 @@ function App() {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/project" element={<ProjectPage />} />
+                <Route path="/ui-lab" element={<UiLabPage />} />
                 {/* Tasks/Plants UI는 MapSidePanel(하단 시트)에 표시, 본문은 지도 유지 */}
                 <Route path="/tasks" element={<LandingPage />} />
                 <Route path="/plants" element={<LandingPage />} />
@@ -29,7 +31,7 @@ function App() {
             </Route>
           </Routes>
         </div>
-      </HashRouter>
+      </BrowserRouter>
     </AuthProvider>
   );
 }
