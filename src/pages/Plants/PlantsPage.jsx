@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Icon } from '@iconify/react';
 import arrowUpLine from '@iconify-icons/mingcute/arrow-up-line';
 import arrowDownLine from '@iconify-icons/mingcute/arrow-down-line';
+import addLine from '@iconify-icons/mingcute/add-line';
 import { fetchLocations, fetchPlants } from '@/shared/api/notionApi';
 import { parseLocationsResponse } from '@/entities/location/lib/notion-schema';
 import { parsePlantsResponse } from '@/entities/plant/lib/notion-schema';
@@ -276,9 +277,7 @@ export default function PlantsPage({ variant = 'default' }) {
           </div>
           <div className="plants-page__footer">
             <button type="button" className="plants-page__add-plant-btn" onClick={() => openPlantCreate()}>
-              <span className="plants-page__add-plant-icon" aria-hidden>
-                +
-              </span>
+              <Icon icon={addLine} className="plants-page__add-plant-icon" aria-hidden />
               식물 추가
             </button>
           </div>

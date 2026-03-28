@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { Icon } from "@iconify/react";
+import closeLine from "@iconify-icons/mingcute/close-line";
 import "./ActionPopover.css";
 
 /**
@@ -102,7 +104,7 @@ export function ActionPopover({
             </span>
             {showClose ? (
               <button type="button" className="action-popover__close" onClick={handleClose} aria-label="닫기">
-                ×
+                <Icon icon={closeLine} />
               </button>
             ) : null}
           </span>

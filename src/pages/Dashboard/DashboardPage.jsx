@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Icon } from '@iconify/react';
+import addLine from '@iconify-icons/mingcute/add-line';
+import rightLine from '@iconify-icons/mingcute/right-line';
 import './DashboardPage.css';
 
 // TODO: loadProjects()로 교체
@@ -40,7 +43,8 @@ export default function DashboardPage() {
         <div className="dashboard-page__section-head">
           <h2 className="dashboard-page__section-title">내 프로젝트</h2>
           <Link to="/project" className="dashboard-page__link">
-            + 새 프로젝트
+            <Icon icon={addLine} className="dashboard-page__link-icon" aria-hidden />
+            새 프로젝트
           </Link>
         </div>
 
@@ -66,7 +70,7 @@ export default function DashboardPage() {
                       </span>
                     </div>
                   </div>
-                  <span className="dashboard-page__card-arrow" aria-hidden>→</span>
+                  <Icon icon={rightLine} className="dashboard-page__card-arrow" aria-hidden />
                 </Link>
               </li>
             ))}

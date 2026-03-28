@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { Icon } from "@iconify/react";
+import checkLine from "@iconify-icons/mingcute/check-line";
+import downLine from "@iconify-icons/mingcute/down-line";
 import "./Select.css";
 
 /**
@@ -67,7 +70,9 @@ export function Select({
         <span className={`select__text ${showSelectedStyle ? "select__text--value" : ""}`}>
           {selectedOption?.label || placeholder}
         </span>
-        <span className={`select__arrow ${open ? "select__arrow--open" : ""}`} aria-hidden="true" />
+        <span className={`select__arrow ${open ? "select__arrow--open" : ""}`} aria-hidden="true">
+          <Icon icon={downLine} />
+        </span>
       </button>
 
       {open ? (
@@ -91,7 +96,11 @@ export function Select({
                 aria-selected={selected}
               >
                 <span>{option.label}</span>
-                {selected ? <span className="select__item-check">✓</span> : null}
+                {selected ? (
+                  <span className="select__item-check">
+                    <Icon icon={checkLine} />
+                  </span>
+                ) : null}
               </button>
             );
           })}

@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { Icon } from "@iconify/react";
+import checkLine from "@iconify-icons/mingcute/check-line";
+import minusLine from "@iconify-icons/mingcute/minus-line";
 import "./Checkbox.css";
 
 /**
@@ -56,8 +59,16 @@ export function Checkbox({
         aria-pressed={isChecked}
         aria-label={label}
       >
-        {indeterminate ? <span className="checkbox__icon">−</span> : null}
-        {!indeterminate && isChecked ? <span className="checkbox__icon">✓</span> : null}
+        {indeterminate ? (
+          <span className="checkbox__icon">
+            <Icon icon={minusLine} />
+          </span>
+        ) : null}
+        {!indeterminate && isChecked ? (
+          <span className="checkbox__icon">
+            <Icon icon={checkLine} />
+          </span>
+        ) : null}
       </button>
       {showLabel ? <span className="checkbox__label">{label}</span> : null}
     </label>

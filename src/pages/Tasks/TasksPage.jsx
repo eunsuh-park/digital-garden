@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Icon } from '@iconify/react';
 import arrowUpLine from '@iconify-icons/mingcute/arrow-up-line';
 import arrowDownLine from '@iconify-icons/mingcute/arrow-down-line';
+import addLine from '@iconify-icons/mingcute/add-line';
 import { fetchLocations, fetchTasks, updateTask } from '@/shared/api/notionApi';
 import { parseLocationsResponse } from '@/entities/location/lib/notion-schema';
 import { parseTasksResponse, TASK_TYPE_LABEL_KO } from '@/entities/task/lib/notion-schema';
@@ -343,9 +344,7 @@ export default function TasksPage({ variant = 'default' }) {
         {variant === 'embedded' && (
           <div className="tasks-page__footer">
             <button type="button" className="tasks-page__add-task-btn" onClick={() => openTaskCreate()}>
-              <span className="tasks-page__add-task-icon" aria-hidden>
-                +
-              </span>
+              <Icon icon={addLine} className="tasks-page__add-task-icon" aria-hidden />
               할 일 추가
             </button>
           </div>

@@ -77,21 +77,27 @@
 }
 
 .select__arrow {
-  width: 7px;
-  height: 7px;
-  border-right: 1.5px solid var(--color-text-muted);
-  border-bottom: 1.5px solid var(--color-text-muted);
-  transform: rotate(45deg) translateY(-1px);
+  width: 14px;
+  height: 14px;
+  color: var(--color-text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
   transition: transform 0.15s ease;
 }
 
 .select__arrow--open {
-  transform: rotate(-135deg) translateY(-1px);
+  transform: rotate(180deg);
 }
 
 .select__control--disabled .select__arrow {
-  border-color: color-mix(in srgb, var(--color-text-muted) 60%, white);
+  color: color-mix(in srgb, var(--color-text-muted) 60%, white);
+}
+
+.select__arrow svg {
+  width: 14px;
+  height: 14px;
 }
 
 .select__menu {
@@ -135,8 +141,13 @@
 
 .select__item-check {
   color: var(--color-primary);
-  font-size: calc(var(--select-font-size) * 0.9);
-  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+}
+
+.select__item-check svg {
+  width: calc(var(--select-font-size) * 0.9);
+  height: calc(var(--select-font-size) * 0.9);
 }
 
 .select__item--disabled {

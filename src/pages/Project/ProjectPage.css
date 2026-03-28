@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  background: #F5F0E8;
+  background: var(--color-bg);
 }
 
 .project-page__card {
@@ -13,8 +13,8 @@
   width: 100%;
   max-width: 420px;
   padding: 24px 28px 28px;
-  background: #FDFAF5;
-  border: 1px solid #E8E0D0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 16px;
   box-shadow: 0 2px 12px rgba(90, 65, 40, 0.06);
   overflow: hidden;
@@ -23,7 +23,7 @@
 }
 
 .project-page__card:hover {
-  border-color: #C8B090;
+  border-color: color-mix(in srgb, var(--color-primary) 30%, var(--color-border));
   box-shadow: 0 8px 24px rgba(90, 65, 40, 0.12);
 }
 
@@ -33,7 +33,7 @@
   left: 0;
   width: 4px;
   height: 100%;
-  background: #3E7B27;
+  background: var(--color-primary);
   border-radius: 16px 0 0 16px;
   opacity: 0.7;
 }
@@ -47,7 +47,7 @@
   display: block;
   font-size: 11px;
   letter-spacing: 0.2em;
-  color: #A89880;
+  color: var(--color-text-muted);
   font-family: 'DM Mono', monospace;
   text-transform: uppercase;
   margin-bottom: 6px;
@@ -56,7 +56,7 @@
 .project-page__title {
   font-size: 26px;
   font-weight: 700;
-  color: #2C1F0E;
+  color: var(--color-text-strong);
   font-family: 'Noto Serif KR', Georgia, serif;
   line-height: 1.2;
 }
@@ -76,131 +76,47 @@
 
 .project-page__field-label {
   font-size: 11px;
-  color: #A89880;
+  color: var(--color-text-muted);
   font-family: 'DM Mono', monospace;
   letter-spacing: 0.04em;
 }
 
-.project-page__input {
-  width: 100%;
-  padding: 12px 14px;
-  font-size: 15px;
-  color: #2C1F0E;
-  background: #FFF;
-  border: 1px solid #E8E0D0;
-  border-radius: 10px;
-  font-family: inherit;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+.project-page__field-control {
+  max-width: 100%;
 }
 
-.project-page__input::placeholder {
-  color: #C8B090;
+.project-page__field-control.text-field {
+  max-width: 100%;
 }
 
-.project-page__input:hover {
-  border-color: #C8B090;
-}
-
-.project-page__input:focus {
-  outline: none;
-  border-color: #3E7B27;
-  box-shadow: 0 0 0 2px rgba(62, 123, 39, 0.15);
-}
-
-/* 공간 S/M/L 칩 */
-.project-page__chips {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.project-page__chips--purpose {
-  flex-direction: column;
-}
-
-.project-page__chip {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-width: 72px;
-  padding: 12px 16px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #5C4A32;
-  background: #F0EBE0;
-  border: 1px solid #E8E0D0;
-  border-radius: 12px;
-  cursor: pointer;
-  font-family: 'Noto Serif KR', Georgia, serif;
-  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-}
-
-.project-page__chip:hover {
-  background: #EDE8DE;
-  border-color: #C8B090;
-}
-
-.project-page__chip--active {
-  background: #EAF2E3;
-  border-color: #3E7B27;
-  color: #2D5016;
-}
-
-.project-page__chip-label {
-  font-size: 18px;
-  line-height: 1.2;
-}
-
-.project-page__chip-desc {
+.project-page__field-control .text-field__label {
   font-size: 11px;
-  font-weight: 400;
-  color: #8A7260;
+  color: var(--color-text-muted);
   font-family: 'DM Mono', monospace;
-  margin-top: 2px;
-}
-
-/* 활용 목적: 가로 배치 가능한 넓은 칩 */
-.project-page__chip--purpose {
-  flex-direction: row;
-  min-width: 100%;
-  text-align: left;
-  padding: 14px 18px;
-  font-size: 15px;
+  letter-spacing: 0.04em;
   font-weight: 500;
 }
 
-.project-page__chip--purpose.project-page__chip--active {
-  background: #EAF2E3;
-  border-color: #3E7B27;
-  color: #2D5016;
+.project-page__field-control .text-field__input-shell {
+  border-color: var(--color-border);
+  border-radius: 10px;
+}
+
+.project-page__tab-group {
+  gap: 8px;
 }
 
 .project-page__btn {
   margin-top: 8px;
-  padding: 14px 20px;
+  width: 100%;
+  min-height: 46px;
   font-size: 15px;
-  font-weight: 600;
-  color: #FFF;
-  background: #3E7B27;
-  border: none;
   border-radius: 12px;
-  cursor: pointer;
   font-family: 'Noto Serif KR', Georgia, serif;
-  transition: background 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
-}
-
-.project-page__btn:hover:not(:disabled) {
-  background: #2D5016;
 }
 
 .project-page__btn:active:not(:disabled) {
   transform: scale(0.98);
-}
-
-.project-page__btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 @media (min-width: 640px) {
@@ -212,12 +128,8 @@
     font-size: 28px;
   }
 
-  .project-page__chips--purpose {
+  .project-page__tab-group--purpose {
     display: grid;
     grid-template-columns: 1fr 1fr;
-  }
-
-  .project-page__chip--purpose {
-    min-width: 0;
   }
 }

@@ -61,13 +61,13 @@
   padding: 0.85rem 1rem;
   border: none;
   border-radius: 999px;
-  background: var(--map-panel-accent, #6d28d9);
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-surface);
   font: inherit;
   font-size: 0.92rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 2px 10px rgba(109, 40, 217, 0.28);
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--color-primary) 35%, transparent);
 }
 
 .plants-page__add-plant-btn:hover {
@@ -79,9 +79,9 @@
 }
 
 .plants-page__add-plant-icon {
-  font-size: 1.25rem;
-  font-weight: 500;
-  line-height: 1;
+  width: 1.1rem;
+  height: 1.1rem;
+  flex-shrink: 0;
 }
 
 .plants-page__loading {

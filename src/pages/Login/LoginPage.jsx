@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthContext';
+import TextField from '@/shared/ui/text-field/TextField';
+import TextButton from '@/shared/ui/text-button/TextButton';
 import './LoginPage.css';
 
 export default function LoginPage() {
@@ -98,85 +100,93 @@ export default function LoginPage() {
 
         <form className="login-page__form" onSubmit={setupMode ? handleSetupSubmit : handleLoginSubmit}>
           <div className="login-page__field">
-            <label className="login-page__field-label" htmlFor="login-username">
-              아이디
-            </label>
-            <input
-              id="login-username"
-              type="text"
-              className="login-page__input"
+            <TextField
+              label="아이디"
+              inputId="login-username"
+              inputType="text"
+              inputName="username"
+              autoComplete="username"
+              size="m"
+              showHelperText={false}
               placeholder="my-id"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              autoComplete="username"
+              onChange={setUsername}
+              className="login-page__field-control"
             />
           </div>
           <div className="login-page__field">
-            <label className="login-page__field-label" htmlFor="login-password">
-              비밀번호
-            </label>
-            <input
-              id="login-password"
-              type="password"
-              className="login-page__input"
+            <TextField
+              label="비밀번호"
+              inputId="login-password"
+              inputType="password"
+              inputName="password"
+              autoComplete={setupMode ? 'new-password' : 'current-password'}
+              size="m"
+              showHelperText={false}
               placeholder="••••••••"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
+              onChange={setPassword}
+              className="login-page__field-control"
             />
           </div>
           {setupMode && (
             <div className="login-page__field">
-              <label className="login-page__field-label" htmlFor="login-password-confirm">
-                비밀번호 확인
-              </label>
-              <input
-                id="login-password-confirm"
-                type="password"
-                className="login-page__input"
+              <TextField
+                label="비밀번호 확인"
+                inputId="login-password-confirm"
+                inputType="password"
+                inputName="password-confirm"
+                autoComplete="new-password"
+                size="m"
+                showHelperText={false}
                 placeholder="••••••••"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                autoComplete="new-password"
+                onChange={setConfirmPassword}
+                className="login-page__field-control"
               />
             </div>
           )}
           {message && (
             <p className={`login-page__message ${isError ? 'login-page__message--error' : ''}`}>{message}</p>
           )}
-          <button type="submit" className="login-page__btn" disabled={submitting}>
-            {submitting ? '처리 중...' : setupMode ? '계정 저장 후 시작' : '로그인'}
-          </button>
+          <TextButton
+            label={submitting ? '처리 중...' : setupMode ? '계정 저장 후 시작' : '로그인'}
+            htmlType="submit"
+            styleType="primary"
+            size="m"
+            disabled={submitting}
+            className="login-page__btn"
+          />
         </form>
 
         <div className="login-page__footer">
           {setupMode ? (
             <>
               <span className="login-page__meta">이미 계정을 설정하셨나요?</span>
-              <button
-                type="button"
-                className="login-page__link login-page__link-btn"
+              <TextButton
+                label="로그인으로 전환"
+                styleType="tertiary"
+                size="xs"
+                className="login-page__link-btn"
                 onClick={() => {
                   resetFeedback();
                   setSetupMode(false);
                 }}
-              >
-                로그인으로 전환
-              </button>
+              />
             </>
           ) : (
             <>
               <span className="login-page__meta">아이디/비밀번호를 새로 설정할까요?</span>
-              <button
-                type="button"
-                className="login-page__link login-page__link-btn"
+              <TextButton
+                label="계정 재설정"
+                styleType="tertiary"
+                size="xs"
+                className="login-page__link-btn"
                 onClick={() => {
                   resetFeedback();
                   setSetupMode(true);
                 }}
-              >
-                계정 재설정
-              </button>
+              />
             </>
           )}
         </div>

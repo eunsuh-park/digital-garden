@@ -1,4 +1,6 @@
 import "./TextButton.css";
+import { Icon } from "@iconify/react";
+import checkLine from "@iconify-icons/mingcute/check-line";
 
 /**
  * @param {{
@@ -8,6 +10,7 @@ import "./TextButton.css";
  *   size?: "l" | "m" | "s" | "xs",
  *   icon?: boolean,
  *   disabled?: boolean,
+ *   htmlType?: "button" | "submit" | "reset",
  *   onClick?: () => void,
  *   className?: string
  * }} props
@@ -19,6 +22,7 @@ export function TextButton({
   size = "l",
   icon = false,
   disabled = false,
+  htmlType = "button",
   onClick,
   className = "",
 }) {
@@ -35,8 +39,12 @@ export function TextButton({
     .join(" ");
 
   return (
-    <button type="button" className={classes} disabled={disabledState} onClick={onClick}>
-      {icon ? <span className="text-button__icon" aria-hidden="true">✓</span> : null}
+    <button type={htmlType} className={classes} disabled={disabledState} onClick={onClick}>
+      {icon ? (
+        <span className="text-button__icon" aria-hidden="true">
+          <Icon icon={checkLine} />
+        </span>
+      ) : null}
       <span>{label}</span>
     </button>
   );

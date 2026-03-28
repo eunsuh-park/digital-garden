@@ -98,6 +98,15 @@
 }
 
 .text-button__icon {
-  font-size: 0.95em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
   line-height: 1;
+}
+
+.text-button__icon svg {
+  width: 1em;
+  height: 1em;
 }

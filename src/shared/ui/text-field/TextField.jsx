@@ -1,4 +1,11 @@
 import { useState } from "react";
+import { Icon } from "@iconify/react";
+import searchLine from "@iconify-icons/mingcute/search-line";
+import closeLine from "@iconify-icons/mingcute/close-line";
+import upLine from "@iconify-icons/mingcute/up-line";
+import downLine from "@iconify-icons/mingcute/down-line";
+import checkLine from "@iconify-icons/mingcute/check-line";
+import closeCircleLine from "@iconify-icons/mingcute/close-circle-line";
 import "./TextField.css";
 
 /**
@@ -23,6 +30,10 @@ import "./TextField.css";
  *   step?: number,
  *   value?: string,
  *   defaultValue?: string,
+ *   inputType?: string,
+ *   inputId?: string,
+ *   inputName?: string,
+ *   autoComplete?: string,
  *   disabled?: boolean,
  *   onChange?: (nextValue: string) => void,
  *   className?: string
@@ -49,6 +60,10 @@ export function TextField({
   step = 1,
   value,
   defaultValue = "",
+  inputType = "text",
+  inputId,
+  inputName,
+  autoComplete,
   disabled = false,
   onChange,
   className = "",
@@ -75,7 +90,7 @@ export function TextField({
     isTextArea
       ? { rows: 4 }
       : {
-          type: "text",
+          type: inputType,
         };
   const valueLength = String(currentValue ?? "").length;
 
@@ -122,13 +137,24 @@ export function TextField({
       </div>
 
       <div className={["text-field__input-shell", `text-field__input-shell--${visualState}`].join(" ")}>
-        {normalizedVariant === "search-with-icon" ? <span className="text-field__left-icon">⌕</span> : null}
-        {normalizedVariant === "search-bar" ? <span className="text-field__left-icon">⌕</span> : null}
+        {normalizedVariant === "search-with-icon" ? (
+          <span className="text-field__left-icon">
+            <Icon icon={searchLine} />
+          </span>
+        ) : null}
+        {normalizedVariant === "search-bar" ? (
+          <span className="text-field__left-icon">
+            <Icon icon={searchLine} />
+          </span>
+        ) : null}
         {(() => {
           const DynamicControl = controlTag;
           return (
             <DynamicControl
               {...controlProps}
+              id={inputId}
+              name={inputName}
+              autoComplete={autoComplete}
               className={["text-field__control", `text-field__control--${isTextArea ? "long" : "short"}`, `text-field__control--${visualState}`].join(" ")}
               placeholder={placeholder}
               value={currentValue}
@@ -143,7 +169,7 @@ export function TextField({
         {normalizedVariant === "suffix" ? <span className="text-field__suffix">{suffixText}</span> : null}
         {(normalizedVariant === "x-mark" || clearable) && String(currentValue || "").length > 0 ? (
           <button type="button" className="text-field__icon-btn" onClick={clearValue} disabled={disabled} aria-label="지우기">
-            ×
+            <Icon icon={closeLine} />
           </button>
         ) : null}
         {showSearchButton ? (
@@ -154,10 +180,10 @@ export function TextField({
         {normalizedVariant === "stepper" ? (
           <span className="text-field__stepper">
             <button type="button" onClick={increaseStepper} disabled={disabled} aria-label="증가">
-              +
+              <Icon icon={upLine} />
             </button>
             <button type="button" onClick={decreaseStepper} disabled={disabled} aria-label="감소">
-              -
+              <Icon icon={downLine} />
             </button>
           </span>
         ) : null}
@@ -171,7 +197,7 @@ export function TextField({
       {showFeedback ? (
         <span className={`text-field__feedback text-field__feedback--${visualState}`}>
           <span className="text-field__feedback-dot" aria-hidden="true">
-            {visualState === "valid-feedback" ? "✓" : "!"}
+            <Icon icon={visualState === "valid-feedback" ? checkLine : closeCircleLine} />
           </span>
           {visualState === "valid-feedback" ? "유효한 피드백" : "유효하지 않은 피드백"}
         </span>

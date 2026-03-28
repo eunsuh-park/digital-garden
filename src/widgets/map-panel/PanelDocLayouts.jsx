@@ -12,15 +12,28 @@ function taskStatusLabel(status) {
 }
 
 function taskStatusStyle(status) {
-  if (status === 'completed') return { bg: 'rgba(39,174,96,0.12)', fg: '#27AE60' };
-  if (status === 'progress') return { bg: 'rgba(41,128,185,0.12)', fg: '#2980B9' };
-  return { bg: 'rgba(153,153,153,0.18)', fg: '#777' };
+  if (status === 'completed') return { bg: 'var(--color-success-bg)', fg: 'var(--color-success-text)' };
+  if (status === 'progress') {
+    return {
+      bg: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
+      fg: 'var(--color-primary)',
+    };
+  }
+  return { bg: 'var(--color-hover-soft)', fg: 'var(--color-text-muted)' };
 }
 
 function difficultyStyle(difficulty) {
-  if (difficulty === 'Hard') return { bg: 'rgba(192,57,43,0.12)', fg: '#C0392B' };
-  if (difficulty === 'Medium') return { bg: 'rgba(196,126,26,0.14)', fg: '#C47E1A' };
-  return { bg: 'rgba(62,123,39,0.12)', fg: '#3E7B27' };
+  if (difficulty === 'Hard') return { bg: 'var(--color-danger-bg)', fg: 'var(--color-danger-text-strong)' };
+  if (difficulty === 'Medium') {
+    return {
+      bg: 'var(--color-warning-bg)',
+      fg: 'var(--color-warning-text)',
+    };
+  }
+  return {
+    bg: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
+    fg: 'var(--color-primary)',
+  };
 }
 
 function plantStatusLabel(status) {

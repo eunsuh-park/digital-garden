@@ -287,7 +287,7 @@
 .panel-doc__cover--task .panel-doc__cover-inner {
   background: linear-gradient(
     165deg,
-    color-mix(in srgb, var(--color-info-accent) 14%, transparent),
+    color-mix(in srgb, var(--color-primary) 14%, transparent),
     color-mix(in srgb, var(--color-border) 45%, transparent)
   );
   color: var(--color-text-muted);
@@ -358,7 +358,7 @@
   background: color-mix(in srgb, var(--color-surface) 92%, transparent);
   color: var(--color-text);
   cursor: not-allowed;
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
   opacity: 0.95;
 }
 
@@ -400,8 +400,8 @@
 }
 
 .panel-doc__badge--accent {
-  background: color-mix(in srgb, var(--color-info-accent) 10%, transparent);
-  color: var(--color-info-accent);
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--color-primary);
 }
 
 .panel-doc__dl {
@@ -614,7 +614,7 @@
 
 .panel-form__chip--on {
   border-color: var(--color-primary);
-  background: color-mix(in srgb, var(--color-info-accent) 12%, transparent);
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
   color: var(--color-text);
 }
 
@@ -634,7 +634,7 @@
   padding: 0.3rem 0.55rem;
   border-radius: 999px;
   border: 1px solid var(--color-border);
-  background: color-mix(in srgb, var(--color-info-accent) 8%, transparent);
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
   font: inherit;
   font-size: 0.75rem;
   font-weight: 600;
@@ -670,7 +670,7 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 12px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
   max-height: 200px;
   overflow-y: auto;
 }
@@ -738,7 +738,7 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 16px;
-  box-shadow: var(--shadow-md);
+  box-shadow: none;
   padding: 1rem 1rem 0.95rem;
 }
 
