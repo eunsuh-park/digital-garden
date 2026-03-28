@@ -1,0 +1,71 @@
+.icon-button {
+  --ib-bg: transparent;
+  --ib-bg-hover: rgba(30, 30, 30, 0.06);
+  --ib-bg-pressed: rgba(30, 30, 30, 0.12);
+  --ib-fg: #1f2937;
+  --ib-fg-disabled: #c9c9c9;
+  width: 56px;
+  height: 56px;
+  border: none;
+  border-radius: 999px;
+  background: var(--ib-bg);
+  color: var(--ib-fg);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+}
+
+.icon-button--nobg {
+  --ib-bg: transparent;
+  --ib-bg-hover: rgba(20, 20, 20, 0.08);
+  --ib-bg-pressed: rgba(20, 20, 20, 0.14);
+  --ib-fg: #101828;
+}
+
+.icon-button--filled {
+  --ib-bg: #2b7fff;
+  --ib-bg-hover: #1f6feb;
+  --ib-bg-pressed: #1557c8;
+  --ib-fg: #ffffff;
+}
+
+.icon-button--destructive {
+  --ib-bg: transparent;
+  --ib-bg-hover: #fff3f3;
+  --ib-bg-pressed: #ffe1e1;
+  --ib-fg: #e53935;
+}
+
+.icon-button:hover:not(:disabled),
+.icon-button--hover {
+  background: var(--ib-bg-hover);
+}
+
+.icon-button--pressed {
+  background: var(--ib-bg-pressed);
+}
+
+.icon-button:disabled,
+.icon-button--disabled {
+  background: #ffffff;
+  color: var(--ib-fg-disabled);
+  cursor: not-allowed;
+}
+
+.icon-button__icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+  flex-shrink: 0;
+}
+
+.icon-button__label {
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.1;
+}

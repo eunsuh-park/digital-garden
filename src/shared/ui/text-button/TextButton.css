@@ -1,0 +1,103 @@
+.text-button {
+  --tb-bg: #2b7fff;
+  --tb-bg-hover: #1f6feb;
+  --tb-bg-focus: #1f6feb;
+  --tb-fg: #ffffff;
+  --tb-border: transparent;
+  --tb-shadow-focus: 0 0 0 2px rgba(43, 127, 255, 0.2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 999px;
+  border: 1px solid var(--tb-border);
+  background: var(--tb-bg);
+  color: var(--tb-fg);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.text-button--l {
+  min-height: 52px;
+  padding: 0 24px;
+  font-size: 22px;
+}
+
+.text-button--m {
+  min-height: 40px;
+  padding: 0 16px;
+  font-size: 18px;
+}
+
+.text-button--s {
+  min-height: 32px;
+  padding: 0 12px;
+  font-size: 14px;
+}
+
+.text-button--xs {
+  min-height: 24px;
+  padding: 0 6px;
+  font-size: 11px;
+}
+
+.text-button--primary {
+  --tb-bg: #2b7fff;
+  --tb-bg-hover: #1f6feb;
+  --tb-bg-focus: #1f6feb;
+  --tb-fg: #ffffff;
+  --tb-border: #2b7fff;
+}
+
+.text-button--secondary {
+  --tb-bg: #ffffff;
+  --tb-bg-hover: #f4f8ff;
+  --tb-bg-focus: #f4f8ff;
+  --tb-fg: #2b7fff;
+  --tb-border: #2b7fff;
+}
+
+.text-button--tertiary {
+  --tb-bg: #f3f6fb;
+  --tb-bg-hover: #e9eff8;
+  --tb-bg-focus: #e9eff8;
+  --tb-fg: #3f4b66;
+  --tb-border: #d8deea;
+}
+
+.text-button--symentic,
+.text-button--semantic {
+  --tb-bg: #1abc9c;
+  --tb-bg-hover: #12a98c;
+  --tb-bg-focus: #12a98c;
+  --tb-fg: #ffffff;
+  --tb-border: #1abc9c;
+}
+
+.text-button:hover:not(:disabled),
+.text-button--hover {
+  background: var(--tb-bg-hover);
+}
+
+.text-button--focus {
+  background: var(--tb-bg-focus);
+  box-shadow: var(--tb-shadow-focus);
+}
+
+.text-button--fasble,
+.text-button:disabled {
+  background: #f2f2f2;
+  border-color: #ebebeb;
+  color: #bdbdbd;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.text-button__icon {
+  font-size: 0.95em;
+  line-height: 1;
+}

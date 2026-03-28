@@ -1,0 +1,226 @@
+.text-field {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: var(--font-sans);
+}
+
+.text-field--l {
+  --text-field-font-size: 22px;
+  --text-field-padding-y: 8px;
+  --text-field-padding-x: 14px;
+  --text-field-height: 52px;
+}
+
+.text-field--m {
+  --text-field-font-size: 18px;
+  --text-field-padding-y: 6px;
+  --text-field-padding-x: 9px;
+  --text-field-height: 40px;
+}
+
+.text-field--s {
+  --text-field-font-size: 14px;
+  --text-field-padding-y: 5px;
+  --text-field-padding-x: 5px;
+  --text-field-height: 32px;
+}
+
+.text-field__label-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.text-field__label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #3f3f3f;
+}
+
+.text-field__required {
+  color: #ff4d4f;
+}
+
+.text-field__help-button {
+  border: 0;
+  background: transparent;
+  color: #8a8a8a;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.text-field__control {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  min-width: 0;
+  width: 100%;
+  color: #222;
+  font-size: var(--text-field-font-size);
+  font-weight: 500;
+  line-height: 1.3;
+  padding: 0;
+}
+
+.text-field__input-shell {
+  width: 100%;
+  border: 1px solid #dfdfdf;
+  border-radius: 4px;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: var(--text-field-padding-y) var(--text-field-padding-x);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.text-field__control::placeholder {
+  color: #cecece;
+}
+
+.text-field__control--short {
+  height: var(--text-field-height);
+}
+
+.text-field__control--long {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.text-field__input-shell--hover {
+  border-color: #adadad;
+}
+
+.text-field__input-shell--active {
+  border-color: #2b7fff;
+  box-shadow: 0 0 0 2px rgba(43, 127, 255, 0.16);
+}
+
+.text-field__input-shell--valid-feedback {
+  border-color: #1abc9c;
+}
+
+.text-field__input-shell--invalid-feedback {
+  border-color: #ff6b6b;
+}
+
+.text-field__input-shell--disabled {
+  border-color: #efefef;
+  background: #fafafa;
+}
+
+.text-field__control:disabled,
+.text-field__control--disabled {
+  color: #b8b8b8;
+  cursor: not-allowed;
+}
+
+.text-field--variant-text-area .text-field__input-shell {
+  align-items: flex-start;
+}
+
+.text-field--variant-text-area .text-field__control {
+  padding-top: 2px;
+}
+
+.text-field__left-icon {
+  color: #6d6d6d;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.text-field__suffix {
+  color: #b7b7b7;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.text-field__icon-btn,
+.text-field__search-btn {
+  border: 0;
+  background: transparent;
+  color: #8a8a8a;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.text-field__icon-btn {
+  font-size: 16px;
+  line-height: 1;
+  padding: 0;
+}
+
+.text-field__search-btn {
+  font-weight: 600;
+  color: #9a9a9a;
+}
+
+.text-field__stepper {
+  display: inline-flex;
+  flex-direction: column;
+  border-left: 1px solid #ececec;
+  margin-left: 2px;
+}
+
+.text-field__stepper button {
+  border: 0;
+  background: transparent;
+  color: #7d7d7d;
+  width: 18px;
+  height: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.text-field__counter {
+  font-size: 11px;
+  color: #b7b7b7;
+  font-family: var(--font-mono);
+}
+
+.text-field__help-text {
+  font-size: 12px;
+  color: #8f8f8f;
+  line-height: 1.3;
+}
+
+.text-field__feedback {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.text-field__feedback-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.text-field__feedback--valid-feedback {
+  color: #1abc9c;
+}
+
+.text-field__feedback--valid-feedback .text-field__feedback-dot {
+  background: #1abc9c;
+}
+
+.text-field__feedback--invalid-feedback {
+  color: #ff6b6b;
+}
+
+.text-field__feedback--invalid-feedback .text-field__feedback-dot {
+  background: #ff6b6b;
+}
