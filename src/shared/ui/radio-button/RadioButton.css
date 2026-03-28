@@ -3,13 +3,13 @@
   align-items: center;
   gap: 6px;
   font-family: var(--font-sans);
-  color: #2f2f2f;
+  color: var(--color-text);
 }
 
 .radio-button__control {
-  border: 1px solid #d4d4d4;
+  border: 1px solid var(--color-border);
   border-radius: 999px;
-  background: #ffffff;
+  background: var(--color-surface);
   padding: 0;
   margin: 0;
   display: inline-flex;
@@ -35,21 +35,21 @@
 }
 
 .radio-button__control--hover {
-  border-color: #a6a6a6;
+  border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
 }
 
 .radio-button__control--focus {
-  border-color: #7aaeff;
-  box-shadow: 0 0 0 2px rgba(43, 127, 255, 0.18);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 22%, transparent);
 }
 
 .radio-button__control--active {
-  border-color: #2b7fff;
+  border-color: var(--color-primary);
 }
 
 .radio-button__dot {
   border-radius: 999px;
-  background: #2b7fff;
+  background: var(--color-primary);
 }
 
 .radio-button--l .radio-button__dot {
@@ -69,20 +69,20 @@
 
 .radio-button--locked .radio-button__control {
   cursor: not-allowed;
-  border-color: #d8d8d8;
-  background: #f4f4f4;
+  border-color: var(--color-border-weak);
+  background: var(--color-hover-soft);
 }
 
 .radio-button--locked .radio-button__dot {
-  background: #bfbfbf;
+  background: color-mix(in srgb, var(--color-primary) 35%, white);
 }
 
 .radio-button__label {
   font-size: 12px;
-  color: #2f2f2f;
+  color: var(--color-text);
   line-height: 1.2;
 }
 
 .radio-button--locked .radio-button__label {
-  color: #8f8f8f;
+  color: var(--color-text-muted);
 }

@@ -1,10 +1,10 @@
 .text-button {
-  --tb-bg: #2b7fff;
-  --tb-bg-hover: #1f6feb;
-  --tb-bg-focus: #1f6feb;
-  --tb-fg: #ffffff;
+  --tb-bg: var(--color-primary);
+  --tb-bg-hover: var(--brand-primary-light);
+  --tb-bg-focus: var(--brand-primary-light);
+  --tb-fg: var(--color-surface);
   --tb-border: transparent;
-  --tb-shadow-focus: 0 0 0 2px rgba(43, 127, 255, 0.2);
+  --tb-shadow-focus: 0 0 0 2px color-mix(in srgb, var(--color-primary) 24%, transparent);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -46,36 +46,36 @@
 }
 
 .text-button--primary {
-  --tb-bg: #2b7fff;
-  --tb-bg-hover: #1f6feb;
-  --tb-bg-focus: #1f6feb;
-  --tb-fg: #ffffff;
-  --tb-border: #2b7fff;
+  --tb-bg: var(--color-primary);
+  --tb-bg-hover: var(--brand-primary-light);
+  --tb-bg-focus: var(--brand-primary-light);
+  --tb-fg: var(--color-surface);
+  --tb-border: var(--color-primary);
 }
 
 .text-button--secondary {
-  --tb-bg: #ffffff;
-  --tb-bg-hover: #f4f8ff;
-  --tb-bg-focus: #f4f8ff;
-  --tb-fg: #2b7fff;
-  --tb-border: #2b7fff;
+  --tb-bg: var(--color-surface);
+  --tb-bg-hover: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+  --tb-bg-focus: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+  --tb-fg: var(--color-primary);
+  --tb-border: var(--color-primary);
 }
 
 .text-button--tertiary {
-  --tb-bg: #f3f6fb;
-  --tb-bg-hover: #e9eff8;
-  --tb-bg-focus: #e9eff8;
-  --tb-fg: #3f4b66;
-  --tb-border: #d8deea;
+  --tb-bg: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
+  --tb-bg-hover: color-mix(in srgb, var(--color-primary) 16%, var(--color-surface));
+  --tb-bg-focus: color-mix(in srgb, var(--color-primary) 16%, var(--color-surface));
+  --tb-fg: var(--brand-primary-strong);
+  --tb-border: color-mix(in srgb, var(--color-primary) 22%, var(--color-border));
 }
 
 .text-button--symentic,
 .text-button--semantic {
-  --tb-bg: #1abc9c;
-  --tb-bg-hover: #12a98c;
-  --tb-bg-focus: #12a98c;
-  --tb-fg: #ffffff;
-  --tb-border: #1abc9c;
+  --tb-bg: var(--brand-primary-light);
+  --tb-bg-hover: var(--color-primary);
+  --tb-bg-focus: var(--color-primary);
+  --tb-fg: var(--color-surface);
+  --tb-border: var(--brand-primary-light);
 }
 
 .text-button:hover:not(:disabled),
@@ -90,9 +90,9 @@
 
 .text-button--fasble,
 .text-button:disabled {
-  background: #f2f2f2;
-  border-color: #ebebeb;
-  color: #bdbdbd;
+  background: var(--color-hover-soft);
+  border-color: var(--color-border-weak);
+  color: color-mix(in srgb, var(--color-text-muted) 70%, white);
   cursor: not-allowed;
   box-shadow: none;
 }

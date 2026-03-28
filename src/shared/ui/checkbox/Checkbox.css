@@ -3,7 +3,7 @@
   align-items: center;
   gap: 6px;
   font-family: var(--font-sans);
-  color: #2f2f2f;
+  color: var(--color-text);
 }
 
 .checkbox__control {
@@ -35,32 +35,32 @@
 }
 
 .checkbox__control--off {
-  background: #ffffff;
-  border: 1px solid #d4d4d4;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
 }
 
 .checkbox__control--off.checkbox__control--hover {
-  border-color: #a6a6a6;
+  border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
 }
 
 .checkbox__control--off.checkbox__control--focus {
-  border-color: #7aaeff;
-  box-shadow: 0 0 0 2px rgba(43, 127, 255, 0.18);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 22%, transparent);
 }
 
 .checkbox__control--on {
-  background: #2b7fff;
-  border: 1px solid #2b7fff;
-  color: #ffffff;
+  background: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  color: var(--color-surface);
 }
 
 .checkbox__control--on.checkbox__control--hover {
-  background: #1f6feb;
-  border-color: #1f6feb;
+  background: var(--brand-primary-light);
+  border-color: var(--brand-primary-light);
 }
 
 .checkbox__control--on.checkbox__control--focus {
-  box-shadow: 0 0 0 2px rgba(43, 127, 255, 0.22);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 26%, transparent);
 }
 
 .checkbox__control--locked {
@@ -68,13 +68,13 @@
 }
 
 .checkbox__control--locked.checkbox__control--off {
-  background: #f0f0f0;
-  border-color: #d9d9d9;
+  background: var(--color-hover-soft);
+  border-color: var(--color-border-weak);
 }
 
 .checkbox__control--locked.checkbox__control--on {
-  background: #bfbfbf;
-  border-color: #bfbfbf;
+  background: color-mix(in srgb, var(--color-primary) 35%, white);
+  border-color: color-mix(in srgb, var(--color-primary) 35%, white);
 }
 
 .checkbox__icon {
@@ -97,9 +97,9 @@
 .checkbox__label {
   font-size: 12px;
   line-height: 1.2;
-  color: #2f2f2f;
+  color: var(--color-text);
 }
 
 .checkbox--locked .checkbox__label {
-  color: #8f8f8f;
+  color: var(--color-text-muted);
 }

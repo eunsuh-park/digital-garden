@@ -6,6 +6,7 @@
   flex-direction: column;
   gap: 16px;
   overflow: auto;
+  font-family: var(--font-sans);
 }
 
 .ui-lab__header {
@@ -80,6 +81,11 @@
 .ui-lab__controls button {
   cursor: pointer;
   font-weight: 600;
+  border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
+}
+
+.ui-lab__controls button:hover {
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
 }
 
 .ui-lab__checkbox-label {

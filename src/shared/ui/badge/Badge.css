@@ -7,8 +7,8 @@
   min-width: var(--badge-min-width);
   height: var(--badge-height);
   padding: 0 var(--badge-padding-x);
-  background: var(--badge-bg, #ef2b2a);
-  color: var(--badge-fg, #ffffff);
+  background: var(--badge-bg, var(--color-primary));
+  color: var(--badge-fg, var(--color-surface));
   font-family: var(--font-sans);
   font-size: var(--badge-font-size);
   font-weight: 600;

@@ -2,9 +2,9 @@
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
-  border: 1px solid #dcdcdc;
-  background: #ffffff;
-  color: #5b5b5b;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
   font-family: var(--font-sans);
   font-weight: 700;
   line-height: 1;
@@ -26,22 +26,22 @@
 
 .button-tab:hover:not(:disabled),
 .button-tab--hover {
-  border-color: #bbbbbb;
-  background: #f7f7f7;
-  color: #3f3f3f;
+  border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+  color: var(--color-text-strong);
 }
 
 .button-tab--active {
-  border-color: #2b7fff;
-  background: #2b7fff;
-  color: #ffffff;
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-surface);
 }
 
 .button-tab:disabled,
 .button-tab--disabled {
-  border-color: #ececec;
-  background: #f7f7f7;
-  color: #c0c0c0;
+  border-color: var(--color-border-weak);
+  background: var(--color-hover-soft);
+  color: color-mix(in srgb, var(--color-text-muted) 70%, white);
   cursor: not-allowed;
 }
 

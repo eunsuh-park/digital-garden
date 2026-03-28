@@ -1,9 +1,9 @@
 .icon-button {
   --ib-bg: transparent;
-  --ib-bg-hover: rgba(30, 30, 30, 0.06);
-  --ib-bg-pressed: rgba(30, 30, 30, 0.12);
-  --ib-fg: #1f2937;
-  --ib-fg-disabled: #c9c9c9;
+  --ib-bg-hover: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  --ib-bg-pressed: color-mix(in srgb, var(--color-primary) 18%, transparent);
+  --ib-fg: var(--color-text-strong);
+  --ib-fg-disabled: color-mix(in srgb, var(--color-text-muted) 70%, white);
   width: 56px;
   height: 56px;
   border: none;
@@ -22,23 +22,23 @@
 
 .icon-button--nobg {
   --ib-bg: transparent;
-  --ib-bg-hover: rgba(20, 20, 20, 0.08);
-  --ib-bg-pressed: rgba(20, 20, 20, 0.14);
-  --ib-fg: #101828;
+  --ib-bg-hover: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  --ib-bg-pressed: color-mix(in srgb, var(--color-primary) 20%, transparent);
+  --ib-fg: var(--color-text);
 }
 
 .icon-button--filled {
-  --ib-bg: #2b7fff;
-  --ib-bg-hover: #1f6feb;
-  --ib-bg-pressed: #1557c8;
-  --ib-fg: #ffffff;
+  --ib-bg: var(--color-primary);
+  --ib-bg-hover: var(--brand-primary-light);
+  --ib-bg-pressed: var(--brand-primary-strong);
+  --ib-fg: var(--color-surface);
 }
 
 .icon-button--destructive {
   --ib-bg: transparent;
-  --ib-bg-hover: #fff3f3;
-  --ib-bg-pressed: #ffe1e1;
-  --ib-fg: #e53935;
+  --ib-bg-hover: color-mix(in srgb, var(--color-danger-text) 8%, var(--color-surface));
+  --ib-bg-pressed: color-mix(in srgb, var(--color-danger-text) 14%, var(--color-surface));
+  --ib-fg: var(--color-danger-text);
 }
 
 .icon-button:hover:not(:disabled),
@@ -52,7 +52,7 @@
 
 .icon-button:disabled,
 .icon-button--disabled {
-  background: #ffffff;
+  background: var(--color-surface);
   color: var(--ib-fg-disabled);
   cursor: not-allowed;
 }
