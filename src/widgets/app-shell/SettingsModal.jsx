@@ -21,13 +21,44 @@ import Checkbox from "@/shared/ui/checkbox/Checkbox";
 import "./SettingsModal.css";
 
 const NAV_ITEMS = [
-  { label: "계정 / 사용자", value: "account", icon: user3Line },
-  { label: "정원 기본 설정", value: "garden", icon: mapLine },
-  { label: "화면 / 인터페이스", value: "interface", icon: eye2Line },
-  { label: "작업 / 일지 설정", value: "task", icon: task2Line },
-  { label: "알림", value: "notify", icon: notificationLine },
-  { label: "기타", value: "etc", icon: settings3Line },
+  {
+    label: "계정",
+    value: "account",
+    icon: user3Line,
+    summary: "계정 정보, 프로필 이미지, 로그인 세션 관련 기본 항목을 설정합니다.",
+  },
+  {
+    label: "정원 설정",
+    value: "garden",
+    icon: mapLine,
+    summary: "정원의 기본 이름, 보기 기준, 섹션 필터와 지도 스타일을 설정합니다.",
+  },
+  {
+    label: "화면",
+    value: "interface",
+    icon: eye2Line,
+    summary: "화면 테마, 애니메이션, UI 밀도 등 인터페이스 표현 방식을 조정합니다.",
+  },
+  {
+    label: "작업·일지",
+    value: "task",
+    icon: task2Line,
+    summary: "작업 기본 상태와 추천 노출, 일지 자동 묶기 기준을 관리합니다.",
+  },
+  {
+    label: "알림",
+    value: "notify",
+    icon: notificationLine,
+    summary: "체크리스트와 식물 관리 알림, 채널(이메일/푸시) 수신 여부를 설정합니다.",
+  },
+  {
+    label: "기타",
+    value: "etc",
+    icon: settings3Line,
+    summary: "언어, 도움말, 피드백 전송 같은 부가 기능을 설정합니다.",
+  },
 ];
+const NAV_TAB_ITEMS = NAV_ITEMS.map(({ label, value }) => ({ label, value }));
 
 const VIEW_BASE_OPTIONS = [
   { label: "도로 기준", value: "road" },
@@ -101,10 +132,9 @@ export default function SettingsModal({ open, onClose }) {
   const [plantPeriodNotifyOn, setPlantPeriodNotifyOn] = useState(true);
   const [channels, setChannels] = useState({ email: true, push: true });
 
-  const activeNavLabel = useMemo(
-    () => NAV_ITEMS.find((item) => item.value === activeNav)?.label ?? "설정",
-    [activeNav]
-  );
+  const activeNavItem = useMemo(() => NAV_ITEMS.find((item) => item.value === activeNav), [activeNav]);
+  const activeNavLabel = activeNavItem?.label ?? "설정";
+  const activeNavSummary = activeNavItem?.summary ?? "";
 
   useEffect(() => {
     if (!open) return undefined;
@@ -131,7 +161,7 @@ export default function SettingsModal({ open, onClose }) {
       case "account":
         return (
           <>
-            <SettingRow title="이름 / 닉네임">
+            <SettingRow title="닉네임">
               <TextField size="s" label="" placeholder="이름 또는 닉네임" showHelperText={false} />
             </SettingRow>
             <Divider />
@@ -255,8 +285,8 @@ export default function SettingsModal({ open, onClose }) {
         </button>
 
         <aside className="settings-modal__sidebar">
-          <SectionHeading label="NowGarden" title="설정" description="항목을 선택해 상세 설정을 확인하세요." compact />
-          <div className="settings-modal__sidebar-nav">
+          <SectionHeading title="설정" compact />
+          <div className="settings-modal__sidebar-nav settings-modal__sidebar-nav--list">
             {NAV_ITEMS.map((item) => (
               <SettingsNavItem
                 key={item.value}
@@ -267,12 +297,21 @@ export default function SettingsModal({ open, onClose }) {
               />
             ))}
           </div>
+          <div className="settings-modal__sidebar-nav settings-modal__sidebar-nav--tabs">
+            <ButtonTabGroup
+              items={NAV_TAB_ITEMS}
+              value={activeNav}
+              onChange={setActiveNav}
+              size="m"
+              className="settings-modal__mobile-tabs"
+            />
+          </div>
         </aside>
 
         <Container className="settings-modal__content-shell">
           <div className="settings-modal__content">
             <div className="settings-modal__content-body">
-              <SectionHeading title={activeNavLabel} description="v0.1 임시 구조입니다. 기능 연결은 이후 단계에서 진행합니다." />
+              <SectionHeading title={activeNavLabel} description={activeNavSummary} />
               {renderContent()}
             </div>
             <div className="settings-modal__footer-actions">
