@@ -6,7 +6,6 @@ import mapLine from "@iconify-icons/mingcute/map-line";
 import eye2Line from "@iconify-icons/mingcute/eye-2-line";
 import task2Line from "@iconify-icons/mingcute/task-2-line";
 import notificationLine from "@iconify-icons/mingcute/notification-line";
-import bookmarkFill from "@iconify-icons/mingcute/bookmark-fill";
 import settings3Line from "@iconify-icons/mingcute/settings-3-line";
 import Container from "@/shared/ui/container/Container";
 import Divider from "@/shared/ui/divider/Divider";
@@ -19,7 +18,6 @@ import Select from "@/shared/ui/select/Select";
 import { ButtonTabGroup } from "@/shared/ui/button-tab/ButtonTab";
 import { RadioGroup } from "@/shared/ui/radio-button/RadioButton";
 import Checkbox from "@/shared/ui/checkbox/Checkbox";
-import Badge from "@/shared/ui/badge/Badge";
 import "./SettingsModal.css";
 
 const NAV_ITEMS = [
@@ -28,7 +26,6 @@ const NAV_ITEMS = [
   { label: "화면 / 인터페이스", value: "interface", icon: eye2Line },
   { label: "작업 / 일지 설정", value: "task", icon: task2Line },
   { label: "알림", value: "notify", icon: notificationLine },
-  { label: "데이터 / 연동", value: "data", icon: bookmarkFill },
   { label: "기타", value: "etc", icon: settings3Line },
 ];
 
@@ -71,11 +68,6 @@ const LANGUAGE_OPTIONS = [
   { label: "자동 감지", value: "auto" },
 ];
 
-const UI_TONE_OPTIONS = [
-  { label: "라이트", value: "light" },
-  { label: "다크", value: "dark" },
-];
-
 const EMAIL_PUSH_OPTIONS = [
   { id: "email", label: "이메일" },
   { id: "push", label: "푸시" },
@@ -95,7 +87,6 @@ function SettingRow({ title, description = "", children, multiline = false, dang
 
 export default function SettingsModal({ open, onClose }) {
   const [activeNav, setActiveNav] = useState("account");
-  const [uiTone, setUiTone] = useState("light");
   const [viewBase, setViewBase] = useState("road");
   const [sectionFilter, setSectionFilter] = useState("all");
   const [mapStyle, setMapStyle] = useState("illustration");
@@ -141,11 +132,11 @@ export default function SettingsModal({ open, onClose }) {
         return (
           <>
             <SettingRow title="이름 / 닉네임">
-              <TextField size="s" label="표시 이름" placeholder="이름 또는 닉네임" showHelperText={false} />
+              <TextField size="s" label="" placeholder="이름 또는 닉네임" showHelperText={false} />
             </SettingRow>
             <Divider />
             <SettingRow title="이메일">
-              <TextField size="s" label="이메일 주소" placeholder="you@example.com" showHelperText={false} />
+              <TextField size="s" label="" placeholder="you@example.com" showHelperText={false} />
             </SettingRow>
             <Divider />
             <SettingRow title="프로필 이미지" description="추후 업로드/크롭 기능과 연동될 자리입니다.">
@@ -161,11 +152,7 @@ export default function SettingsModal({ open, onClose }) {
         return (
           <>
             <SettingRow title="정원 이름">
-              <TextField size="s" label="정원 이름" placeholder="나의 정원" showHelperText={false} />
-            </SettingRow>
-            <Divider />
-            <SettingRow title="위치 (지도 / 텍스트)" description="지도 picker는 추후 확장 예정입니다.">
-              <TextButton label="Map picker (placeholder)" styleType="secondary" size="s" />
+              <TextField size="s" label="" placeholder="나의 정원" showHelperText={false} />
             </SettingRow>
             <Divider />
             <SettingRow title="기본 뷰 기준">
@@ -175,6 +162,10 @@ export default function SettingsModal({ open, onClose }) {
             <SettingRow title="기본 섹션 필터 상태">
               <Select options={FILTER_OPTIONS} value={sectionFilter} onChange={setSectionFilter} size="m" />
             </SettingRow>
+            <Divider />
+            <SettingRow title="지도 스타일">
+              <RadioGroup options={MAP_STYLE_OPTIONS} value={mapStyle} onChange={setMapStyle} size="s" />
+            </SettingRow>
           </>
         );
       case "interface":
@@ -182,10 +173,6 @@ export default function SettingsModal({ open, onClose }) {
           <>
             <SettingRow title="다크 / 라이트 모드">
               <ToggleButton size="m" checked={darkModeOn} onChange={setDarkModeOn} ariaLabel="다크 모드 토글" />
-            </SettingRow>
-            <Divider />
-            <SettingRow title="지도 스타일">
-              <RadioGroup options={MAP_STYLE_OPTIONS} value={mapStyle} onChange={setMapStyle} size="s" />
             </SettingRow>
             <Divider />
             <SettingRow title="애니메이션 사용 여부">
@@ -239,41 +226,6 @@ export default function SettingsModal({ open, onClose }) {
             </SettingRow>
           </>
         );
-      case "data":
-        return (
-          <>
-            <SettingRow title="Notion 연동 상태">
-              <Badge count="연결됨" size="l" ariaLabel="Notion 연결 상태" />
-            </SettingRow>
-            <Divider />
-            <SettingRow title="데이터 동기화">
-              <TextButton label="지금 동기화" styleType="secondary" size="s" />
-            </SettingRow>
-            <Divider />
-            <SettingRow title="내보내기 (Export)">
-              <TextButton label="Export JSON" styleType="tertiary" size="s" />
-            </SettingRow>
-            <Divider />
-            <SettingRow
-              title="초기화"
-              description="데이터 초기화는 되돌릴 수 없습니다."
-              danger
-            >
-              <ActionPopover
-                title="초기화 확인"
-                subtitle="위험 작업"
-                content="정원 데이터와 개인 설정을 모두 초기화하는 자리입니다."
-                placement="top"
-                align="right"
-                trigger="click"
-                showFooter={false}
-                bodyMaxHeight={120}
-              >
-                <TextButton label="초기화" styleType="danger" size="s" />
-              </ActionPopover>
-            </SettingRow>
-          </>
-        );
       case "etc":
       default:
         return (
@@ -319,11 +271,11 @@ export default function SettingsModal({ open, onClose }) {
 
         <Container className="settings-modal__content-shell">
           <div className="settings-modal__content">
-            <SectionHeading title={activeNavLabel} description="v0.1 임시 구조입니다. 기능 연결은 이후 단계에서 진행합니다." />
-            {renderContent()}
-            <Divider />
+            <div className="settings-modal__content-body">
+              <SectionHeading title={activeNavLabel} description="v0.1 임시 구조입니다. 기능 연결은 이후 단계에서 진행합니다." />
+              {renderContent()}
+            </div>
             <div className="settings-modal__footer-actions">
-              <ButtonTabGroup items={UI_TONE_OPTIONS} value={uiTone} onChange={setUiTone} size="m" />
               <TextButton label="취소" styleType="tertiary" size="s" onClick={onClose} />
               <TextButton label="임시 저장" styleType="primary" size="s" />
             </div>
