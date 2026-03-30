@@ -18,7 +18,7 @@ import './NavDrawer.css';
  * 태블릿: 프로젝트 + 지도/할일/식물 (CSS로 하단 푸터 숨김)
  * 모바일: 위 + 설정/프로필/로그아웃
  */
-export default function NavDrawer({ isOpen, onClose, onLogout }) {
+export default function NavDrawer({ isOpen, onClose, onOpenSettings, onLogout }) {
   useEffect(() => {
     if (!isOpen) return undefined;
     const prev = document.body.style.overflow;
@@ -127,7 +127,7 @@ export default function NavDrawer({ isOpen, onClose, onLogout }) {
           </section>
 
           <section className="nav-drawer__footer" aria-label="계정(플레이스홀더)">
-            <button type="button" className="nav-drawer__footer-btn">
+            <button type="button" className="nav-drawer__footer-btn" onClick={onOpenSettings}>
               <Icon icon={settings3Line} width={20} height={20} />
               설정
             </button>

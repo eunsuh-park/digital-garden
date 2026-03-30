@@ -11,7 +11,7 @@ import './AppBar.css';
  * 태블릿·모바일 상단 App Bar — 로고 중앙, 좌측 메뉴
  * 태블릿(768~1023): 우측에 설정·프로필·로그아웃
  */
-export default function AppBar({ onOpenMenu, onLogout }) {
+export default function AppBar({ onOpenMenu, onOpenSettings, onLogout }) {
   return (
     <header className="app-bar">
       <button
@@ -28,7 +28,7 @@ export default function AppBar({ onOpenMenu, onLogout }) {
       </Link>
 
       <div className="app-bar__end" aria-label="계정 메뉴(플레이스홀더)">
-        <button type="button" className="app-bar__icon-btn" aria-label="설정 (준비 중)">
+        <button type="button" className="app-bar__icon-btn" aria-label="설정 열기" onClick={onOpenSettings}>
           <Icon icon={settings3Line} width={22} height={22} />
         </button>
         <button type="button" className="app-bar__icon-btn" aria-label="프로필 (준비 중)">
