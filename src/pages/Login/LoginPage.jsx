@@ -10,12 +10,12 @@ import './LoginPage.css';
 export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, credentialsConfigured, login, setupCredentials } = useAuth();
+  const { isAuthenticated, login, register } = useAuth();
 
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [setupMode, setSetupMode] = useState(() => !credentialsConfigured);
+  const [setupMode, setSetupMode] = useState(false);
   const [message, setMessage] = useState('');
   const [isError, setIsError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -35,23 +35,19 @@ export default function LoginPage() {
     e.preventDefault();
     resetFeedback();
 
-    if (!username.trim() || !password) {
+    const normalizedEmail = email.trim();
+    if (!normalizedEmail || !password) {
       setIsError(true);
-      setMessage('아이디와 비밀번호를 모두 입력해 주세요.');
+      setMessage('이메일과 비밀번호를 모두 입력해 주세요.');
       return;
     }
 
     setSubmitting(true);
     try {
-      const result = await login(username.trim(), password);
+      const result = await login(normalizedEmail, password);
       if (!result.ok) {
         setIsError(true);
-        if (result.reason === 'missing_credentials') {
-          setMessage('등록된 계정이 없습니다. 아래에서 먼저 계정을 설정해 주세요.');
-          setSetupMode(true);
-        } else {
-          setMessage('아이디 또는 비밀번호가 올바르지 않습니다.');
-        }
+        setMessage(result.reason || '로그인에 실패했습니다. 이메일/비밀번호를 확인해 주세요.');
         return;
       }
 
@@ -65,10 +61,10 @@ export default function LoginPage() {
     e.preventDefault();
     resetFeedback();
 
-    const normalizedUsername = username.trim();
-    if (!normalizedUsername || !password || !confirmPassword) {
+    const normalizedEmail = email.trim();
+    if (!normalizedEmail || !password || !confirmPassword) {
       setIsError(true);
-      setMessage('아이디, 비밀번호, 비밀번호 확인을 모두 입력해 주세요.');
+      setMessage('이메일, 비밀번호, 비밀번호 확인을 모두 입력해 주세요.');
       return;
     }
     if (password.length < 8) {
@@ -84,8 +80,17 @@ export default function LoginPage() {
 
     setSubmitting(true);
     try {
-      await setupCredentials(normalizedUsername, password);
-      navigate('/', { replace: true });
+      const result = await register(normalizedEmail, password);
+      if (!result.ok) {
+        setIsError(true);
+        setMessage(result.reason || '회원가입에 실패했습니다.');
+        return;
+      }
+      setIsError(false);
+      setMessage('회원가입 성공! 이제 로그인해 주세요.');
+      setSetupMode(false);
+      setPassword('');
+      setConfirmPassword('');
     } finally {
       setSubmitting(false);
     }
@@ -103,7 +108,7 @@ export default function LoginPage() {
             <>
               {setupMode ? (
                 <>
-                  <span className="login-page__meta">이미 계정을 설정하셨나요?</span>
+                  <span className="login-page__meta">이미 계정이 있으신가요?</span>
                   <TextButton
                     label="로그인으로 전환"
                     styleType="tertiary"
@@ -117,9 +122,9 @@ export default function LoginPage() {
                 </>
               ) : (
                 <>
-                  <span className="login-page__meta">아이디/비밀번호를 새로 설정할까요?</span>
+                  <span className="login-page__meta">계정이 없으신가요?</span>
                   <TextButton
-                    label="계정 재설정"
+                    label="회원가입"
                     styleType="tertiary"
                     size="xs"
                     className="login-page__link-btn"
@@ -136,16 +141,16 @@ export default function LoginPage() {
           <form className="login-page__form" onSubmit={setupMode ? handleSetupSubmit : handleLoginSubmit}>
             <div className="login-page__field">
               <TextField
-                label="아이디"
-                inputId="login-username"
-                inputType="text"
-                inputName="username"
-                autoComplete="username"
+                label="이메일"
+                inputId="login-email"
+                inputType="email"
+                inputName="email"
+                autoComplete="email"
                 size="m"
                 showHelperText={false}
-                placeholder="my-id"
-                value={username}
-                onChange={setUsername}
+                placeholder="you@example.com"
+                value={email}
+                onChange={setEmail}
                 className="login-page__field-control"
               />
             </div>
@@ -185,7 +190,7 @@ export default function LoginPage() {
               <p className={`login-page__message ${isError ? 'login-page__message--error' : ''}`}>{message}</p>
             )}
             <TextButton
-              label={submitting ? '처리 중...' : setupMode ? '계정 저장 후 시작' : '로그인'}
+              label={submitting ? '처리 중...' : setupMode ? '회원가입' : '로그인'}
               htmlType="submit"
               styleType="primary"
               size="m"

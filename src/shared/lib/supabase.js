@@ -1,1 +1,1 @@
-export { supabase } from './supabaseClient.js';
+export { supabase } from '@/lib/supabase';

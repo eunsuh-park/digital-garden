@@ -1,47 +1,71 @@
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import {
-  clearSession,
-  hasStoredCredentials,
-  setupCredentials as setupStoredCredentials,
-  verifyAndLogin,
-} from '@/shared/lib/localAuth';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { getCurrentUser, signIn, signOut, signUp } from '@/shared/api/auth';
+import { supabase } from '@/shared/lib/supabase';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
-  const [credentialsConfigured, setCredentialsConfigured] = useState(() => hasStoredCredentials());
+  const [isAuthReady, setIsAuthReady] = useState(false);
 
-  const login = useCallback(async (username, password) => {
-    const result = await verifyAndLogin(username, password);
-    if (result.ok) {
-      setCurrentUser(username);
-      return { ok: true };
+  useEffect(() => {
+    let isMounted = true;
+
+    async function bootstrapAuth() {
+      const user = await getCurrentUser();
+      if (!isMounted) return;
+      setCurrentUser(user ?? null);
+      setIsAuthReady(true);
     }
-    return result;
+
+    bootstrapAuth();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setCurrentUser(session?.user ?? null);
+      setIsAuthReady(true);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
-  const logout = useCallback(() => {
-    clearSession();
+  const login = useCallback(async (email, password) => {
+    const result = await signIn(email, password);
+    if (result.error) {
+      return { ok: false, reason: result.error.message, error: result.error };
+    }
+    setCurrentUser(result.data?.user ?? null);
+    return { ok: true, data: result.data };
+  }, []);
+
+  const register = useCallback(async (email, password) => {
+    const result = await signUp(email, password);
+    if (result.error) {
+      return { ok: false, reason: result.error.message, error: result.error };
+    }
+    setCurrentUser(result.data?.user ?? null);
+    return { ok: true, data: result.data };
+  }, []);
+
+  const logout = useCallback(async () => {
+    await signOut();
     setCurrentUser(null);
-  }, []);
-
-  const setupCredentials = useCallback(async (username, password) => {
-    await setupStoredCredentials(username, password);
-    setCredentialsConfigured(true);
-    setCurrentUser(username);
   }, []);
 
   const value = useMemo(
     () => ({
       isAuthenticated: Boolean(currentUser),
       currentUser,
-      credentialsConfigured,
+      isAuthReady,
       login,
+      register,
       logout,
-      setupCredentials,
     }),
-    [currentUser, credentialsConfigured, login, logout, setupCredentials]
+    [currentUser, isAuthReady, login, register, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
