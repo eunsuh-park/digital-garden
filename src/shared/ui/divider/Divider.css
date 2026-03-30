@@ -1,0 +1,64 @@
+.divider {
+  --divider-color: var(--color-border);
+  position: relative;
+}
+
+.divider--tone-muted {
+  --divider-color: var(--color-border-weak);
+}
+
+.divider--horizontal {
+  width: 100%;
+  border-top: 1px solid var(--divider-color);
+}
+
+.divider--vertical {
+  display: inline-block;
+  width: 1px;
+  min-height: 20px;
+  background: var(--divider-color);
+  vertical-align: middle;
+}
+
+.divider--dashed.divider--horizontal {
+  border-top-style: dashed;
+}
+
+.divider--with-label {
+  border-top: 0;
+}
+
+.divider--with-label::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: 1px solid var(--divider-color);
+}
+
+.divider--dashed.divider--with-label::before {
+  border-top-style: dashed;
+}
+
+.divider__label {
+  position: relative;
+  display: inline-block;
+  padding: 0 10px;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-family: var(--font-mono);
+}
+
+.divider--left .divider__label {
+  margin-left: 0;
+}
+
+.divider--center {
+  text-align: center;
+}
+
+.divider--right {
+  text-align: right;
+}

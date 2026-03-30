@@ -5,7 +5,7 @@ import checkLine from "@iconify-icons/mingcute/check-line";
 /**
  * @param {{
  *   label?: string,
- *   styleType?: "primary" | "secondary" | "tertiary" | "symentic" | "semantic",
+ *   styleType?: "primary" | "secondary" | "tertiary" | "danger" | "symentic" | "semantic",
  *   state?: "able" | "hover" | "focus" | "fasble",
  *   size?: "l" | "m" | "s" | "xs",
  *   icon?: boolean,

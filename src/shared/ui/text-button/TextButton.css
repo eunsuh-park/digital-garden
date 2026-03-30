@@ -69,6 +69,14 @@
   --tb-border: color-mix(in srgb, var(--color-primary) 22%, var(--color-border));
 }
 
+.text-button--danger {
+  --tb-bg: var(--color-danger-bg);
+  --tb-bg-hover: color-mix(in srgb, var(--color-danger-bg) 80%, black);
+  --tb-bg-focus: color-mix(in srgb, var(--color-danger-bg) 80%, black);
+  --tb-fg: var(--color-surface);
+  --tb-border: var(--color-danger-bg);
+}
+
 .text-button--symentic,
 .text-button--semantic {
   --tb-bg: var(--brand-primary-light);

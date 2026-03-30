@@ -1,71 +1,19 @@
-/* 카드 컴포넌트(TaskCard, PlantCard)와 동일한 톤: 배경·테두리·그림자·타이포 */
-.login-page {
+.login-page__container {
   min-height: calc(100vh - 60px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
-  background: var(--color-bg);
 }
 
 .login-page__card {
-  position: relative;
-  width: 100%;
   max-width: 380px;
-  padding: 24px 28px 28px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(90, 65, 40, 0.06);
-  overflow: hidden;
-  transition: box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-    border-color 0.25s ease;
 }
 
-.login-page__card:hover {
-  border-color: color-mix(in srgb, var(--color-primary) 30%, var(--color-border));
-  box-shadow: 0 8px 24px rgba(90, 65, 40, 0.12);
-}
-
-.login-page__accent {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 4px;
-  height: 100%;
-  background: var(--color-primary);
-  border-radius: 16px 0 0 16px;
-  opacity: 0.7;
-}
-
-.login-page__header {
-  padding-left: 8px;
-  margin-bottom: 24px;
-}
-
-.login-page__label {
-  display: block;
-  font-size: 11px;
-  letter-spacing: 0.2em;
-  color: var(--color-text-muted);
-  font-family: 'DM Mono', monospace;
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-
-.login-page__title {
-  font-size: 26px;
-  font-weight: 700;
-  color: var(--color-text-strong);
-  font-family: 'Noto Serif KR', Georgia, serif;
-  line-height: 1.2;
+.login-page__body {
+  gap: 0;
 }
 
 .login-page__form {
   display: flex;
   flex-direction: column;
   gap: 18px;
-  padding-left: 8px;
 }
 
 .login-page__field {
@@ -85,7 +33,7 @@
 .login-page__field-control .text-field__label {
   font-size: 11px;
   color: var(--color-text-muted);
-  font-family: 'DM Mono', monospace;
+  font-family: "DM Mono", monospace;
   letter-spacing: 0.04em;
   font-weight: 500;
 }
@@ -101,34 +49,23 @@
   border-radius: 12px;
   min-height: 46px;
   font-size: 15px;
-  font-family: 'Noto Serif KR', Georgia, serif;
+  font-family: "Noto Serif KR", Georgia, serif;
 }
 
 .login-page__btn:active {
   transform: scale(0.98);
 }
 
-.login-page__footer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid var(--color-border);
-  padding-left: 8px;
-}
-
 .login-page__meta {
   font-size: 12px;
   color: var(--color-text-muted);
-  font-family: 'DM Mono', monospace;
+  font-family: "DM Mono", monospace;
 }
 
 .login-page__link-btn {
   min-height: 24px;
   border-radius: 8px;
-  font-family: 'DM Mono', monospace;
+  font-family: "DM Mono", monospace;
   font-weight: 500;
 }
 
@@ -136,23 +73,14 @@
   margin: -2px 0 0;
   font-size: 12px;
   color: var(--color-primary);
-  font-family: 'DM Mono', monospace;
+  font-family: "DM Mono", monospace;
 }
 
 .login-page__message--error {
-  color: #B3261E;
+  color: #b3261e;
 }
 
 @media (min-width: 640px) {
-  .login-page__card {
-    padding: 28px 32px 32px;
-    border-radius: 16px;
-  }
-
-  .login-page__title {
-    font-size: 28px;
-  }
-
   .login-page__form {
     gap: 20px;
   }

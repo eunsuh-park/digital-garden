@@ -1,0 +1,15 @@
+.ui-container {
+  width: 100%;
+  padding: 1.5rem;
+  background: var(--color-bg);
+}
+
+.ui-container--viewport {
+  min-height: calc(100vh - 60px);
+}
+
+.ui-container--centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

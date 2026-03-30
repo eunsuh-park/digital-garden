@@ -12,6 +12,10 @@ import ToggleButton from "@/shared/ui/toggle-button/ToggleButton";
 import ButtonTab, { ButtonTabGroup } from "@/shared/ui/button-tab/ButtonTab";
 import Tooltip from "@/shared/ui/tooltip/Tooltip";
 import ActionPopover from "@/shared/ui/action-popover/ActionPopover";
+import Container from "@/shared/ui/container/Container";
+import Dialog from "@/shared/ui/dialog/Dialog";
+import Divider from "@/shared/ui/divider/Divider";
+import SectionHeading from "@/shared/ui/section-heading/SectionHeading";
 import "./UiLabPage.css";
 
 const BADGE_SIZES = ["m", "l"];
@@ -25,7 +29,7 @@ const TEXT_FIELD_TYPES = ["short", "long"];
 const TEXT_FIELD_VARIANTS = ["text-field", "search-bar", "suffix", "x-mark", "stepper", "text-area", "search-with-icon"];
 const TEXT_FIELD_SIZES = ["l", "m", "s"];
 const TEXT_FIELD_STATES = ["default", "hover", "active", "valid-feedback", "invalid-feedback"];
-const TEXT_BUTTON_STYLES = ["primary", "secondary", "tertiary", "symentic"];
+const TEXT_BUTTON_STYLES = ["primary", "secondary", "tertiary", "danger", "symentic"];
 const TEXT_BUTTON_STATES = ["able", "hover", "focus", "fasble"];
 const TEXT_BUTTON_SIZES = ["l", "m", "s", "xs"];
 const ICON_BUTTON_STYLES = ["nobg", "filled", "destructive"];
@@ -184,6 +188,91 @@ export default function UiLabPage() {
           </Link>
         </div>
       </header>
+
+      <section className="ui-lab__section">
+        <div className="ui-lab__section-title">
+          <h2>Foundation</h2>
+          <span>shared/ui/container, shared/ui/dialog</span>
+        </div>
+
+        <p className="ui-lab__section-description">
+          로그인 폼 톤을 재사용 가능한 기본 레이어로 분리한 조합 예시입니다.
+        </p>
+
+        <div className="ui-lab__preview-card">
+          <Container centered className="ui-lab__foundation-stage">
+            <Dialog
+              label="Digital Garden"
+              title="로그인"
+              maxWidth={380}
+              footer={
+                <>
+                  <span className="ui-lab__foundation-meta">아이디/비밀번호를 새로 설정할까요?</span>
+                  <TextButton label="계정 재설정" styleType="tertiary" size="xs" />
+                </>
+              }
+            >
+              <div className="ui-lab__foundation-body">
+                <TextField
+                  label="아이디"
+                  inputId="ui-lab-foundation-username"
+                  inputType="text"
+                  inputName="username"
+                  placeholder="my-id"
+                  size="m"
+                  showHelperText={false}
+                />
+                <TextField
+                  label="비밀번호"
+                  inputId="ui-lab-foundation-password"
+                  inputType="password"
+                  inputName="password"
+                  placeholder="••••••••"
+                  size="m"
+                  showHelperText={false}
+                />
+                <TextButton label="로그인" styleType="primary" size="m" className="ui-lab__foundation-submit" />
+              </div>
+            </Dialog>
+          </Container>
+        </div>
+      </section>
+
+      <section className="ui-lab__section">
+        <div className="ui-lab__section-title">
+          <h2>SectionHeading</h2>
+          <span>shared/ui/section-heading</span>
+        </div>
+
+        <div className="ui-lab__preview-card ui-lab__preview-card--column">
+          <SectionHeading
+            label="Garden Zone"
+            title="토마토 구역 작업"
+            description="이번 주 물주기, 가지치기, 지지대 점검 작업을 우선순위 순서로 진행합니다."
+            action={<TextButton label="전체 보기" styleType="secondary" size="xs" />}
+          />
+          <SectionHeading title="간결 모드 헤더" description="설명과 타이틀만 보여주는 compact 스타일입니다." compact />
+        </div>
+      </section>
+
+      <section className="ui-lab__section">
+        <div className="ui-lab__section-title">
+          <h2>Divider</h2>
+          <span>shared/ui/divider</span>
+        </div>
+
+        <div className="ui-lab__preview-card ui-lab__preview-card--column">
+          <Divider />
+          <Divider label="or" />
+          <Divider label="Section" align="left" />
+          <Divider label="Step 2" align="right" dashed />
+          <div className="ui-lab__divider-inline">
+            <span>이전</span>
+            <Divider orientation="vertical" />
+            <span>다음</span>
+          </div>
+        </div>
+      </section>
 
       <section className="ui-lab__section">
         <div className="ui-lab__section-title">
@@ -632,21 +721,25 @@ export default function UiLabPage() {
           <TextButton label="버튼 이름" styleType="primary" size="l" state="able" icon />
           <TextButton label="버튼 이름" styleType="secondary" size="l" state="able" icon />
           <TextButton label="버튼 이름" styleType="tertiary" size="l" state="able" icon />
+          <TextButton label="버튼 이름" styleType="danger" size="l" state="able" icon />
           <TextButton label="버튼 이름" styleType="symentic" size="l" state="able" icon />
 
           <TextButton label="버튼 이름" styleType="primary" size="m" state="hover" icon />
           <TextButton label="버튼 이름" styleType="secondary" size="m" state="hover" icon />
           <TextButton label="버튼 이름" styleType="tertiary" size="m" state="focus" icon />
+          <TextButton label="버튼 이름" styleType="danger" size="m" state="focus" icon />
           <TextButton label="버튼 이름" styleType="symentic" size="m" state="focus" icon />
 
           <TextButton label="버튼 이름" styleType="primary" size="s" state="able" />
           <TextButton label="버튼 이름" styleType="secondary" size="s" state="able" />
           <TextButton label="버튼 이름" styleType="tertiary" size="s" state="able" />
+          <TextButton label="버튼 이름" styleType="danger" size="s" state="able" />
           <TextButton label="버튼 이름" styleType="symentic" size="s" state="able" />
 
           <TextButton label="버튼 이름" styleType="primary" size="xs" state="fasble" icon />
           <TextButton label="버튼 이름" styleType="secondary" size="xs" state="fasble" icon />
           <TextButton label="버튼 이름" styleType="tertiary" size="xs" state="fasble" icon />
+          <TextButton label="버튼 이름" styleType="danger" size="xs" state="fasble" icon />
           <TextButton label="버튼 이름" styleType="symentic" size="xs" state="fasble" icon />
         </div>
       </section>
