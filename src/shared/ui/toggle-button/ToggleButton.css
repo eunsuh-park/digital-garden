@@ -1,8 +1,8 @@
 .toggle-button {
-  --tg-width: 96px;
-  --tg-height: 56px;
-  --tg-knob-size: 42px;
-  --tg-padding: 7px;
+  --tg-width: 44px;
+  --tg-height: 24px;
+  --tg-knob-size: 18px;
+  --tg-padding: 3px;
   --tg-off-bg: var(--color-border);
   --tg-on-bg: var(--color-primary);
   --tg-disabled-bg: var(--color-hover-soft);
@@ -20,17 +20,17 @@
 }
 
 .toggle-button--m {
-  --tg-width: 80px;
-  --tg-height: 46px;
-  --tg-knob-size: 34px;
-  --tg-padding: 6px;
+  --tg-width: 40px;
+  --tg-height: 22px;
+  --tg-knob-size: 16px;
+  --tg-padding: 3px;
 }
 
 .toggle-button--s {
-  --tg-width: 64px;
-  --tg-height: 36px;
-  --tg-knob-size: 24px;
-  --tg-padding: 6px;
+  --tg-width: 32px;
+  --tg-height: 18px;
+  --tg-knob-size: 12px;
+  --tg-padding: 3px;
 }
 
 .toggle-button--checked {

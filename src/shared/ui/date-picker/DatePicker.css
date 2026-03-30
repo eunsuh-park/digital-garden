@@ -7,30 +7,30 @@
 }
 
 .date-picker--l {
-  --date-picker-width: 196px;
+  --date-picker-width: 200px;
   --date-picker-height: 40px;
-  --date-picker-font-size: 28px;
-  --date-picker-panel-width: 196px;
+  --date-picker-font-size: 14px;
+  --date-picker-panel-width: 240px;
 }
 
 .date-picker--m {
-  --date-picker-width: 182px;
+  --date-picker-width: 184px;
   --date-picker-height: 36px;
-  --date-picker-font-size: 24px;
-  --date-picker-panel-width: 182px;
+  --date-picker-font-size: 14px;
+  --date-picker-panel-width: 240px;
 }
 
 .date-picker--s {
   --date-picker-width: 168px;
-  --date-picker-height: 30px;
-  --date-picker-font-size: 20px;
-  --date-picker-panel-width: 168px;
+  --date-picker-height: 32px;
+  --date-picker-font-size: 13px;
+  --date-picker-panel-width: 232px;
 }
 
 .date-picker__field {
   width: var(--date-picker-width);
   height: var(--date-picker-height);
-  border-radius: 6px;
+  border-radius: 8px;
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   padding: 0 10px 0 12px;
@@ -231,7 +231,7 @@
   border-radius: 4px;
   background: var(--color-surface);
   border: 1px solid var(--color-border-weak);
-  font-size: 33px;
+  font-size: 18px;
   line-height: 1.25;
   font-weight: 700;
   color: var(--color-text);

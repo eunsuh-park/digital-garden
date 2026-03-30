@@ -8,27 +8,29 @@
 .section-heading__content {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .section-heading__label {
-  font-size: 11px;
-  letter-spacing: 0.2em;
-  color: var(--color-text-muted);
-  font-family: var(--font-mono);
-  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: -0.01em;
+  color: #6b6f63;
+  font-family: var(--font-sans);
+  font-weight: 600;
 }
 
 .section-heading__title {
-  font-size: 18px;
-  color: var(--color-text-strong);
-  font-family: var(--font-serif);
-  line-height: 1.25;
+  font-size: 30px;
+  color: #2f312b;
+  font-family: var(--font-sans);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-weight: 700;
 }
 
 .section-heading__description {
-  font-size: 13px;
-  color: var(--color-text-muted);
+  font-size: 14px;
+  color: #8f9388;
   line-height: 1.5;
 }
 
@@ -38,9 +40,10 @@
 }
 
 .section-heading--compact .section-heading__title {
-  font-size: 16px;
+  font-size: 18px;
+  letter-spacing: -0.01em;
 }
 
 .section-heading--compact .section-heading__description {
-  font-size: 12px;
+  font-size: 13px;
 }

@@ -6,31 +6,31 @@
 }
 
 .select--l {
-  --select-width: 180px;
+  --select-width: 200px;
   --select-height: 40px;
-  --select-font-size: 22px;
-  --select-padding-x: 14px;
+  --select-font-size: 14px;
+  --select-padding-x: 12px;
 }
 
 .select--m {
-  --select-width: 160px;
-  --select-height: 32px;
-  --select-font-size: 18px;
+  --select-width: 184px;
+  --select-height: 36px;
+  --select-font-size: 14px;
   --select-padding-x: 10px;
 }
 
 .select--s {
-  --select-width: 140px;
-  --select-height: 24px;
-  --select-font-size: 14px;
-  --select-padding-x: 8px;
+  --select-width: 168px;
+  --select-height: 32px;
+  --select-font-size: 13px;
+  --select-padding-x: 10px;
 }
 
 .select__control {
   width: var(--select-width);
   min-height: var(--select-height);
   border: 1px solid var(--color-border);
-  border-radius: 6px;
+  border-radius: 8px;
   background: var(--color-surface);
   color: var(--color-text);
   display: inline-flex;

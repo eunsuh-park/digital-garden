@@ -19,9 +19,9 @@
 }
 
 .button-tab--m {
-  min-height: 32px;
+  min-height: 36px;
   padding: 0 14px;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .button-tab:hover:not(:disabled),

@@ -15,8 +15,8 @@
   position: absolute;
   inset: 50% auto auto 50%;
   transform: translate(-50%, -50%);
-  width: min(1080px, calc(100vw - 2rem));
-  max-height: min(760px, calc(100vh - 2rem));
+  width: 680px;
+  height: 600px;
   border: 1px solid var(--color-border);
   border-radius: 24px;
   box-shadow: var(--shadow-lg);
@@ -49,22 +49,17 @@
 
 .settings-modal__sidebar {
   border-right: 1px solid var(--color-border);
-  padding: 1rem;
+  padding: 16px 14px;
   background: color-mix(in srgb, var(--color-surface) 74%, var(--color-surface-soft));
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 10px;
 }
 
-.settings-modal__sidebar-nav .button-tab-group {
-  display: grid;
-  gap: 0.5rem;
-}
-
-.settings-modal__quick-actions {
+.settings-modal__sidebar-nav {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .settings-modal__content-shell.ui-container {
@@ -76,22 +71,10 @@
 .settings-modal__content {
   height: 100%;
   overflow: auto;
-  padding: 1.5rem;
+  padding: 20px 18px;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-}
-
-.settings-modal__heading-action {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.settings-modal__tooltip-anchor {
-  font-size: 12px;
-  color: var(--color-text-muted);
-  cursor: default;
+  gap: 14px;
 }
 
 .settings-modal__promo-content {
@@ -168,6 +151,7 @@
     grid-template-columns: 1fr;
     max-height: calc(100vh - 1rem);
     width: calc(100vw - 1rem);
+    height: auto;
   }
 
   .settings-modal__sidebar {

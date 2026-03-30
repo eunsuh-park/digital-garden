@@ -4,8 +4,8 @@ import closeLine from "@iconify-icons/mingcute/close-line";
 import settings3Line from "@iconify-icons/mingcute/settings-3-line";
 import notificationLine from "@iconify-icons/mingcute/notification-line";
 import safeAlertLine from "@iconify-icons/mingcute/safe-alert-line";
-import Badge from "@/shared/ui/badge/Badge";
-import ButtonTab, { ButtonTabGroup } from "@/shared/ui/button-tab/ButtonTab";
+import timeLine from "@iconify-icons/mingcute/time-line";
+import { ButtonTabGroup } from "@/shared/ui/button-tab/ButtonTab";
 import Checkbox from "@/shared/ui/checkbox/Checkbox";
 import Container from "@/shared/ui/container/Container";
 import DatePicker from "@/shared/ui/date-picker/DatePicker";
@@ -18,15 +18,15 @@ import Select from "@/shared/ui/select/Select";
 import TextButton from "@/shared/ui/text-button/TextButton";
 import TextField from "@/shared/ui/text-field/TextField";
 import ToggleButton from "@/shared/ui/toggle-button/ToggleButton";
-import Tooltip from "@/shared/ui/tooltip/Tooltip";
 import ActionPopover from "@/shared/ui/action-popover/ActionPopover";
+import SettingsNavItem from "@/shared/ui/settings-nav-item/SettingsNavItem";
 import "./SettingsModal.css";
 
 const NAV_ITEMS = [
-  { label: "일반", value: "general" },
-  { label: "알림", value: "notify" },
-  { label: "개인 맞춤", value: "personal" },
-  { label: "보안", value: "security" },
+  { label: "일반", value: "general", icon: settings3Line },
+  { label: "알림", value: "notify", icon: notificationLine },
+  { label: "개인 맞춤", value: "personal", icon: timeLine },
+  { label: "보안", value: "security", icon: safeAlertLine },
 ];
 
 const VIEW_OPTIONS = [
@@ -53,12 +53,6 @@ const VOICE_OPTIONS = [
   { label: "Nova", value: "nova" },
 ];
 
-const MAP_STYLE_OPTIONS = [
-  { label: "간이 지도", value: "simple" },
-  { label: "위성", value: "satellite" },
-  { label: "혼합형", value: "hybrid" },
-];
-
 const REMINDER_OPTIONS = [
   { label: "매일 오전", value: "daily-am" },
   { label: "주 3회", value: "three-times" },
@@ -83,7 +77,6 @@ export default function SettingsModal({ open, onClose }) {
   const [mapView, setMapView] = useState("road");
   const [accentColor, setAccentColor] = useState("sage");
   const [language, setLanguage] = useState("auto");
-  const [mapStyle, setMapStyle] = useState("hybrid");
   const [voice, setVoice] = useState("breeze");
   const [reminderType, setReminderType] = useState("daily-am");
   const [mapVisualStyle, setMapVisualStyle] = useState("default");
@@ -126,31 +119,21 @@ export default function SettingsModal({ open, onClose }) {
         <aside className="settings-modal__sidebar">
           <SectionHeading label="NowGarden" title="설정" description="환경을 취향에 맞게 조정하세요." compact />
           <div className="settings-modal__sidebar-nav">
-            <ButtonTabGroup items={NAV_ITEMS} value={activeNav} onChange={setActiveNav} size="m" />
-          </div>
-
-          <Divider label="바로 가기" align="left" />
-
-          <div className="settings-modal__quick-actions">
-            <ButtonTab label="알림 센터" size="m" status={activeNav === "notify" ? "active" : "default"} onClick={() => setActiveNav("notify")} />
-            <ButtonTab label="보안 센터" size="m" status={activeNav === "security" ? "active" : "default"} onClick={() => setActiveNav("security")} />
+            {NAV_ITEMS.map((item) => (
+              <SettingsNavItem
+                key={item.value}
+                label={item.label}
+                icon={<Icon icon={item.icon} width={18} height={18} />}
+                active={activeNav === item.value}
+                onClick={() => setActiveNav(item.value)}
+              />
+            ))}
           </div>
         </aside>
 
         <Container className="settings-modal__content-shell">
           <div className="settings-modal__content">
-            <SectionHeading
-              title="일반"
-              description="임시 프로토타입 화면입니다. 실제 저장 기능은 아직 연결하지 않았습니다."
-              action={
-                <div className="settings-modal__heading-action">
-                  <Badge count="4" size="m" ariaLabel="미확인 알림" />
-                  <Tooltip content="미확인 변경 항목 수입니다." placement="bottom">
-                    <span className="settings-modal__tooltip-anchor">도움말</span>
-                  </Tooltip>
-                </div>
-              }
-            />
+            <SectionHeading title="일반" description="임시 프로토타입 화면입니다. 실제 저장 기능은 아직 연결하지 않았습니다." />
 
             <Dialog
               label="추천"

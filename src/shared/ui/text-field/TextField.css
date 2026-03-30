@@ -8,24 +8,24 @@
 }
 
 .text-field--l {
-  --text-field-font-size: 22px;
-  --text-field-padding-y: 8px;
-  --text-field-padding-x: 14px;
-  --text-field-height: 52px;
+  --text-field-font-size: 14px;
+  --text-field-padding-y: 10px;
+  --text-field-padding-x: 12px;
+  --text-field-height: 44px;
 }
 
 .text-field--m {
-  --text-field-font-size: 18px;
-  --text-field-padding-y: 6px;
-  --text-field-padding-x: 9px;
+  --text-field-font-size: 14px;
+  --text-field-padding-y: 8px;
+  --text-field-padding-x: 10px;
   --text-field-height: 40px;
 }
 
 .text-field--s {
-  --text-field-font-size: 14px;
-  --text-field-padding-y: 5px;
-  --text-field-padding-x: 5px;
-  --text-field-height: 32px;
+  --text-field-font-size: 13px;
+  --text-field-padding-y: 7px;
+  --text-field-padding-x: 10px;
+  --text-field-height: 36px;
 }
 
 .text-field__label-row {
@@ -70,7 +70,7 @@
 .text-field__input-shell {
   width: 100%;
   border: 1px solid var(--color-border);
-  border-radius: 4px;
+  border-radius: 8px;
   background: var(--color-surface);
   display: inline-flex;
   align-items: center;
@@ -88,7 +88,7 @@
 }
 
 .text-field__control--long {
-  min-height: 96px;
+  min-height: 92px;
   resize: vertical;
 }
 
