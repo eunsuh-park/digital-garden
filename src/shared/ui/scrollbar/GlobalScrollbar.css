@@ -1,0 +1,34 @@
+:root {
+  --ui-scrollbar-size: 10px;
+  --ui-scrollbar-track: rgba(17, 24, 39, 0.06);
+  --ui-scrollbar-thumb: rgba(45, 90, 39, 0.42);
+  --ui-scrollbar-thumb-hover: rgba(45, 90, 39, 0.62);
+  --ui-scrollbar-radius: 999px;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ui-scrollbar-thumb) var(--ui-scrollbar-track);
+}
+
+*::-webkit-scrollbar {
+  width: var(--ui-scrollbar-size);
+  height: var(--ui-scrollbar-size);
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--ui-scrollbar-track);
+  border-radius: var(--ui-scrollbar-radius);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--ui-scrollbar-thumb);
+  border-radius: var(--ui-scrollbar-radius);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--ui-scrollbar-thumb-hover);
+  background-clip: padding-box;
+}

@@ -9,11 +9,13 @@ import UiLabPage from '@/pages/UiLab/UiLabPage';
 import TokenLabPage from '@/pages/TokenLab/TokenLabPage';
 import { AuthProvider } from '@/app/providers/AuthContext';
 import RequireAuth from '@/app/providers/RequireAuth';
+import GlobalScrollbar from '@/shared/ui/scrollbar/GlobalScrollbar';
 import './App.css';
 
 function App() {
   return (
     <AuthProvider>
+      <GlobalScrollbar />
       <BrowserRouter>
         <div className="app">
           <Routes>

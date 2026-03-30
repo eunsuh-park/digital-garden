@@ -1,92 +1,119 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Icon } from "@iconify/react";
 import closeLine from "@iconify-icons/mingcute/close-line";
-import settings3Line from "@iconify-icons/mingcute/settings-3-line";
+import user3Line from "@iconify-icons/mingcute/user-3-line";
+import mapLine from "@iconify-icons/mingcute/map-line";
+import eye2Line from "@iconify-icons/mingcute/eye-2-line";
+import task2Line from "@iconify-icons/mingcute/task-2-line";
 import notificationLine from "@iconify-icons/mingcute/notification-line";
-import safeAlertLine from "@iconify-icons/mingcute/safe-alert-line";
-import timeLine from "@iconify-icons/mingcute/time-line";
-import { ButtonTabGroup } from "@/shared/ui/button-tab/ButtonTab";
-import Checkbox from "@/shared/ui/checkbox/Checkbox";
+import bookmarkFill from "@iconify-icons/mingcute/bookmark-fill";
+import settings3Line from "@iconify-icons/mingcute/settings-3-line";
 import Container from "@/shared/ui/container/Container";
-import DatePicker from "@/shared/ui/date-picker/DatePicker";
-import Dialog from "@/shared/ui/dialog/Dialog";
 import Divider from "@/shared/ui/divider/Divider";
-import IconButton from "@/shared/ui/icon-button/IconButton";
-import RadioButton, { RadioGroup } from "@/shared/ui/radio-button/RadioButton";
 import SectionHeading from "@/shared/ui/section-heading/SectionHeading";
-import Select from "@/shared/ui/select/Select";
-import TextButton from "@/shared/ui/text-button/TextButton";
-import TextField from "@/shared/ui/text-field/TextField";
-import ToggleButton from "@/shared/ui/toggle-button/ToggleButton";
-import ActionPopover from "@/shared/ui/action-popover/ActionPopover";
 import SettingsNavItem from "@/shared/ui/settings-nav-item/SettingsNavItem";
+import TextField from "@/shared/ui/text-field/TextField";
+import TextButton from "@/shared/ui/text-button/TextButton";
+import ToggleButton from "@/shared/ui/toggle-button/ToggleButton";
+import Select from "@/shared/ui/select/Select";
+import { ButtonTabGroup } from "@/shared/ui/button-tab/ButtonTab";
+import { RadioGroup } from "@/shared/ui/radio-button/RadioButton";
+import Checkbox from "@/shared/ui/checkbox/Checkbox";
+import Badge from "@/shared/ui/badge/Badge";
 import "./SettingsModal.css";
 
 const NAV_ITEMS = [
-  { label: "일반", value: "general", icon: settings3Line },
+  { label: "계정 / 사용자", value: "account", icon: user3Line },
+  { label: "정원 기본 설정", value: "garden", icon: mapLine },
+  { label: "화면 / 인터페이스", value: "interface", icon: eye2Line },
+  { label: "작업 / 일지 설정", value: "task", icon: task2Line },
   { label: "알림", value: "notify", icon: notificationLine },
-  { label: "개인 맞춤", value: "personal", icon: timeLine },
-  { label: "보안", value: "security", icon: safeAlertLine },
+  { label: "데이터 / 연동", value: "data", icon: bookmarkFill },
+  { label: "기타", value: "etc", icon: settings3Line },
 ];
 
-const VIEW_OPTIONS = [
+const VIEW_BASE_OPTIONS = [
   { label: "도로 기준", value: "road" },
-  { label: "위성 기준", value: "satellite" },
-  { label: "혼합형", value: "hybrid" },
+  { label: "집 기준", value: "home" },
 ];
 
-const COLOR_OPTIONS = [
-  { label: "세이지 그린", value: "sage" },
-  { label: "모스 그린", value: "moss" },
-  { label: "브라운 베이지", value: "beige" },
+const FILTER_OPTIONS = [
+  { label: "전체 섹션", value: "all" },
+  { label: "할 일 중심", value: "task" },
+  { label: "식물 중심", value: "plant" },
+];
+
+const MAP_STYLE_OPTIONS = [
+  { label: "일러스트", value: "illustration" },
+  { label: "위성", value: "satellite" },
+  { label: "혼합", value: "hybrid" },
+];
+
+const DENSITY_OPTIONS = [
+  { label: "Compact", value: "compact" },
+  { label: "Cozy", value: "cozy" },
+];
+
+const TASK_STATUS_OPTIONS = [
+  { label: "예정", value: "planned" },
+  { label: "진행중", value: "doing" },
+  { label: "완료", value: "done" },
+];
+
+const JOURNAL_GROUP_OPTIONS = [
+  { label: "방문 단위", value: "visit" },
+  { label: "날짜 단위", value: "date" },
 ];
 
 const LANGUAGE_OPTIONS = [
-  { label: "자동 감지", value: "auto" },
   { label: "한국어", value: "ko" },
   { label: "English", value: "en" },
+  { label: "자동 감지", value: "auto" },
 ];
 
-const VOICE_OPTIONS = [
-  { label: "Breeze", value: "breeze" },
-  { label: "Clair", value: "clair" },
-  { label: "Nova", value: "nova" },
-];
-
-const REMINDER_OPTIONS = [
-  { label: "매일 오전", value: "daily-am" },
-  { label: "주 3회", value: "three-times" },
-  { label: "필요할 때만", value: "manual" },
-];
-
-const THEME_OPTIONS = [
+const UI_TONE_OPTIONS = [
   { label: "라이트", value: "light" },
-  { label: "시스템", value: "system" },
   { label: "다크", value: "dark" },
 ];
 
-const RADIO_STYLE_OPTIONS = [
-  { label: "미니멀", value: "minimal" },
-  { label: "기본", value: "default" },
-  { label: "강조", value: "accent" },
+const EMAIL_PUSH_OPTIONS = [
+  { id: "email", label: "이메일" },
+  { id: "push", label: "푸시" },
 ];
 
+function SettingRow({ title, description = "", children, multiline = false, danger = false }) {
+  return (
+    <div className={`settings-modal__setting-row ${multiline ? "settings-modal__setting-row--multiline" : ""} ${danger ? "settings-modal__setting-row--danger" : ""}`}>
+      <div className="settings-modal__setting-main">
+        <h4>{title}</h4>
+        {description ? <p>{description}</p> : null}
+      </div>
+      <div className="settings-modal__setting-control">{children}</div>
+    </div>
+  );
+}
+
 export default function SettingsModal({ open, onClose }) {
-  const [activeNav, setActiveNav] = useState("general");
-  const [activeTheme, setActiveTheme] = useState("system");
-  const [mapView, setMapView] = useState("road");
-  const [accentColor, setAccentColor] = useState("sage");
-  const [language, setLanguage] = useState("auto");
-  const [voice, setVoice] = useState("breeze");
-  const [reminderType, setReminderType] = useState("daily-am");
-  const [mapVisualStyle, setMapVisualStyle] = useState("default");
-  const [memo, setMemo] = useState("정원 방문 전 장갑/가위 확인");
-  const [visitedOnly, setVisitedOnly] = useState(true);
-  const [highlightOn, setHighlightOn] = useState(true);
-  const [checklistOn, setChecklistOn] = useState(true);
-  const [recommendationOn, setRecommendationOn] = useState(false);
-  const [summaryPushOn, setSummaryPushOn] = useState(true);
-  const [dateValue, setDateValue] = useState(new Date());
+  const [activeNav, setActiveNav] = useState("account");
+  const [uiTone, setUiTone] = useState("light");
+  const [viewBase, setViewBase] = useState("road");
+  const [sectionFilter, setSectionFilter] = useState("all");
+  const [mapStyle, setMapStyle] = useState("illustration");
+  const [density, setDensity] = useState("cozy");
+  const [taskStatus, setTaskStatus] = useState("planned");
+  const [journalGrouping, setJournalGrouping] = useState("visit");
+  const [language, setLanguage] = useState("ko");
+  const [darkModeOn, setDarkModeOn] = useState(false);
+  const [animationOn, setAnimationOn] = useState(true);
+  const [taskRecommendOn, setTaskRecommendOn] = useState(true);
+  const [checklistNotifyOn, setChecklistNotifyOn] = useState(true);
+  const [plantPeriodNotifyOn, setPlantPeriodNotifyOn] = useState(true);
+  const [channels, setChannels] = useState({ email: true, push: true });
+
+  const activeNavLabel = useMemo(
+    () => NAV_ITEMS.find((item) => item.value === activeNav)?.label ?? "설정",
+    [activeNav]
+  );
 
   useEffect(() => {
     if (!open) return undefined;
@@ -108,6 +135,165 @@ export default function SettingsModal({ open, onClose }) {
 
   if (!open) return null;
 
+  const renderContent = () => {
+    switch (activeNav) {
+      case "account":
+        return (
+          <>
+            <SettingRow title="이름 / 닉네임">
+              <TextField size="s" label="표시 이름" placeholder="이름 또는 닉네임" showHelperText={false} />
+            </SettingRow>
+            <Divider />
+            <SettingRow title="이메일">
+              <TextField size="s" label="이메일 주소" placeholder="you@example.com" showHelperText={false} />
+            </SettingRow>
+            <Divider />
+            <SettingRow title="프로필 이미지" description="추후 업로드/크롭 기능과 연동될 자리입니다.">
+              <TextButton label="아바타 업로드" styleType="secondary" size="s" />
+            </SettingRow>
+            <Divider />
+            <SettingRow title="로그아웃">
+              <TextButton label="로그아웃" styleType="tertiary" size="s" />
+            </SettingRow>
+          </>
+        );
+      case "garden":
+        return (
+          <>
+            <SettingRow title="정원 이름">
+              <TextField size="s" label="정원 이름" placeholder="나의 정원" showHelperText={false} />
+            </SettingRow>
+            <Divider />
+            <SettingRow title="위치 (지도 / 텍스트)" description="지도 picker는 추후 확장 예정입니다.">
+              <TextButton label="Map picker (placeholder)" styleType="secondary" size="s" />
+            </SettingRow>
+            <Divider />
+            <SettingRow title="기본 뷰 기준">
+              <ButtonTabGroup items={VIEW_BASE_OPTIONS} value={viewBase} onChange={setViewBase} size="m" />
+            </SettingRow>
+            <Divider />
+            <SettingRow title="기본 섹션 필터 상태">
+              <Select options={FILTER_OPTIONS} value={sectionFilter} onChange={setSectionFilter} size="m" />
+            </SettingRow>
+          </>
+        );
+      case "interface":
+        return (
+          <>
+            <SettingRow title="다크 / 라이트 모드">
+              <ToggleButton size="m" checked={darkModeOn} onChange={setDarkModeOn} ariaLabel="다크 모드 토글" />
+            </SettingRow>
+            <Divider />
+            <SettingRow title="지도 스타일">
+              <RadioGroup options={MAP_STYLE_OPTIONS} value={mapStyle} onChange={setMapStyle} size="s" />
+            </SettingRow>
+            <Divider />
+            <SettingRow title="애니메이션 사용 여부">
+              <ToggleButton size="m" checked={animationOn} onChange={setAnimationOn} ariaLabel="애니메이션 토글" />
+            </SettingRow>
+            <Divider />
+            <SettingRow title="UI 밀도">
+              <ButtonTabGroup items={DENSITY_OPTIONS} value={density} onChange={setDensity} size="m" />
+            </SettingRow>
+          </>
+        );
+      case "task":
+        return (
+          <>
+            <SettingRow title="기본 작업 상태">
+              <Select options={TASK_STATUS_OPTIONS} value={taskStatus} onChange={setTaskStatus} size="m" />
+            </SettingRow>
+            <Divider />
+            <SettingRow title="작업 추천 표시 여부">
+              <ToggleButton size="m" checked={taskRecommendOn} onChange={setTaskRecommendOn} ariaLabel="작업 추천 표시 토글" />
+            </SettingRow>
+            <Divider />
+            <SettingRow title="일지 자동 묶기 방식">
+              <Select options={JOURNAL_GROUP_OPTIONS} value={journalGrouping} onChange={setJournalGrouping} size="m" />
+            </SettingRow>
+          </>
+        );
+      case "notify":
+        return (
+          <>
+            <SettingRow title="방문 전 체크리스트 알림">
+              <ToggleButton size="m" checked={checklistNotifyOn} onChange={setChecklistNotifyOn} ariaLabel="체크리스트 알림 토글" />
+            </SettingRow>
+            <Divider />
+            <SettingRow title="식물 관리 시기 알림">
+              <ToggleButton size="m" checked={plantPeriodNotifyOn} onChange={setPlantPeriodNotifyOn} ariaLabel="식물 알림 토글" />
+            </SettingRow>
+            <Divider />
+            <SettingRow title="이메일 / 푸시 여부" multiline>
+              <div className="settings-modal__checkbox-group">
+                {EMAIL_PUSH_OPTIONS.map((option) => (
+                  <Checkbox
+                    key={option.id}
+                    size="s"
+                    label={option.label}
+                    checked={channels[option.id]}
+                    onChange={(checked) => setChannels((prev) => ({ ...prev, [option.id]: checked }))}
+                  />
+                ))}
+              </div>
+            </SettingRow>
+          </>
+        );
+      case "data":
+        return (
+          <>
+            <SettingRow title="Notion 연동 상태">
+              <Badge count="연결됨" size="l" ariaLabel="Notion 연결 상태" />
+            </SettingRow>
+            <Divider />
+            <SettingRow title="데이터 동기화">
+              <TextButton label="지금 동기화" styleType="secondary" size="s" />
+            </SettingRow>
+            <Divider />
+            <SettingRow title="내보내기 (Export)">
+              <TextButton label="Export JSON" styleType="tertiary" size="s" />
+            </SettingRow>
+            <Divider />
+            <SettingRow
+              title="초기화"
+              description="데이터 초기화는 되돌릴 수 없습니다."
+              danger
+            >
+              <ActionPopover
+                title="초기화 확인"
+                subtitle="위험 작업"
+                content="정원 데이터와 개인 설정을 모두 초기화하는 자리입니다."
+                placement="top"
+                align="right"
+                trigger="click"
+                showFooter={false}
+                bodyMaxHeight={120}
+              >
+                <TextButton label="초기화" styleType="danger" size="s" />
+              </ActionPopover>
+            </SettingRow>
+          </>
+        );
+      case "etc":
+      default:
+        return (
+          <>
+            <SettingRow title="언어">
+              <Select options={LANGUAGE_OPTIONS} value={language} onChange={setLanguage} size="m" />
+            </SettingRow>
+            <Divider />
+            <SettingRow title="도움말">
+              <TextButton label="도움말 열기" styleType="tertiary" size="s" />
+            </SettingRow>
+            <Divider />
+            <SettingRow title="피드백 보내기">
+              <TextButton label="피드백 전송" styleType="primary" size="s" />
+            </SettingRow>
+          </>
+        );
+    }
+  };
+
   return (
     <div className="settings-modal-root" role="presentation">
       <div className="settings-modal-root__backdrop" onClick={onClose} aria-hidden />
@@ -117,7 +303,7 @@ export default function SettingsModal({ open, onClose }) {
         </button>
 
         <aside className="settings-modal__sidebar">
-          <SectionHeading label="NowGarden" title="설정" description="환경을 취향에 맞게 조정하세요." compact />
+          <SectionHeading label="NowGarden" title="설정" description="항목을 선택해 상세 설정을 확인하세요." compact />
           <div className="settings-modal__sidebar-nav">
             {NAV_ITEMS.map((item) => (
               <SettingsNavItem
@@ -133,144 +319,13 @@ export default function SettingsModal({ open, onClose }) {
 
         <Container className="settings-modal__content-shell">
           <div className="settings-modal__content">
-            <SectionHeading title="일반" description="임시 프로토타입 화면입니다. 실제 저장 기능은 아직 연결하지 않았습니다." />
-
-            <Dialog
-              label="추천"
-              title="정원을 더 안전하게 관리해보세요"
-              description="가족 구성원이나 협업자 권한을 나눠두면 실수 없이 관리할 수 있어요."
-              maxWidth="100%"
-              hoverable={false}
-              footer={
-                <>
-                  <TextButton label="공유 설정 보기" styleType="secondary" size="xs" />
-                  <IconButton styleType="nobg" state="default" showLabel label="즐겨찾기" />
-                </>
-              }
-            >
-              <div className="settings-modal__promo-content">
-                <RadioButton size="s" checked showLabel label="권한 분리 추천" />
-                <span>프로젝트별로 편집 가능 범위를 분리해 두는 옵션입니다.</span>
-              </div>
-            </Dialog>
-
+            <SectionHeading title={activeNavLabel} description="v0.1 임시 구조입니다. 기능 연결은 이후 단계에서 진행합니다." />
+            {renderContent()}
             <Divider />
-
-            <div className="settings-modal__grid">
-              <div className="settings-modal__item">
-                <h4>기본 보기</h4>
-                <Select options={VIEW_OPTIONS} value={mapView} onChange={setMapView} size="m" />
-              </div>
-
-              <div className="settings-modal__item">
-                <h4>강조 컬러</h4>
-                <Select options={COLOR_OPTIONS} value={accentColor} onChange={setAccentColor} size="m" />
-              </div>
-
-              <div className="settings-modal__item">
-                <h4>언어</h4>
-                <Select options={LANGUAGE_OPTIONS} value={language} onChange={setLanguage} size="m" />
-              </div>
-
-              <div className="settings-modal__item">
-                <h4>기본 지도 스타일</h4>
-                <RadioGroup options={RADIO_STYLE_OPTIONS} value={mapVisualStyle} onChange={setMapVisualStyle} size="s" />
-              </div>
-            </div>
-
-            <Divider />
-
-            <div className="settings-modal__row">
-              <div>
-                <h4>섹션 하이라이트</h4>
-                <p>할 일이나 일지 진입 시 해당 영역을 강조 표시합니다.</p>
-              </div>
-              <ToggleButton size="m" checked={highlightOn} onChange={setHighlightOn} ariaLabel="섹션 하이라이트 토글" />
-            </div>
-
-            <div className="settings-modal__row">
-              <div>
-                <h4>방문 전 체크리스트</h4>
-                <p>방문 전에 필요한 준비 항목을 자동으로 묶어 보여줍니다.</p>
-              </div>
-              <ToggleButton size="m" checked={checklistOn} onChange={setChecklistOn} ariaLabel="체크리스트 토글" />
-            </div>
-
-            <div className="settings-modal__row">
-              <div>
-                <h4>작업 추천 표시</h4>
-                <p>시즌과 식물 상태에 따라 추천 작업을 먼저 노출합니다.</p>
-              </div>
-              <ToggleButton size="m" checked={recommendationOn} onChange={setRecommendationOn} ariaLabel="작업 추천 토글" />
-            </div>
-
-            <Divider />
-
-            <div className="settings-modal__grid">
-              <div className="settings-modal__item">
-                <h4>안내 음성</h4>
-                <Select options={VOICE_OPTIONS} value={voice} onChange={setVoice} size="m" />
-              </div>
-              <div className="settings-modal__item">
-                <h4>알림 주기</h4>
-                <Select options={REMINDER_OPTIONS} value={reminderType} onChange={setReminderType} size="m" />
-              </div>
-              <div className="settings-modal__item">
-                <h4>리마인드 시작일</h4>
-                <DatePicker value={dateValue} onChange={setDateValue} size="m" />
-              </div>
-              <div className="settings-modal__item">
-                <h4>메모</h4>
-                <TextField
-                  variant="text-area"
-                  type="long"
-                  size="s"
-                  label="간단 메모"
-                  value={memo}
-                  onChange={setMemo}
-                  showCounter
-                  maxLength={60}
-                />
-              </div>
-            </div>
-
-            <Divider />
-
-            <div className="settings-modal__checks">
-              <Checkbox size="s" checked={visitedOnly} onChange={setVisitedOnly} label="방문 예정 항목만 보기" />
-              <Checkbox size="s" checked={summaryPushOn} onChange={setSummaryPushOn} label="오늘의 요약 알림 받기" />
-              <Checkbox size="s" defaultChecked label="계절 변화 안내 받기" />
-            </div>
-
-            <Divider />
-
-            <div className="settings-modal__footer">
-              <ButtonTabGroup items={THEME_OPTIONS} value={activeTheme} onChange={setActiveTheme} size="m" />
-              <div className="settings-modal__footer-actions">
-                <TextButton label="취소" styleType="tertiary" size="s" onClick={onClose} />
-                <ActionPopover
-                  title="초기화 옵션"
-                  subtitle="위험 작업"
-                  content="정원 레이아웃, 필터, 임시 보기 설정을 초기화하는 기능 자리입니다."
-                  placement="top"
-                  align="right"
-                  trigger="click"
-                  showFooter={false}
-                  bodyMaxHeight={140}
-                >
-                  <TextButton label="초기화 옵션 보기" styleType="danger" size="s" />
-                </ActionPopover>
-                <TextButton label="임시 저장" styleType="primary" size="s" />
-              </div>
-            </div>
-
-            <div className="settings-modal__icons">
-              <Icon icon={settings3Line} width={16} height={16} />
-              <span>일반 설정</span>
-              <Icon icon={notificationLine} width={16} height={16} />
-              <span>알림</span>
-              <Icon icon={safeAlertLine} width={16} height={16} />
-              <span>보안</span>
+            <div className="settings-modal__footer-actions">
+              <ButtonTabGroup items={UI_TONE_OPTIONS} value={uiTone} onChange={setUiTone} size="m" />
+              <TextButton label="취소" styleType="tertiary" size="s" onClick={onClose} />
+              <TextButton label="임시 저장" styleType="primary" size="s" />
             </div>
           </div>
         </Container>
