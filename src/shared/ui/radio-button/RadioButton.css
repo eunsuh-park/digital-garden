@@ -15,8 +15,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  transition: border-color 0.22s ease, box-shadow 0.22s ease, background-color 0.22s ease, transform 0.18s ease;
   cursor: pointer;
+}
+
+.radio-button__control:hover:not(:disabled) {
+  transform: scale(1.04);
 }
 
 .radio-button--l .radio-button__control {
@@ -50,6 +54,7 @@
 .radio-button__dot {
   border-radius: 999px;
   background: var(--color-primary);
+  transition: transform 0.2s ease, background-color 0.22s ease;
 }
 
 .radio-button--l .radio-button__dot {
@@ -81,6 +86,7 @@
   font-size: 13px;
   color: var(--color-text);
   line-height: 1.2;
+  transition: color 0.22s ease;
 }
 
 .radio-button--locked .radio-button__label {

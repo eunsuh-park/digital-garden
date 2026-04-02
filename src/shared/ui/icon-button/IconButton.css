@@ -4,6 +4,7 @@
   --ib-bg-pressed: color-mix(in srgb, var(--color-primary) 18%, transparent);
   --ib-fg: var(--color-text-strong);
   --ib-fg-disabled: color-mix(in srgb, var(--color-text-muted) 70%, white);
+  --ib-scale: 1;
   width: 40px;
   height: 40px;
   border: none;
@@ -17,16 +18,25 @@
   gap: 2px;
   font-family: var(--font-sans);
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+  transform: scale(var(--ib-scale));
+  transition: background-color 0.22s ease, color 0.22s ease, opacity 0.22s ease, transform 0.22s ease;
 }
 
-.icon-button:has(.icon-button__label) {
+.icon-button--label-inline {
   min-width: 64px;
   width: auto;
   padding: 0 10px;
   border-radius: 999px;
   flex-direction: row;
   gap: 6px;
+}
+
+.icon-button--label-stacked {
+  width: 56px;
+  height: 56px;
+  padding: 6px 8px;
+  border-radius: 16px;
+  gap: 4px;
 }
 
 .icon-button--nobg {
@@ -55,8 +65,13 @@
   background: var(--ib-bg-hover);
 }
 
+.icon-button:hover:not(:disabled) {
+  --ib-scale: 1.03;
+}
+
 .icon-button--pressed {
   background: var(--ib-bg-pressed);
+  --ib-scale: 0.97;
 }
 
 .icon-button:disabled,
@@ -77,4 +92,5 @@
   font-size: 12px;
   font-weight: 600;
   line-height: 1.1;
+  text-align: center;
 }

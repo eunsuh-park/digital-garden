@@ -5,6 +5,7 @@
   --tb-fg: var(--color-surface);
   --tb-border: transparent;
   --tb-shadow-focus: 0 0 0 2px color-mix(in srgb, var(--color-primary) 24%, transparent);
+  --tb-scale: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -14,7 +15,8 @@
   background: var(--tb-bg);
   color: var(--tb-fg);
   cursor: pointer;
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  transform: scale(var(--tb-scale));
+  transition: background-color 0.22s ease, border-color 0.22s ease, color 0.22s ease, box-shadow 0.22s ease, transform 0.2s ease;
   font-family: var(--font-sans);
   font-weight: 700;
   line-height: 1;
@@ -91,9 +93,17 @@
   background: var(--tb-bg-hover);
 }
 
+.text-button:hover:not(:disabled) {
+  --tb-scale: 1.01;
+}
+
 .text-button--focus {
   background: var(--tb-bg-focus);
   box-shadow: var(--tb-shadow-focus);
+}
+
+.text-button:active:not(:disabled) {
+  --tb-scale: 0.985;
 }
 
 .text-button--fasble,

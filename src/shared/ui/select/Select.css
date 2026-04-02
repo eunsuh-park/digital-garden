@@ -42,7 +42,7 @@
   font-weight: 500;
   line-height: 1.2;
   cursor: pointer;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
+  transition: border-color 0.22s ease, box-shadow 0.22s ease, color 0.22s ease, background-color 0.22s ease;
 }
 
 .select__control:hover:not(:disabled),
@@ -84,7 +84,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: transform 0.15s ease;
+  transition: transform 0.22s ease, color 0.22s ease;
 }
 
 .select__arrow--open {
@@ -129,6 +129,7 @@
   font-size: var(--select-font-size);
   color: var(--color-text);
   text-align: left;
+  transition: background-color 0.18s ease, color 0.18s ease;
 }
 
 .select__item:hover {

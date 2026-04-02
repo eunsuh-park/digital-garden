@@ -5,7 +5,6 @@ import arrowUpLine from '@iconify-icons/mingcute/arrow-up-line';
 import arrowDownLine from '@iconify-icons/mingcute/arrow-down-line';
 import arrowLeftLine from '@iconify-icons/mingcute/arrow-left-line';
 import arrowRightLine from '@iconify-icons/mingcute/arrow-right-line';
-import addLine from '@iconify-icons/mingcute/add-line';
 import { useLocations } from '@/app/providers/LocationsContext';
 import { useMapPanelDetail } from '@/app/providers/MapPanelDetailContext';
 import { groupLocationsByColor, labelForColorGroup } from '@/shared/lib/locationsGroup';
@@ -103,7 +102,7 @@ function LocationTabContent() {
 export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
   const { pathname } = useLocation();
   const { locations, tasks, plants, loading } = useLocations();
-  const { detail, closeDetail, closeAllDetail, openLocationCreate } = useMapPanelDetail();
+  const { detail, closeDetail, closeAllDetail } = useMapPanelDetail();
 
   useEffect(() => {
     closeAllDetail();
@@ -226,18 +225,6 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
             <div className="map-side-panel__location-host">
               <div className="map-side-panel__location-scroll">
                 <LocationTabContent />
-              </div>
-              <div className="map-side-panel__location-footer">
-                <button
-                  type="button"
-                  className="map-side-panel__add-btn"
-                  onClick={() => openLocationCreate()}
-                >
-                  <span className="map-side-panel__add-btn-icon" aria-hidden>
-                    <Icon icon={addLine} width={18} height={18} />
-                  </span>
-                  구역 추가
-                </button>
               </div>
             </div>
           )}

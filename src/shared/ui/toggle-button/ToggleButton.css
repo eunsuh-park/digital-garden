@@ -3,6 +3,7 @@
   --tg-height: 24px;
   --tg-knob-size: 18px;
   --tg-padding: 3px;
+  --tg-translate-x: 0px;
   --tg-off-bg: var(--color-border);
   --tg-on-bg: var(--color-primary);
   --tg-disabled-bg: var(--color-hover-soft);
@@ -16,7 +17,7 @@
   align-items: center;
   justify-content: flex-start;
   cursor: pointer;
-  transition: background-color 0.18s ease, box-shadow 0.18s ease;
+  transition: background-color 0.26s ease, box-shadow 0.26s ease, transform 0.22s ease;
 }
 
 .toggle-button--m {
@@ -35,7 +36,7 @@
 
 .toggle-button--checked {
   background: var(--tg-on-bg);
-  justify-content: flex-end;
+  --tg-translate-x: calc(var(--tg-width) - var(--tg-knob-size) - (var(--tg-padding) * 2));
 }
 
 .toggle-button--disabled {
@@ -53,4 +54,18 @@
   border-radius: 999px;
   background: var(--color-surface);
   box-shadow: 0 2px 6px rgba(17, 24, 39, 0.2);
+  transform: translateX(var(--tg-translate-x));
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease;
+}
+
+.toggle-button:hover:not(:disabled) {
+  transform: scale(1.02);
+}
+
+.toggle-button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.toggle-button:hover:not(:disabled) .toggle-button__knob {
+  box-shadow: 0 4px 10px rgba(17, 24, 39, 0.22);
 }

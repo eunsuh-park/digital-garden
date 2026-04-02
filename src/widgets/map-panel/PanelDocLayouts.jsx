@@ -1,6 +1,5 @@
 import { Icon } from '@iconify/react';
 import imageAddLine from '@iconify-icons/mingcute/pic-line';
-import checkLine from '@iconify-icons/mingcute/check-line';
 import leaf3Fill from '@iconify-icons/mingcute/leaf-3-fill';
 import mapLine from '@iconify-icons/mingcute/map-line';
 import { TASK_TYPE_LABEL_KO } from '@/entities/task/lib/notion-schema';
@@ -72,15 +71,6 @@ export function TaskDetailLayout({
 
   return (
     <article className="panel-doc">
-      <div className="panel-doc__cover panel-doc__cover--task" aria-hidden>
-        <div className="panel-doc__cover-inner">
-          <span className="panel-doc__icon" aria-hidden>
-            <Icon icon={checkLine} width={28} height={28} />
-          </span>
-          <span className="panel-doc__cap">할 일</span>
-        </div>
-      </div>
-
       <div className="panel-doc__body">
         <h1 className="panel-doc__h1">{task.title}</h1>
 

@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { Icon } from '@iconify/react';
 import refresh2Line from '@iconify-icons/mingcute/refresh-2-line';
-import eye2Line from '@iconify-icons/mingcute/eye-2-line';
-import fullscreenLine from '@iconify-icons/mingcute/fullscreen-line';
-import closeLine from '@iconify-icons/mingcute/close-line';
 import { useMapPanelLayout } from '@/app/providers/MapPanelLayoutContext';
 import { useMapPanelDetail } from '@/app/providers/MapPanelDetailContext';
+import {
+  getMapViewPreference,
+  subscribeMapViewPreference,
+} from '@/shared/lib/mapViewPreferences';
 import Popover from './Popover';
 import './GardenMap.css';
 import gardenMapSvg from '@/gardenMap.svg?raw';
@@ -23,28 +24,16 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
   const { openLocationDetail } = useMapPanelDetail();
   const [activeLocationId, setActiveLocationId] = useState(null);
   const [hoverLocationId, setHoverLocationId] = useState(null);
-  const [mapBase, setMapBase] = useState('road'); // road | house
-  const [mapDirection, setMapDirection] = useState('horizontal'); // vertical | horizontal
+  const initialView = useMemo(() => getMapViewPreference(), []);
+  const [mapBase, setMapBase] = useState(initialView.base); // road | house
+  const [mapDirection, setMapDirection] = useState(initialView.direction); // vertical | horizontal
   const [zoom, setZoom] = useState(1); // 1 = 100% (최소)
-  const [mapOnlyMode, setMapOnlyMode] = useState(false);
-  const [toolboxCollapsed, setToolboxCollapsed] = useState(true);
   const [popoverPos, setPopoverPos] = useState({ x: 0, y: 0 });
   const svgHostRef = useRef(null);
   const svgViewBoxRef = useRef(null);
   const svgOriginalViewBoxRef = useRef(null);
   const panRef = useRef({ active: false, startX: 0, startY: 0, startVbX: 0, startVbY: 0 });
   const pinchRef = useRef({ active: false, startDistance: 0, startZoom: 1 });
-
-  const ORIENTATION_OPTIONS = useMemo(
-    () => [
-      { value: 'road-horizontal', label: '도로를 기준으로 수평 View', base: 'road', direction: 'horizontal' },
-      { value: 'road-vertical', label: '도로를 기준으로 수직 View', base: 'road', direction: 'vertical' },
-      { value: 'house-horizontal', label: '집을 기준으로 수평 View', base: 'house', direction: 'horizontal' },
-      { value: 'house-vertical', label: '집을 기준으로 수직 View', base: 'house', direction: 'vertical' },
-    ],
-    []
-  );
-  const orientationValue = `${mapBase}-${mapDirection}`;
 
   const handleLocationClick = useCallback((e, locationId) => {
     setActiveLocationId(locationId);
@@ -248,29 +237,12 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
     if (e.touches.length === 0) panRef.current.active = false;
   }, []);
 
-  const handleOrientationChange = useCallback(
-    (e) => {
-      const selected = ORIENTATION_OPTIONS.find((opt) => opt.value === e.target.value);
-      if (!selected) return;
-      setMapBase(selected.base);
-      setMapDirection(selected.direction);
-    },
-    [ORIENTATION_OPTIONS]
-  );
-
-  const toggleMapOnlyMode = useCallback(() => {
-    setMapOnlyMode((prev) => !prev);
-  }, []);
-
   useEffect(() => {
-    const cls = 'map-only-mode';
-    document.body.classList.toggle(cls, mapOnlyMode);
-    if (mapOnlyMode) {
-      setHoverLocationId(null);
-      setPopoverPos({ x: 0, y: 0 });
-    }
-    return () => document.body.classList.remove(cls);
-  }, [mapOnlyMode]);
+    return subscribeMapViewPreference((next) => {
+      setMapBase(next.base);
+      setMapDirection(next.direction);
+    });
+  }, []);
 
   const selectedLocation = activeLocationId && getLocationById ? getLocationById(activeLocationId) : null;
   const hoverLocation = hoverLocationId && getLocationById ? getLocationById(hoverLocationId) : null;
@@ -459,108 +431,29 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
       <div className="garden-map__controls" aria-label="지도 도구">
         <div className="garden-map__toolbar" role="toolbar" aria-label="지도 도구">
           {stackedLayout ? (
-            <div className={`garden-map__toolbar-inner ${toolboxCollapsed ? 'garden-map__toolbar-inner--collapsed' : ''}`}>
-              {toolboxCollapsed ? (
-                <button
-                  type="button"
-                  className="garden-map__icon-btn garden-map__icon-btn--eye"
-                  onClick={() => setToolboxCollapsed(false)}
-                  aria-label="툴박스 펼치기"
-                  title="툴박스 펼치기"
-                >
-                  <Icon icon={eye2Line} width={18} height={18} />
-                </button>
-              ) : (
-                <>
-                  {!mapOnlyMode ? (
-                    <label className="garden-map__select-wrap" aria-label="지도의 기준과 방향 선택">
-                      <select
-                        className="garden-map__select"
-                        value={orientationValue}
-                        onChange={handleOrientationChange}
-                      >
-                        {ORIENTATION_OPTIONS.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  ) : null}
-
-                  {!mapOnlyMode ? (
-                    <button
-                      type="button"
-                      className="garden-map__icon-btn"
-                      onClick={handleZoomReset}
-                      disabled={zoom <= 1.00001}
-                      aria-label="축척 원래대로"
-                      title="축척 원래대로"
-                    >
-                      <Icon icon={refresh2Line} width={16} height={16} />
-                    </button>
-                  ) : null}
-
-                  <button
-                    type="button"
-                    className="garden-map__icon-btn"
-                    onClick={toggleMapOnlyMode}
-                    aria-label={mapOnlyMode ? '전체 UI 다시 표시' : '맵만 보기'}
-                    title={mapOnlyMode ? '전체 UI 다시 표시' : '맵만 보기'}
-                  >
-                    <Icon icon={fullscreenLine} width={18} height={18} />
-                  </button>
-                  <button
-                    type="button"
-                    className="garden-map__icon-btn"
-                    onClick={() => setToolboxCollapsed(true)}
-                    aria-label="툴박스 접기"
-                    title="툴박스 접기"
-                  >
-                    <Icon icon={closeLine} width={18} height={18} />
-                  </button>
-                </>
-              )}
-            </div>
-          ) : (
             <div className="garden-map__toolbar-inner">
-              {!mapOnlyMode ? (
-                <label className="garden-map__select-wrap" aria-label="지도의 기준과 방향 선택">
-                  <select
-                    className="garden-map__select"
-                    value={orientationValue}
-                    onChange={handleOrientationChange}
-                  >
-                    {ORIENTATION_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              ) : null}
-
-              {!mapOnlyMode ? (
-                <button
-                  type="button"
-                  className="garden-map__icon-btn"
-                  onClick={handleZoomReset}
-                  disabled={zoom <= 1.00001}
-                  aria-label="축척 원래대로"
-                  title="축척 원래대로"
-                >
-                  <Icon icon={refresh2Line} width={16} height={16} />
-                </button>
-              ) : null}
-
               <button
                 type="button"
                 className="garden-map__icon-btn"
-                onClick={toggleMapOnlyMode}
-                aria-label={mapOnlyMode ? '전체 UI 다시 표시' : '맵만 보기'}
-                title={mapOnlyMode ? '전체 UI 다시 표시' : '맵만 보기'}
+                onClick={handleZoomReset}
+                disabled={zoom <= 1.00001}
+                aria-label="축척 원래대로"
+                title="축척 원래대로"
               >
-                <Icon icon={fullscreenLine} width={18} height={18} />
+                <Icon icon={refresh2Line} width={16} height={16} />
+              </button>
+            </div>
+          ) : (
+            <div className="garden-map__toolbar-inner">
+              <button
+                type="button"
+                className="garden-map__icon-btn"
+                onClick={handleZoomReset}
+                disabled={zoom <= 1.00001}
+                aria-label="축척 원래대로"
+                title="축척 원래대로"
+              >
+                <Icon icon={refresh2Line} width={16} height={16} />
               </button>
             </div>
           )}
@@ -589,7 +482,7 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
         />
       </div>
 
-      {!mapOnlyMode && hoverLocation ? (
+      {hoverLocation ? (
         <Popover
           section={hoverLocation}
           tasks={getTasks(hoverLocation.id)}

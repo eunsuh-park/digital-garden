@@ -7,6 +7,7 @@ import bookmarkFill from "@iconify-icons/mingcute/bookmark-fill";
  *   styleType?: "nobg" | "filled" | "destructive",
  *   state?: "default" | "hover" | "pressed" | "disabled",
  *   showLabel?: boolean,
+ *   labelPlacement?: "inline" | "stacked",
  *   label?: string,
  *   disabled?: boolean,
  *   onClick?: () => void,
@@ -17,6 +18,7 @@ export function IconButton({
   styleType = "nobg",
   state = "default",
   showLabel = false,
+  labelPlacement = "inline",
   label = "아이콘",
   disabled = false,
   onClick,
@@ -27,6 +29,7 @@ export function IconButton({
     "icon-button",
     `icon-button--${styleType}`,
     state !== "default" ? `icon-button--${state}` : "",
+    showLabel ? `icon-button--label-${labelPlacement}` : "",
     className,
   ]
     .filter(Boolean)

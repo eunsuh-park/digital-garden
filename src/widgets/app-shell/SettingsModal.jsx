@@ -18,6 +18,12 @@ import Select from "@/shared/ui/select/Select";
 import { ButtonTabGroup } from "@/shared/ui/button-tab/ButtonTab";
 import { RadioGroup } from "@/shared/ui/radio-button/RadioButton";
 import Checkbox from "@/shared/ui/checkbox/Checkbox";
+import {
+  getMapViewPreference,
+  MAP_VIEW_OPTIONS,
+  setMapViewPreference,
+  subscribeMapViewPreference,
+} from "@/shared/lib/mapViewPreferences";
 import "./SettingsModal.css";
 
 const NAV_ITEMS = [
@@ -59,11 +65,6 @@ const NAV_ITEMS = [
   },
 ];
 const NAV_TAB_ITEMS = NAV_ITEMS.map(({ label, value }) => ({ label, value }));
-
-const VIEW_BASE_OPTIONS = [
-  { label: "도로 기준", value: "road" },
-  { label: "집 기준", value: "home" },
-];
 
 const FILTER_OPTIONS = [
   { label: "전체 섹션", value: "all" },
@@ -118,7 +119,10 @@ function SettingRow({ title, description = "", children, multiline = false, dang
 
 export default function SettingsModal({ open, onClose }) {
   const [activeNav, setActiveNav] = useState("account");
-  const [viewBase, setViewBase] = useState("road");
+  const [mapDefaultView, setMapDefaultView] = useState(() => {
+    const initial = getMapViewPreference();
+    return `${initial.base}-${initial.direction}`;
+  });
   const [sectionFilter, setSectionFilter] = useState("all");
   const [mapStyle, setMapStyle] = useState("illustration");
   const [density, setDensity] = useState("cozy");
@@ -154,6 +158,12 @@ export default function SettingsModal({ open, onClose }) {
     return () => window.removeEventListener("keydown", handleKeydown);
   }, [open, onClose]);
 
+  useEffect(() => {
+    return subscribeMapViewPreference((next) => {
+      setMapDefaultView(`${next.base}-${next.direction}`);
+    });
+  }, []);
+
   if (!open) return null;
 
   const renderContent = () => {
@@ -185,8 +195,17 @@ export default function SettingsModal({ open, onClose }) {
               <TextField size="s" label="" placeholder="나의 정원" showHelperText={false} />
             </SettingRow>
             <Divider />
-            <SettingRow title="기본 뷰 기준">
-              <ButtonTabGroup items={VIEW_BASE_OPTIONS} value={viewBase} onChange={setViewBase} size="m" />
+            <SettingRow title="Default 페이지 지도 각도" description="Location 기본 화면에서 지도를 어떤 기준과 방향으로 보여줄지 설정합니다.">
+              <Select
+                options={MAP_VIEW_OPTIONS.map(({ label, value }) => ({ label, value }))}
+                value={mapDefaultView}
+                onChange={(value) => {
+                  setMapDefaultView(value);
+                  const selected = MAP_VIEW_OPTIONS.find((option) => option.value === value);
+                  if (selected) setMapViewPreference(selected.base, selected.direction);
+                }}
+                size="m"
+              />
             </SettingRow>
             <Divider />
             <SettingRow title="기본 섹션 필터 상태">

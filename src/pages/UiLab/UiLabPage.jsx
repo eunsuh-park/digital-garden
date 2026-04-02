@@ -127,6 +127,7 @@ export default function UiLabPage() {
   const [iconButtonStyle, setIconButtonStyle] = useState("nobg");
   const [iconButtonState, setIconButtonState] = useState("default");
   const [iconButtonShowLabel, setIconButtonShowLabel] = useState(false);
+  const [iconButtonLabelPlacement, setIconButtonLabelPlacement] = useState("inline");
   const [iconButtonDisabled, setIconButtonDisabled] = useState(false);
   const [iconButtonLabel, setIconButtonLabel] = useState("아이콘");
   const [checkboxSize, setCheckboxSize] = useState("m");
@@ -809,6 +810,13 @@ export default function UiLabPage() {
             />
             Label
           </label>
+          <label>
+            Label Placement
+            <select value={iconButtonLabelPlacement} onChange={(e) => setIconButtonLabelPlacement(e.target.value)}>
+              <option value="inline">inline</option>
+              <option value="stacked">stacked</option>
+            </select>
+          </label>
           <label className="ui-lab__checkbox-label">
             <input
               type="checkbox"
@@ -831,6 +839,7 @@ export default function UiLabPage() {
             styleType={iconButtonStyle}
             state={iconButtonState}
             showLabel={iconButtonShowLabel}
+            labelPlacement={iconButtonLabelPlacement}
             label={iconButtonLabel || "아이콘"}
             disabled={iconButtonDisabled}
           />
@@ -839,30 +848,42 @@ export default function UiLabPage() {
         <div className="ui-lab__variant-grid ui-lab__variant-grid--icon">
           <IconButton styleType="nobg" state="default" />
           <IconButton styleType="nobg" state="default" showLabel label="아이콘" />
+          <IconButton styleType="nobg" state="default" showLabel labelPlacement="stacked" label="아이콘" />
           <IconButton styleType="nobg" state="hover" />
           <IconButton styleType="nobg" state="hover" showLabel label="아이콘" />
+          <IconButton styleType="nobg" state="hover" showLabel labelPlacement="stacked" label="아이콘" />
           <IconButton styleType="nobg" state="pressed" />
           <IconButton styleType="nobg" state="pressed" showLabel label="아이콘" />
+          <IconButton styleType="nobg" state="pressed" showLabel labelPlacement="stacked" label="아이콘" />
           <IconButton styleType="nobg" state="disabled" />
           <IconButton styleType="nobg" state="disabled" showLabel label="아이콘" />
+          <IconButton styleType="nobg" state="disabled" showLabel labelPlacement="stacked" label="아이콘" />
 
           <IconButton styleType="filled" state="default" />
           <IconButton styleType="filled" state="default" showLabel label="아이콘" />
+          <IconButton styleType="filled" state="default" showLabel labelPlacement="stacked" label="아이콘" />
           <IconButton styleType="filled" state="hover" />
           <IconButton styleType="filled" state="hover" showLabel label="아이콘" />
+          <IconButton styleType="filled" state="hover" showLabel labelPlacement="stacked" label="아이콘" />
           <IconButton styleType="filled" state="pressed" />
           <IconButton styleType="filled" state="pressed" showLabel label="아이콘" />
+          <IconButton styleType="filled" state="pressed" showLabel labelPlacement="stacked" label="아이콘" />
           <IconButton styleType="filled" state="disabled" />
           <IconButton styleType="filled" state="disabled" showLabel label="아이콘" />
+          <IconButton styleType="filled" state="disabled" showLabel labelPlacement="stacked" label="아이콘" />
 
           <IconButton styleType="destructive" state="default" />
           <IconButton styleType="destructive" state="default" showLabel label="아이콘" />
+          <IconButton styleType="destructive" state="default" showLabel labelPlacement="stacked" label="아이콘" />
           <IconButton styleType="destructive" state="hover" />
           <IconButton styleType="destructive" state="hover" showLabel label="아이콘" />
+          <IconButton styleType="destructive" state="hover" showLabel labelPlacement="stacked" label="아이콘" />
           <IconButton styleType="destructive" state="pressed" />
           <IconButton styleType="destructive" state="pressed" showLabel label="아이콘" />
+          <IconButton styleType="destructive" state="pressed" showLabel labelPlacement="stacked" label="아이콘" />
           <IconButton styleType="destructive" state="disabled" />
           <IconButton styleType="destructive" state="disabled" showLabel label="아이콘" />
+          <IconButton styleType="destructive" state="disabled" showLabel labelPlacement="stacked" label="아이콘" />
         </div>
       </section>
 

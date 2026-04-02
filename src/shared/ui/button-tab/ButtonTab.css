@@ -1,4 +1,5 @@
 .button-tab {
+  --button-tab-scale: 1;
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
@@ -9,7 +10,8 @@
   font-weight: 700;
   line-height: 1;
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  transform: scale(var(--button-tab-scale));
+  transition: background-color 0.22s ease, color 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, transform 0.2s ease;
 }
 
 .button-tab--l {
@@ -31,6 +33,10 @@
   color: var(--color-text-strong);
 }
 
+.button-tab:hover:not(:disabled) {
+  --button-tab-scale: 1.01;
+}
+
 .button-tab--active {
   border-color: var(--color-primary);
   background: var(--color-primary);
@@ -43,6 +49,10 @@
   background: var(--color-hover-soft);
   color: color-mix(in srgb, var(--color-text-muted) 70%, white);
   cursor: not-allowed;
+}
+
+.button-tab:active:not(:disabled) {
+  --button-tab-scale: 0.985;
 }
 
 .button-tab-group {
