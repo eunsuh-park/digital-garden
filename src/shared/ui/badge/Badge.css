@@ -7,26 +7,78 @@
   min-width: var(--badge-min-width);
   height: var(--badge-height);
   padding: 0 var(--badge-padding-x);
-  background: var(--badge-bg, var(--color-primary));
-  color: var(--badge-fg, var(--color-surface));
+  background: var(--badge-bg);
+  color: var(--badge-fg);
   font-family: var(--font-sans);
   font-size: var(--badge-font-size);
-  font-weight: 600;
+  font-weight: var(--badge-font-weight);
   line-height: 1;
   letter-spacing: 0;
   white-space: nowrap;
 }
 
 .badge--size-m {
-  --badge-height: 16px;
-  --badge-radius: 999px;
-  --badge-font-size: 10px;
+  --badge-height: var(--component-badge-size-m-height);
+  --badge-radius: var(--component-badge-radius);
+  --badge-font-size: var(--component-badge-size-m-font-size);
+  --badge-font-weight: var(--component-badge-font-weight);
 }
 
 .badge--size-l {
-  --badge-height: 20px;
-  --badge-radius: 999px;
-  --badge-font-size: 12px;
+  --badge-height: var(--component-badge-size-l-height);
+  --badge-radius: var(--component-badge-radius);
+  --badge-font-size: var(--component-badge-size-l-font-size);
+  --badge-font-weight: var(--component-badge-font-weight);
+}
+
+.badge--tone-brand.badge--emphasis-solid {
+  --badge-bg: var(--component-badge-tone-brand-solid-bg);
+  --badge-fg: var(--component-badge-tone-brand-solid-fg);
+}
+
+.badge--tone-brand.badge--emphasis-soft {
+  --badge-bg: var(--component-badge-tone-brand-soft-bg);
+  --badge-fg: var(--component-badge-tone-brand-soft-fg);
+}
+
+.badge--tone-neutral.badge--emphasis-solid {
+  --badge-bg: var(--component-badge-tone-neutral-solid-bg);
+  --badge-fg: var(--component-badge-tone-neutral-solid-fg);
+}
+
+.badge--tone-neutral.badge--emphasis-soft {
+  --badge-bg: var(--component-badge-tone-neutral-soft-bg);
+  --badge-fg: var(--component-badge-tone-neutral-soft-fg);
+}
+
+.badge--tone-success.badge--emphasis-solid {
+  --badge-bg: var(--component-badge-tone-success-solid-bg);
+  --badge-fg: var(--component-badge-tone-success-solid-fg);
+}
+
+.badge--tone-success.badge--emphasis-soft {
+  --badge-bg: var(--component-badge-tone-success-soft-bg);
+  --badge-fg: var(--component-badge-tone-success-soft-fg);
+}
+
+.badge--tone-warning.badge--emphasis-solid {
+  --badge-bg: var(--component-badge-tone-warning-solid-bg);
+  --badge-fg: var(--component-badge-tone-warning-solid-fg);
+}
+
+.badge--tone-warning.badge--emphasis-soft {
+  --badge-bg: var(--component-badge-tone-warning-soft-bg);
+  --badge-fg: var(--component-badge-tone-warning-soft-fg);
+}
+
+.badge--tone-danger.badge--emphasis-solid {
+  --badge-bg: var(--component-badge-tone-danger-solid-bg);
+  --badge-fg: var(--component-badge-tone-danger-solid-fg);
+}
+
+.badge--tone-danger.badge--emphasis-soft {
+  --badge-bg: var(--component-badge-tone-danger-soft-bg);
+  --badge-fg: var(--component-badge-tone-danger-soft-fg);
 }
 
 .badge--none {
@@ -35,36 +87,36 @@
 
 .badge--size-m.badge--none,
 .badge--size-m.badge--single {
-  --badge-min-width: 16px;
-  --badge-padding-x: 4px;
+  --badge-min-width: var(--component-badge-size-m-min-width-single);
+  --badge-padding-x: var(--component-badge-size-m-padding-x-single);
 }
 
 .badge--size-m.badge--double {
-  --badge-min-width: 20px;
-  --badge-padding-x: 5px;
+  --badge-min-width: var(--component-badge-size-m-min-width-double);
+  --badge-padding-x: var(--component-badge-size-m-padding-x-double);
 }
 
 .badge--size-m.badge--triple {
-  --badge-min-width: 26px;
-  --badge-padding-x: 5px;
+  --badge-min-width: var(--component-badge-size-m-min-width-triple);
+  --badge-padding-x: var(--component-badge-size-m-padding-x-triple);
 }
 
 .badge--size-l.badge--none {
-  --badge-min-width: 20px;
-  --badge-padding-x: 4px;
+  --badge-min-width: var(--component-badge-size-l-min-width-none);
+  --badge-padding-x: var(--component-badge-size-l-padding-x-none);
 }
 
 .badge--size-l.badge--single {
-  --badge-min-width: 20px;
-  --badge-padding-x: 6px;
+  --badge-min-width: var(--component-badge-size-l-min-width-single);
+  --badge-padding-x: var(--component-badge-size-l-padding-x-single);
 }
 
 .badge--size-l.badge--double {
-  --badge-min-width: 24px;
-  --badge-padding-x: 6px;
+  --badge-min-width: var(--component-badge-size-l-min-width-double);
+  --badge-padding-x: var(--component-badge-size-l-padding-x-double);
 }
 
 .badge--size-l.badge--triple {
-  --badge-min-width: 30px;
-  --badge-padding-x: 6px;
+  --badge-min-width: var(--component-badge-size-l-min-width-triple);
+  --badge-padding-x: var(--component-badge-size-l-padding-x-triple);
 }

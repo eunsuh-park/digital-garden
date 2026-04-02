@@ -19,6 +19,8 @@ import SectionHeading from "@/shared/ui/section-heading/SectionHeading";
 import "./UiLabPage.css";
 
 const BADGE_SIZES = ["m", "l"];
+const BADGE_TONES = ["brand", "neutral", "success", "warning", "danger"];
+const BADGE_EMPHASES = ["solid", "soft"];
 const DATE_PICKER_SIZES = ["l", "m", "s"];
 const DATE_PICKER_STATES = ["default", "hover", "active", "selected"];
 const DATE_PICKER_TYPES = ["calendar", "wheel"];
@@ -87,6 +89,8 @@ function toInputDate(value) {
 
 export default function UiLabPage() {
   const [badgeSize, setBadgeSize] = useState("l");
+  const [badgeTone, setBadgeTone] = useState("brand");
+  const [badgeEmphasis, setBadgeEmphasis] = useState("solid");
   const [badgeCount, setBadgeCount] = useState("99+");
   const [badgeMaxCount, setBadgeMaxCount] = useState(99);
 
@@ -292,6 +296,26 @@ export default function UiLabPage() {
             </select>
           </label>
           <label>
+            Tone
+            <select value={badgeTone} onChange={(e) => setBadgeTone(e.target.value)}>
+              {BADGE_TONES.map((tone) => (
+                <option key={tone} value={tone}>
+                  {tone}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Emphasis
+            <select value={badgeEmphasis} onChange={(e) => setBadgeEmphasis(e.target.value)}>
+              {BADGE_EMPHASES.map((emphasis) => (
+                <option key={emphasis} value={emphasis}>
+                  {emphasis}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
             Count
             <input value={badgeCount} onChange={(e) => setBadgeCount(e.target.value)} placeholder="예: 1, 9+, 99+" />
           </label>
@@ -307,18 +331,24 @@ export default function UiLabPage() {
         </div>
 
         <div className="ui-lab__preview-card">
-          <Badge size={badgeSize} count={normalizedBadgeCount} maxCount={badgeMaxCount} />
+          <Badge
+            size={badgeSize}
+            tone={badgeTone}
+            emphasis={badgeEmphasis}
+            count={normalizedBadgeCount}
+            maxCount={badgeMaxCount}
+          />
         </div>
 
         <div className="ui-lab__variant-row">
-          <Badge size="m" count={null} />
-          <Badge size="m" count={1} />
-          <Badge size="m" count="9+" />
-          <Badge size="m" count="99+" />
-          <Badge size="l" count={null} />
-          <Badge size="l" count={1} />
-          <Badge size="l" count="9+" />
-          <Badge size="l" count="99+" />
+          <Badge size="m" tone="brand" emphasis="solid" count={null} />
+          <Badge size="m" tone="brand" emphasis="solid" count={1} />
+          <Badge size="m" tone="success" emphasis="soft" count="9+" />
+          <Badge size="m" tone="danger" emphasis="solid" count="99+" />
+          <Badge size="l" tone="neutral" emphasis="soft" count={null} />
+          <Badge size="l" tone="neutral" emphasis="solid" count={1} />
+          <Badge size="l" tone="warning" emphasis="soft" count="9+" />
+          <Badge size="l" tone="danger" emphasis="soft" count="99+" />
         </div>
       </section>
 

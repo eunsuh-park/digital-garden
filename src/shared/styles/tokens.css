@@ -142,4 +142,47 @@
   --color-primary: var(--brand-primary);
   --color-primary-light: var(--brand-primary-light);
   --color-accent: var(--brand-accent);
+
+  /* ==================== COMPONENT TOKENS ==================== */
+  /* Badge */
+  --component-badge-radius: var(--radius-full);
+  --component-badge-font-weight: var(--font-weight-semibold);
+  --component-badge-size-m-height: 16px;
+  --component-badge-size-m-font-size: 10px;
+  --component-badge-size-m-min-width-single: 16px;
+  --component-badge-size-m-min-width-double: 20px;
+  --component-badge-size-m-min-width-triple: 26px;
+  --component-badge-size-m-padding-x-single: 4px;
+  --component-badge-size-m-padding-x-double: 5px;
+  --component-badge-size-m-padding-x-triple: 5px;
+  --component-badge-size-l-height: 20px;
+  --component-badge-size-l-font-size: 12px;
+  --component-badge-size-l-min-width-none: 20px;
+  --component-badge-size-l-min-width-single: 20px;
+  --component-badge-size-l-min-width-double: 24px;
+  --component-badge-size-l-min-width-triple: 30px;
+  --component-badge-size-l-padding-x-none: 4px;
+  --component-badge-size-l-padding-x-single: 6px;
+  --component-badge-size-l-padding-x-double: 6px;
+  --component-badge-size-l-padding-x-triple: 6px;
+  --component-badge-tone-brand-solid-bg: var(--color-primary);
+  --component-badge-tone-brand-solid-fg: var(--color-surface);
+  --component-badge-tone-brand-soft-bg: var(--color-success-bg);
+  --component-badge-tone-brand-soft-fg: var(--color-success-text);
+  --component-badge-tone-neutral-solid-bg: var(--gray-800);
+  --component-badge-tone-neutral-solid-fg: var(--gray-0);
+  --component-badge-tone-neutral-soft-bg: var(--gray-100);
+  --component-badge-tone-neutral-soft-fg: var(--gray-700);
+  --component-badge-tone-success-solid-bg: var(--color-success-text);
+  --component-badge-tone-success-solid-fg: var(--color-surface);
+  --component-badge-tone-success-soft-bg: var(--color-success-bg);
+  --component-badge-tone-success-soft-fg: var(--color-success-text);
+  --component-badge-tone-warning-solid-bg: var(--color-warning-text);
+  --component-badge-tone-warning-solid-fg: var(--color-surface);
+  --component-badge-tone-warning-soft-bg: var(--color-warning-bg);
+  --component-badge-tone-warning-soft-fg: var(--color-warning-text);
+  --component-badge-tone-danger-solid-bg: var(--color-danger-text-strong);
+  --component-badge-tone-danger-solid-fg: var(--color-surface);
+  --component-badge-tone-danger-soft-bg: var(--color-danger-bg);
+  --component-badge-tone-danger-soft-fg: var(--color-danger-text);
 }
