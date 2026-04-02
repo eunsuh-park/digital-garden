@@ -166,6 +166,10 @@ export default function SettingsModal({ open, onClose }) {
 
   if (!open) return null;
 
+  const handleSave = () => {
+    onClose?.();
+  };
+
   const renderContent = () => {
     switch (activeNav) {
       case "account":
@@ -335,7 +339,7 @@ export default function SettingsModal({ open, onClose }) {
             </div>
             <div className="settings-modal__footer-actions">
               <TextButton label="취소" styleType="tertiary" size="s" onClick={onClose} />
-              <TextButton label="임시 저장" styleType="primary" size="s" />
+              <TextButton label="저장" styleType="primary" size="s" onClick={handleSave} />
             </div>
           </div>
         </Container>

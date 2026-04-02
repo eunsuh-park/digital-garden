@@ -281,6 +281,7 @@
   font-weight: 700;
   cursor: pointer;
   box-shadow: none;
+  transition: background-color 0.22s ease, transform 0.18s ease, color 0.22s ease;
 }
 
 .map-side-panel__add-btn:hover {
@@ -289,6 +290,12 @@
 
 .map-side-panel__add-btn:active {
   transform: scale(0.99);
+}
+
+.map-side-panel__add-btn--active {
+  background: color-mix(in srgb, var(--color-primary) 14%, var(--color-surface));
+  color: var(--color-primary);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 26%, var(--color-border));
 }
 
 .map-side-panel__add-btn-icon {

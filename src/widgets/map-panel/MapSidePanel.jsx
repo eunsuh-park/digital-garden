@@ -7,7 +7,13 @@ import arrowLeftLine from '@iconify-icons/mingcute/arrow-left-line';
 import arrowRightLine from '@iconify-icons/mingcute/arrow-right-line';
 import { useLocations } from '@/app/providers/LocationsContext';
 import { useMapPanelDetail } from '@/app/providers/MapPanelDetailContext';
+import { useToast } from '@/app/providers/ToastContext';
 import { groupLocationsByColor, labelForColorGroup } from '@/shared/lib/locationsGroup';
+import {
+  getMapBuilderMode,
+  setMapBuilderMode,
+  subscribeMapBuilderMode,
+} from '@/shared/lib/mapBuilderMode';
 import TasksPage from '@/pages/Tasks/TasksPage';
 import PlantsPage from '@/pages/Plants/PlantsPage';
 import {
@@ -103,10 +109,16 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
   const { pathname } = useLocation();
   const { locations, tasks, plants, loading } = useLocations();
   const { detail, closeDetail, closeAllDetail } = useMapPanelDetail();
+  const { showToast } = useToast();
+  const [mapBuilderMode, setMapBuilderModeState] = useState(() => getMapBuilderMode());
 
   useEffect(() => {
     closeAllDetail();
   }, [pathname, closeAllDetail]);
+
+  useEffect(() => {
+    return subscribeMapBuilderMode(setMapBuilderModeState);
+  }, []);
 
   const locationMap = useMemo(() => Object.fromEntries(locations.map((l) => [l.id, l])), [locations]);
   const plantMap = useMemo(() => Object.fromEntries(plants.map((p) => [p.id, p])), [plants]);
@@ -225,6 +237,19 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
             <div className="map-side-panel__location-host">
               <div className="map-side-panel__location-scroll">
                 <LocationTabContent />
+              </div>
+              <div className="map-side-panel__location-footer">
+                <button
+                  type="button"
+                  className={`map-side-panel__add-btn ${mapBuilderMode ? 'map-side-panel__add-btn--active' : ''}`}
+                  onClick={() => {
+                    const next = setMapBuilderMode(!mapBuilderMode);
+                    setMapBuilderModeState(next);
+                    showToast(next ? '맵 빌더 모드로 전환했습니다.' : '기본 탐색 모드로 돌아왔습니다.');
+                  }}
+                >
+                  {mapBuilderMode ? '맵 빌더 모드 사용 중' : '맵 빌더 모드로 전환'}
+                </button>
               </div>
             </div>
           )}
