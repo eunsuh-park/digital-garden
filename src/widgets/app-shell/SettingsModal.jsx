@@ -199,7 +199,7 @@ export default function SettingsModal({ open, onClose }) {
               <TextField size="s" label="" placeholder="나의 정원" showHelperText={false} />
             </SettingRow>
             <Divider />
-            <SettingRow title="Default 페이지 지도 각도" description="Location 기본 화면에서 지도를 어떤 기준과 방향으로 보여줄지 설정합니다.">
+            <SettingRow title="Default 페이지 지도 각도" description="Zone(구역) 기본 화면에서 지도를 어떤 기준과 방향으로 보여줄지 설정합니다.">
               <Select
                 options={MAP_VIEW_OPTIONS.map(({ label, value }) => ({ label, value }))}
                 value={mapDefaultView}

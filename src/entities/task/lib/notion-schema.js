@@ -1,7 +1,7 @@
 /**
  * Tasks DB 스키마 매핑
- * - Target_Location → Locations (N:1)
- * - Target_Plant → Plants (N:1, Plants.Name과 연결)
+ * - Target_Location → Zone(구역)
+ * - Target_Plant → Plants
  */
 import {
   getTitle,
@@ -58,7 +58,7 @@ export function parseTaskPage(page) {
   const title = getTitle(props[PROP_MAP.title]) || getTitle(props.Title);
   const statusRaw = getNotionStatus(props[PROP_MAP.status]) || getSelect(props[PROP_MAP.status]);
   const due = getDate(props[PROP_MAP.due_date]);
-  const sectionIds = getRelation(props[PROP_MAP.section]);
+  const zoneIdsFromNotion = getRelation(props[PROP_MAP.section]) || [];
   const targetPlantIds = getRelation(props[PROP_MAP.target_plant]);
   const notes = getRichText(props[PROP_MAP.notes]) || '';
   const difficultyRaw = getSelect(props[PROP_MAP.difficulty]);
@@ -68,16 +68,20 @@ export function parseTaskPage(page) {
   const prereqTaskIds = getRelation(props[PROP_MAP.prereq_tasks]) || getRelation(props['선행 작업']);
   const followupTaskIds = getRelation(props[PROP_MAP.followup_tasks]) || getRelation(props['후속 작업']);
 
-  // status: Notion 선택값 → progress | pending | completed
+  const notionStatus = statusRaw != null && String(statusRaw).trim() ? String(statusRaw).trim() : '';
+
+  // 보조 필드: 필터·완료 판별 등 — 표시 문구는 notion_status(노션 원문) 우선
   const statusMap = {
     '시작 전': 'pending',
     진행중: 'progress',
+    '진행 중': 'progress',
     예정: 'pending',
     완료: 'completed',
   };
-  const status = statusMap[statusRaw] ?? (statusRaw ? 'pending' : 'pending');
+  const status = statusMap[statusRaw] ?? statusMap[notionStatus] ?? (statusRaw ? 'pending' : 'pending');
 
-  // Difficulty: Notion 값 → Easy | Medium | Hard (TaskCard difficultyConfig)
+  // 난이도: 영문 Easy/Medium/Hard만 인정 (API와 동일). 허용 목록 밖이면 null.
+  const ALLOWED_DIFF = new Set(['Easy', 'Medium', 'Hard']);
   const difficultyMap = {
     Easy: 'Easy',
     Medium: 'Medium',
@@ -88,7 +92,8 @@ export function parseTaskPage(page) {
     어려움: 'Hard',
     어려운: 'Hard',
   };
-  const difficulty = difficultyMap[difficultyRaw] || difficultyMap[difficultyRaw?.trim()] || 'Easy';
+  const difficultyNorm = difficultyMap[difficultyRaw] || difficultyMap[difficultyRaw?.trim()];
+  const difficulty = difficultyNorm && ALLOWED_DIFF.has(difficultyNorm) ? difficultyNorm : null;
 
   // Task_Type: Notion 값 → 영문 키 (TaskCard taskTypeConfig에서 한글 라벨로 표시)
   const taskTypeNorm = (taskTypeRaw || '').trim();
@@ -100,8 +105,10 @@ export function parseTaskPage(page) {
     id: page.id,
     title: title || '(제목 없음)',
     status,
+    notion_status: notionStatus,
     due_date: due,
-    section_id: sectionIds[0] || null,
+    zone_id: zoneIdsFromNotion[0] || null,
+    target_zone_ids: zoneIdsFromNotion,
     target_plant_ids: targetPlantIds || [],
     notes: notes.trim() || '',
     difficulty,

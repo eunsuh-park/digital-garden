@@ -81,11 +81,11 @@ async function mutateApi(path, label, options = {}) {
 }
 
 export async function fetchSections() {
-  return fetchLocations();
+  return fetchZones();
 }
 
-export async function fetchLocations() {
-  return fetchApi('/notion-locations', 'Locations(구역)');
+export async function fetchZones() {
+  return fetchApi('/notion-zones', 'Zones(구역, Notion Locations)');
 }
 
 export async function fetchTasks() {
@@ -97,31 +97,24 @@ export async function fetchPlants() {
 }
 
 /**
- * Locations DB: 안전 필드만 업데이트(Name/Description)
- * - relation(color/svg_id 등)은 update payload에서 제외
+ * Zone(Notion Locations): Name/Description만 업데이트
  */
-export async function updateLocation(id, updates) {
-  return mutateApi('/notion-locations', 'Locations(구역) update', {
+export async function updateZone(id, updates) {
+  return mutateApi('/notion-zones', 'Zones update', {
     method: 'POST',
     body: { action: 'update', id, ...updates },
   });
 }
 
-/**
- * Locations DB: 새 구역 생성 (Name, Description, Color)
- */
-export async function createLocation(payload) {
-  return mutateApi('/notion-locations', 'Locations create', {
+export async function createZone(payload) {
+  return mutateApi('/notion-zones', 'Zones create', {
     method: 'POST',
     body: { action: 'create', ...payload },
   });
 }
 
-/**
- * Locations DB: 구역 삭제(archive)
- */
-export async function deleteLocation(id) {
-  return mutateApi('/notion-locations', 'Locations delete', {
+export async function deleteZone(id) {
+  return mutateApi('/notion-zones', 'Zones delete', {
     method: 'POST',
     body: { action: 'delete', id },
   });

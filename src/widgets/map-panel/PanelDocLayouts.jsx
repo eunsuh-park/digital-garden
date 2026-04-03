@@ -47,8 +47,8 @@ function plantStatusLabel(status) {
  */
 export function TaskDetailLayout({
   task,
-  locationName = null,
-  onLocationNavigate,
+  zoneName = null,
+  onZoneNavigate,
   plantLinks = [],
   taskLinkGroups,
 }) {
@@ -84,19 +84,19 @@ export function TaskDetailLayout({
           <span className="panel-doc__badge panel-doc__badge--accent">{taskTypeLabel}</span>
         </div>
 
-        {locationName || scheduledDate || estimatedDuration ? (
+        {zoneName || scheduledDate || estimatedDuration ? (
           <dl className="panel-doc__dl panel-doc__dl--ruled">
-            {locationName ? (
+            {zoneName ? (
               <>
                 <dt>대상 구역</dt>
                 <dd>
-                  {onLocationNavigate ? (
-                    <button type="button" className="panel-doc__link" onClick={onLocationNavigate}>
-                      <Icon icon={mapLine} width={14} height={14} aria-hidden /> {locationName}
+                  {onZoneNavigate ? (
+                    <button type="button" className="panel-doc__link" onClick={onZoneNavigate}>
+                      <Icon icon={mapLine} width={14} height={14} aria-hidden /> {zoneName}
                     </button>
                   ) : (
                     <>
-                      <Icon icon={mapLine} width={14} height={14} aria-hidden /> {locationName}
+                      <Icon icon={mapLine} width={14} height={14} aria-hidden /> {zoneName}
                     </>
                   )}
                 </dd>
@@ -170,7 +170,7 @@ export function TaskDetailLayout({
 /**
  * 우측 패널 식물 상세 — 스타일: panel-doc (panel-view.css)
  */
-export function PlantDetailLayout({ plant, locationName, imageUrl = null, onLocationNavigate }) {
+export function PlantDetailLayout({ plant, zoneName, imageUrl = null, onZoneNavigate }) {
   const status = plantStatusLabel(plant.status);
   const bloom =
     plant.bloom_season && plant.bloom_season !== '-' ? plant.bloom_season : null;
@@ -228,17 +228,17 @@ export function PlantDetailLayout({ plant, locationName, imageUrl = null, onLoca
               <dd>{species}</dd>
             </>
           ) : null}
-          {locationName ? (
+          {zoneName ? (
             <>
               <dt>위치</dt>
               <dd>
-                {onLocationNavigate ? (
-                  <button type="button" className="panel-doc__link" onClick={onLocationNavigate}>
-                    <Icon icon={mapLine} width={14} height={14} aria-hidden /> {locationName}
+                {onZoneNavigate ? (
+                  <button type="button" className="panel-doc__link" onClick={onZoneNavigate}>
+                    <Icon icon={mapLine} width={14} height={14} aria-hidden /> {zoneName}
                   </button>
                 ) : (
                   <>
-                    <Icon icon={mapLine} width={14} height={14} aria-hidden /> {locationName}
+                    <Icon icon={mapLine} width={14} height={14} aria-hidden /> {zoneName}
                   </>
                 )}
               </dd>

@@ -5,10 +5,10 @@ import arrowUpLine from '@iconify-icons/mingcute/arrow-up-line';
 import arrowDownLine from '@iconify-icons/mingcute/arrow-down-line';
 import arrowLeftLine from '@iconify-icons/mingcute/arrow-left-line';
 import arrowRightLine from '@iconify-icons/mingcute/arrow-right-line';
-import { useLocations } from '@/app/providers/LocationsContext';
+import { useZones } from '@/app/providers/ZonesContext';
 import { useMapPanelDetail } from '@/app/providers/MapPanelDetailContext';
 import { useToast } from '@/app/providers/ToastContext';
-import { groupLocationsByColor, labelForColorGroup } from '@/shared/lib/locationsGroup';
+import { groupZonesByColor, labelForColorGroup } from '@/shared/lib/zonesGroup';
 import {
   getMapBuilderMode,
   setMapBuilderMode,
@@ -17,8 +17,8 @@ import {
 import TasksPage from '@/pages/Tasks/TasksPage';
 import PlantsPage from '@/pages/Plants/PlantsPage';
 import {
-  MapPanelLocationDetail,
-  MapPanelLocationCreate,
+  MapPanelZoneDetail,
+  MapPanelZoneCreate,
   MapPanelPlantDetail,
   MapPanelPlantCreate,
   MapPanelTaskCreate,
@@ -26,12 +26,12 @@ import {
 } from './MapPanelDetailViews';
 import './MapSidePanel.css';
 
-function LocationTabContent() {
-  const { locations, loading, error } = useLocations();
-  const { openLocationDetail } = useMapPanelDetail();
+function ZoneTabContent() {
+  const { zones, loading, error } = useZones();
+  const { openZoneDetail } = useMapPanelDetail();
   const [expandedColors, setExpandedColors] = useState(() => new Set());
 
-  const groups = useMemo(() => groupLocationsByColor(locations), [locations]);
+  const groups = useMemo(() => groupZonesByColor(zones), [zones]);
 
   const toggleColor = (color) => {
     setExpandedColors((prev) => {
@@ -50,7 +50,7 @@ function LocationTabContent() {
     return <p className="map-side-panel__hint map-side-panel__hint--error">{error}</p>;
   }
 
-  if (!locations.length) {
+  if (!zones.length) {
     return <p className="map-side-panel__hint">등록된 구역이 없습니다.</p>;
   }
 
@@ -82,16 +82,16 @@ function LocationTabContent() {
             </button>
             {expanded && (
               <ul className="map-side-panel__sublist">
-                {items.map((loc) => (
-                  <li key={loc.id} className="map-side-panel__subitem">
+                {items.map((z) => (
+                  <li key={z.id} className="map-side-panel__subitem">
                     <button
                       type="button"
                       className="map-side-panel__subitem-btn"
-                      onClick={() => openLocationDetail(loc)}
+                      onClick={() => openZoneDetail(z)}
                     >
-                      <span className="map-side-panel__subitem-name">{loc.name}</span>
-                      {loc.color_label ? (
-                        <span className="map-side-panel__subitem-meta">{loc.color_label}</span>
+                      <span className="map-side-panel__subitem-name">{z.name}</span>
+                      {z.color_label ? (
+                        <span className="map-side-panel__subitem-meta">{z.color_label}</span>
                       ) : null}
                     </button>
                   </li>
@@ -107,7 +107,7 @@ function LocationTabContent() {
 
 export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
   const { pathname } = useLocation();
-  const { locations, tasks, plants, loading } = useLocations();
+  const { zones, tasks, plants, loading } = useZones();
   const { detail, closeDetail, closeAllDetail } = useMapPanelDetail();
   const { showToast } = useToast();
   const [mapBuilderMode, setMapBuilderModeState] = useState(() => getMapBuilderMode());
@@ -120,19 +120,19 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
     return subscribeMapBuilderMode(setMapBuilderModeState);
   }, []);
 
-  const locationMap = useMemo(() => Object.fromEntries(locations.map((l) => [l.id, l])), [locations]);
+  const zoneMap = useMemo(() => Object.fromEntries(zones.map((z) => [z.id, z])), [zones]);
   const plantMap = useMemo(() => Object.fromEntries(plants.map((p) => [p.id, p])), [plants]);
   const taskTitleMap = useMemo(() => Object.fromEntries(tasks.map((t) => [t.id, t.title])), [tasks]);
 
   const tabFromPath =
-    pathname.startsWith('/tasks') ? 'tasks' : pathname.startsWith('/plants') ? 'plants' : 'location';
+    pathname.startsWith('/tasks') ? 'tasks' : pathname.startsWith('/plants') ? 'plants' : 'zone';
 
   const pendingTasksCount = useMemo(
     () => tasks.filter((t) => t.status !== 'completed').length,
     [tasks]
   );
 
-  const locationTotal = loading ? '…' : String(locations.length);
+  const zoneTotal = loading ? '…' : String(zones.length);
   const tasksCountLabel = loading ? '…' : String(pendingTasksCount);
   const plantsCountLabel = loading ? '…' : String(plants.length);
 
@@ -146,7 +146,7 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
     .join(' ');
 
   return (
-    <aside className={asideClass} aria-label="장소·할 일·식물 패널">
+    <aside className={asideClass} aria-label="구역·할 일·식물 패널">
       {!detail && (
         <button
           type="button"
@@ -176,13 +176,13 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
               to="/"
               end
               role="tab"
-              aria-selected={tabFromPath === 'location'}
+              aria-selected={tabFromPath === 'zone'}
               className={({ isActive }) =>
                 `map-side-panel__tab ${isActive ? 'map-side-panel__tab--active' : ''}`
               }
             >
-              Location{' '}
-              <span className="map-side-panel__tab-count">({locationTotal})</span>
+              Zone{' '}
+              <span className="map-side-panel__tab-count">({zoneTotal})</span>
             </NavLink>
             <NavLink
               to="/tasks"
@@ -211,17 +211,17 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
           className={`map-side-panel__body ${detail ? 'map-side-panel__body--detail' : ''}`}
           role="tabpanel"
         >
-          {detail?.type === 'location' && (
-            <MapPanelLocationDetail location={detail.location} onBack={closeDetail} />
+          {detail?.type === 'zone' && (
+            <MapPanelZoneDetail zone={detail.zone} onBack={closeDetail} />
           )}
-          {detail?.type === 'location-create' && <MapPanelLocationCreate onBack={closeDetail} />}
+          {detail?.type === 'zone-create' && <MapPanelZoneCreate onBack={closeDetail} />}
           {detail?.type === 'task-create' && <MapPanelTaskCreate onBack={closeDetail} />}
           {detail?.type === 'plant-create' && <MapPanelPlantCreate onBack={closeDetail} />}
           {detail?.type === 'task' && (
             <MapPanelTaskDetail
               task={detail.task}
               onBack={closeDetail}
-              locationMap={locationMap}
+              zoneMap={zoneMap}
               plantMap={plantMap}
               taskTitleMap={taskTitleMap}
             />
@@ -230,15 +230,15 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
             <MapPanelPlantDetail
               plant={detail.plant}
               onBack={closeDetail}
-              locationMap={locationMap}
+              zoneMap={zoneMap}
             />
           )}
-          {!detail && tabFromPath === 'location' && (
-            <div className="map-side-panel__location-host">
-              <div className="map-side-panel__location-scroll">
-                <LocationTabContent />
+          {!detail && tabFromPath === 'zone' && (
+            <div className="map-side-panel__zone-host">
+              <div className="map-side-panel__zone-scroll">
+                <ZoneTabContent />
               </div>
-              <div className="map-side-panel__location-footer">
+              <div className="map-side-panel__zone-footer">
                 <button
                   type="button"
                   className={`map-side-panel__add-btn ${mapBuilderMode ? 'map-side-panel__add-btn--active' : ''}`}

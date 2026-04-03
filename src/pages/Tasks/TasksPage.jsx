@@ -3,15 +3,14 @@ import { Icon } from '@iconify/react';
 import arrowUpLine from '@iconify-icons/mingcute/arrow-up-line';
 import arrowDownLine from '@iconify-icons/mingcute/arrow-down-line';
 import addLine from '@iconify-icons/mingcute/add-line';
-import { fetchLocations, fetchTasks, updateTask } from '@/shared/api/notionApi';
-import { parseLocationsResponse } from '@/entities/location/lib/notion-schema';
+import { fetchTasks, updateTask } from '@/shared/api/notionApi';
 import { parseTasksResponse, TASK_TYPE_LABEL_KO } from '@/entities/task/lib/notion-schema';
 import FullPage from '@/shared/ui/full-page/FullPage';
 import FullPageFilter from '@/shared/ui/full-page/FullPageFilter';
 import FullPageSorter from '@/shared/ui/full-page/FullPageSorter';
 import ErrorState from '@/shared/ui/error-state/ErrorState';
 import TaskCard from '@/shared/ui/task-card/TaskCard';
-import { useLocations } from '@/app/providers/LocationsContext';
+import { useZones } from '@/app/providers/ZonesContext';
 import { useMapPanelDetail } from '@/app/providers/MapPanelDetailContext';
 import { useTasksPanelUi, TASKS_PANEL_DEFAULT_SORT } from '@/app/providers/TasksPanelUiContext';
 import { isTaskOverdue } from '@/shared/lib/taskDates';
@@ -120,7 +119,7 @@ function TasksTypeAccordion({ tasks, renderCard }) {
 export default function TasksPage({ variant = 'default' }) {
   const { openTaskDetail, openTaskCreate } = useMapPanelDetail();
   const panelUi = useTasksPanelUi();
-  const ctx = useLocations();
+  const ctx = useZones();
   const isEmbedded = variant === 'embedded';
 
   const [localFilter, setLocalFilter] = useState({});
@@ -137,7 +136,6 @@ export default function TasksPage({ variant = 'default' }) {
 
   const defaultSort = isEmbedded && panelUi ? panelUi.defaultSort : TASKS_PANEL_DEFAULT_SORT;
 
-  const [locations, setLocations] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -151,12 +149,9 @@ export default function TasksPage({ variant = 'default' }) {
         setLoading(true);
       }
       setError(null);
-      const [locationsRes, tasksRes] = await Promise.all([fetchLocations(), fetchTasks()]);
-
+      const tasksRes = await fetchTasks();
       const tasksList = parseTasksResponse(tasksRes);
-      const locationsList = parseLocationsResponse(locationsRes);
       setTasks(tasksList);
-      setLocations(locationsList);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -250,7 +245,7 @@ export default function TasksPage({ variant = 'default' }) {
     const cardTask = {
       Title: t.title,
       Task_Type: t.task_type ?? 'Observation',
-      Status: toCardStatus(t.status),
+      Status: t.notion_status?.trim() || toCardStatus(t.status),
       Scheduled_Date: t.scheduled_date || t.due_date,
     };
     const overdue = isTaskOverdue(t);
@@ -289,7 +284,7 @@ export default function TasksPage({ variant = 'default' }) {
         <div className="tasks-page__scroll">
           {variant !== 'embedded' && (
             <p className="notion-db-badge" aria-label="연동된 Notion DB">
-              Notion DB: Locations(구역) · 할 일 · 식물
+              Notion DB: Zones(구역) · 할 일 · 식물
             </p>
           )}
 

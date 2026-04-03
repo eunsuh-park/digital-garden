@@ -93,6 +93,24 @@
   box-shadow: none;
 }
 
+.navigation-rail__project-btn.navigation-rail__project-link--active {
+  background: var(--color-primary);
+  color: var(--color-surface);
+  box-shadow: none;
+}
+
+.navigation-rail__project-btn[href] {
+  text-decoration: none;
+}
+
+.navigation-rail__loading {
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin: 0.25rem 0 0;
+  padding: 0 0.25rem;
+}
+
 .navigation-rail__project-btn:hover:not(:disabled) {
   box-shadow: var(--shadow-md);
 }

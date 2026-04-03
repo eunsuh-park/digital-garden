@@ -1,6 +1,6 @@
 /**
- * Locations DB 스키마 매핑
- * - Color: Notion `select` — 지도 색·사이드 패널 그룹(color_token)과 라벨(color_label)에 사용
+ * Notion Locations DB → 앱 도메인명 Zone(구역)
+ * Color: Notion select — 지도·패널 color_token / color_label
  */
 import { getTitle, getRichText, getSelect } from '@/shared/lib/parseNotionProps';
 
@@ -11,7 +11,7 @@ export const PROP_MAP = {
   svg_id: 'Svg_Id',
 };
 
-export function parseLocationPage(page) {
+export function parseZonePage(page) {
   const props = page.properties || {};
   const name = getTitle(props[PROP_MAP.name]) || getTitle(props['Name']);
   const colorProp = props[PROP_MAP.color];
@@ -19,7 +19,6 @@ export function parseLocationPage(page) {
   const svgId = getRichText(props[PROP_MAP.svg_id]) || '';
   const description = getRichText(props[PROP_MAP.description]) || '';
 
-  // gardenMap.svg 도형 id와의 간단한 이름 기반 fallback (Notion Svg_Id가 비어 있을 때만 사용)
   const nameBasedSvgId = (() => {
     const n = (name || '').toLowerCase();
     if (!n) return '';
@@ -85,15 +84,15 @@ function colorTokenFromRaw(raw) {
   return map[v] || map[v.toLowerCase()] || '#a8d5a2';
 }
 
-export function parseLocationsResponse(data, taskCountMap = {}, plantCountMap = {}) {
+export function parseZonesResponse(data, taskCountMap = {}, plantCountMap = {}) {
   return (data.results || []).map((p) => {
-    const location = parseLocationPage(p);
-    location.taskCount = taskCountMap[location.id] ?? 0;
-    location.plantCount = plantCountMap[location.id] ?? 0;
-    return location;
+    const zone = parseZonePage(p);
+    zone.taskCount = taskCountMap[zone.id] ?? 0;
+    zone.plantCount = plantCountMap[zone.id] ?? 0;
+    return zone;
   });
 }
 
-// Backward-compatible aliases (기존 sections 명칭 호환)
-export const parseSectionPage = parseLocationPage;
-export const parseSectionsResponse = parseLocationsResponse;
+/** 하위 호환: 이전 section/location 명칭 */
+export const parseSectionPage = parseZonePage;
+export const parseSectionsResponse = parseZonesResponse;

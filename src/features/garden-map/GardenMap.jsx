@@ -11,17 +11,17 @@ import gardenMapSvg from '@/gardenMap.svg?raw';
 
 /**
  * SVG 간이 지도 - 실제 대지를 반영한 핵심 인터페이스
- * CP-04: Section 좌표/SVG id, hover/click → 팝오버·하이라이트·드로어 연결
- * @param {Object[]} locations - 구역(Locations) 목록
- * @param {Function} getTasksByLocation - (locationId) => tasks
- * @param {Function} getPlantsByLocation - (locationId) => plants
- * @param {Function} getLocationById - (id) => location
+ * CP-04: Zone 좌표/SVG id, hover/click → 팝오버·하이라이트·드로어 연결
+ * @param {Object[]} zones - 구역(Zone) 목록
+ * @param {Function} getTasksByZone - (zoneId) => tasks
+ * @param {Function} getPlantsByZone - (zoneId) => plants
+ * @param {Function} getZoneById - (id) => zone
  */
-export default function GardenMap({ locations = [], getTasksByLocation, getPlantsByLocation, getLocationById }) {
+export default function GardenMap({ zones = [], getTasksByZone, getPlantsByZone, getZoneById }) {
   const { stackedLayout } = useMapPanelLayout();
-  const { detail, openLocationDetail } = useMapPanelDetail();
-  const [activeLocationId, setActiveLocationId] = useState(null);
-  const [hoverLocationId, setHoverLocationId] = useState(null);
+  const { detail, openZoneDetail } = useMapPanelDetail();
+  const [activeZoneId, setActiveZoneId] = useState(null);
+  const [hoverZoneId, setHoverZoneId] = useState(null);
   const initialView = useMemo(() => getMapViewPreference(), []);
   const [mapBase, setMapBase] = useState(initialView.base); // road | house
   const [mapDirection, setMapDirection] = useState(initialView.direction); // vertical | horizontal
@@ -36,16 +36,15 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
   const pinchRef = useRef({ active: false, startDistance: 0, startZoom: 1, startAngle: 0, startRotation: 0 });
   const rotateRef = useRef({ active: false, startX: 0, startRotation: 0 });
 
-  const handleLocationClick = useCallback((e, locationId) => {
-    setActiveLocationId(locationId);
-    const loc = getLocationById ? getLocationById(locationId) : null;
-    if (loc) openLocationDetail(loc);
-    // 섹션 클릭 시 hover 상태 팝오버는 닫기
-    setHoverLocationId(null);
-  }, [getLocationById, openLocationDetail]);
+  const handleZoneClick = useCallback((e, zoneId) => {
+    setActiveZoneId(zoneId);
+    const z = getZoneById ? getZoneById(zoneId) : null;
+    if (z) openZoneDetail(z);
+    setHoverZoneId(null);
+  }, [getZoneById, openZoneDetail]);
 
-  const handleLocationHover = useCallback((e, locationId, isEnter) => {
-    setHoverLocationId(isEnter ? locationId : null);
+  const handleZoneHover = useCallback((e, zoneId, isEnter) => {
+    setHoverZoneId(isEnter ? zoneId : null);
     if (isEnter) {
       setPopoverPos({ x: e.clientX, y: e.clientY });
     }
@@ -273,10 +272,9 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
     });
   }, []);
 
-  const selectedLocation = activeLocationId && getLocationById ? getLocationById(activeLocationId) : null;
-  const hoverLocation = hoverLocationId && getLocationById ? getLocationById(hoverLocationId) : null;
-  const getTasks = getTasksByLocation || (() => []);
-  const getPlants = getPlantsByLocation || (() => []);
+  const hoverZone = hoverZoneId && getZoneById ? getZoneById(hoverZoneId) : null;
+  const getTasks = getTasksByZone || (() => []);
+  const getPlants = getPlantsByZone || (() => []);
 
   const svgIdFallbackMap = useMemo(
     () => ({
@@ -288,12 +286,12 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
     []
   );
 
-  const resolvedLocations = useMemo(() => {
-    return locations.map((l) => ({
-      ...l,
-      resolved_svg_id: l.svg_id || '',
+  const resolvedZones = useMemo(() => {
+    return zones.map((z) => ({
+      ...z,
+      resolved_svg_id: z.svg_id || '',
     }));
-  }, [locations]);
+  }, [zones]);
 
   const getTargetEl = useCallback((svg, svgId) => {
     if (!svgId || !svg) return null;
@@ -304,16 +302,16 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
     return null;
   }, [svgIdFallbackMap]);
 
-  const focusedLocationIds = useMemo(() => {
+  const focusedZoneIds = useMemo(() => {
     if (!detail) return [];
-    if (detail.type === 'location') return detail.location?.id ? [detail.location.id] : [];
+    if (detail.type === 'zone') return detail.zone?.id ? [detail.zone.id] : [];
     if (detail.type === 'task') {
-      if (detail.task?.section_id) return [detail.task.section_id];
-      return detail.task?.target_location_ids || [];
+      if (detail.task?.zone_id) return [detail.task.zone_id];
+      return detail.task?.target_zone_ids || [];
     }
     if (detail.type === 'plant') {
-      if (detail.plant?.section_id) return [detail.plant.section_id];
-      return detail.plant?.location_ids || [];
+      if (detail.plant?.zone_id) return [detail.plant.zone_id];
+      return [];
     }
     return [];
   }, [detail]);
@@ -332,8 +330,8 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
     }
 
     // 이벤트 바인딩 + 기본 스타일 적용
-    resolvedLocations.forEach((location) => {
-      const svgId = resolveSvgId(location.resolved_svg_id);
+    resolvedZones.forEach((z) => {
+      const svgId = resolveSvgId(z.resolved_svg_id);
       const el = getTargetEl(svg, svgId);
       if (!el) return;
 
@@ -350,16 +348,16 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
       el.setAttribute('tabindex', '0');
       el.setAttribute(
         'aria-label',
-        `${location.name} 구역, 할 일 ${location.taskCount ?? 0}건`
+        `${z.name} 구역, 할 일 ${z.taskCount ?? 0}건`
       );
 
-      const onClick = (e) => handleLocationClick(e, location.id);
-      const onEnter = (e) => handleLocationHover(e, location.id, true);
-      const onLeave = (e) => handleLocationHover(e, location.id, false);
+      const onClick = (e) => handleZoneClick(e, z.id);
+      const onEnter = (e) => handleZoneHover(e, z.id, true);
+      const onLeave = (e) => handleZoneHover(e, z.id, false);
       const onKeyDown = (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          handleLocationClick(e, location.id);
+          handleZoneClick(e, z.id);
         }
       };
 
@@ -379,7 +377,7 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
     return () => {
       cleanups.forEach((fn) => fn());
     };
-  }, [resolvedLocations, getTargetEl, handleLocationClick, handleLocationHover]);
+  }, [resolvedZones, getTargetEl, handleZoneClick, handleZoneHover]);
 
   useEffect(() => {
     const host = svgHostRef.current;
@@ -387,27 +385,27 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
     const svg = host.querySelector('svg');
     if (!svg) return;
 
-    const focusedIdSet = new Set(focusedLocationIds);
+    const focusedIdSet = new Set(focusedZoneIds);
     const hasFocusedTarget = focusedIdSet.size > 0;
 
-    resolvedLocations.forEach((location) => {
-      const el = getTargetEl(svg, location.resolved_svg_id);
+    resolvedZones.forEach((z) => {
+      const el = getTargetEl(svg, z.resolved_svg_id);
       if (!el) return;
 
-      const isActive = activeLocationId === location.id;
-      const isHover = hoverLocationId === location.id;
-      const isFocused = focusedIdSet.has(location.id);
+      const isActive = activeZoneId === z.id;
+      const isHover = hoverZoneId === z.id;
+      const isFocused = focusedIdSet.has(z.id);
       el.style.opacity = hasFocusedTarget && !isFocused ? '0.72' : '1';
       el.style.fillOpacity = '1';
       el.style.pointerEvents = 'auto';
-      if (location.color_token) {
-        el.style.fill = location.color_token;
+      if (z.color_token) {
+        el.style.fill = z.color_token;
       }
       el.style.stroke = isFocused || isActive || isHover ? '#2d5a27' : 'rgba(0,0,0,0.15)';
       el.style.strokeWidth = isFocused ? '3.5' : isActive || isHover ? '2' : '1';
       el.style.filter = isFocused ? 'drop-shadow(0 0 10px rgba(45, 90, 39, 0.28))' : 'none';
     });
-  }, [resolvedLocations, activeLocationId, hoverLocationId, focusedLocationIds, getTargetEl]);
+  }, [resolvedZones, activeZoneId, hoverZoneId, focusedZoneIds, getTargetEl]);
 
   // 할 일이 있는 구역(taskCount > 0)에 지도 배지(빨간 점) 표시
   useEffect(() => {
@@ -426,11 +424,11 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
     layer.setAttribute('id', layerId);
     layer.setAttribute('pointer-events', 'none');
 
-    resolvedLocations.forEach((location) => {
-      const pendingTasks = Number(location.taskCount || 0);
+    resolvedZones.forEach((z) => {
+      const pendingTasks = Number(z.taskCount || 0);
       if (pendingTasks <= 0) return;
 
-      const target = getTargetEl(svg, location.resolved_svg_id);
+      const target = getTargetEl(svg, z.resolved_svg_id);
       if (!target || typeof target.getBBox !== 'function') return;
 
       const box = target.getBBox();
@@ -453,18 +451,18 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
 
     svg.appendChild(layer);
     return () => layer.remove();
-  }, [resolvedLocations, getTargetEl]);
+  }, [resolvedZones, getTargetEl]);
 
   useEffect(() => {
-    if (!focusedLocationIds.length) return;
+    if (!focusedZoneIds.length) return;
     const host = svgHostRef.current;
     const svg = host?.querySelector?.('svg');
     const orig = svgOriginalViewBoxRef.current;
     if (!svg || !orig) return;
 
-    const focusedLocations = resolvedLocations.filter((location) => focusedLocationIds.includes(location.id));
-    const boxes = focusedLocations
-      .map((location) => getTargetEl(svg, location.resolved_svg_id))
+    const focusedZones = resolvedZones.filter((z) => focusedZoneIds.includes(z.id));
+    const boxes = focusedZones
+      .map((z) => getTargetEl(svg, z.resolved_svg_id))
       .filter(Boolean)
       .map((el) => {
         try {
@@ -500,7 +498,7 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
     svg.setAttribute('viewBox', `${next.x} ${next.y} ${next.w} ${next.h}`);
     const nextZoom = clampZoom(Number((orig.w / next.w).toFixed(2)));
     setZoom(nextZoom);
-  }, [focusedLocationIds, resolvedLocations, getTargetEl, clampViewBox, clampZoom, svgReady]);
+  }, [focusedZoneIds, resolvedZones, getTargetEl, clampViewBox, clampZoom, svgReady]);
 
   return (
     <div className={stackedLayout ? 'garden-map garden-map--stacked' : 'garden-map'}>
@@ -531,17 +529,17 @@ export default function GardenMap({ locations = [], getTasksByLocation, getPlant
         />
       </div>
 
-      {hoverLocation ? (
+      {hoverZone ? (
         <Popover
-          section={hoverLocation}
-          tasks={getTasks(hoverLocation.id)}
-          plants={getPlants(hoverLocation.id)}
+          zone={hoverZone}
+          tasks={getTasks(hoverZone.id)}
+          plants={getPlants(hoverZone.id)}
           position={popoverPos}
           onOpenDrawer={() => {
-            setActiveLocationId(hoverLocation.id);
-            const loc = getLocationById ? getLocationById(hoverLocation.id) : null;
-            if (loc) openLocationDetail(loc);
-            setHoverLocationId(null);
+            setActiveZoneId(hoverZone.id);
+            const z = getZoneById ? getZoneById(hoverZone.id) : null;
+            if (z) openZoneDetail(z);
+            setHoverZoneId(null);
           }}
         />
       ) : null}

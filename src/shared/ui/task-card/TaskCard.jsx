@@ -28,8 +28,12 @@ const taskTypeConfig = {
 const statusConfig = {
   "시작 전": { color: "#999", bg: "#F5F4F0", dot: "#CCC" },
   "진행 중": { color: "#2980B9", bg: "#E8F4FB", dot: "#3498DB" },
+  // 노션 원문이 공백 없을 수 있음
+  진행중: { color: "#2980B9", bg: "#E8F4FB", dot: "#3498DB" },
   완료: { color: "#27AE60", bg: "#EAF7EF", dot: "#2ECC71" },
 };
+
+const statusStyleFallback = { color: "#666", bg: "#F0EEEA", dot: "#AAA" };
 
 const SAMPLE_TASKS = [
   {
@@ -64,8 +68,9 @@ export function TaskCard({
 }) {
   const [hovered, setHovered] = useState(false);
   const type = taskTypeConfig[task.Task_Type] || { icon: task2Line, label: task.Task_Type, color: "#999", bg: "#F5F4F0" };
-  const status = statusConfig[task.Status] || statusConfig["시작 전"];
-  const isComplete = task.Status === "완료";
+  const statusLabel = task.Status || "시작 전";
+  const status = statusConfig[statusLabel] || statusStyleFallback;
+  const isComplete = statusLabel === "완료";
   const showCompleteToggle = Boolean(onToggleComplete) && !isComplete;
 
   const dateStr = task.Scheduled_Date

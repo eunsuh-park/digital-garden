@@ -3,8 +3,7 @@ import { createContext, useCallback, useContext, useMemo, useState } from 'react
 const MapPanelDetailContext = createContext(null);
 
 /**
- * 하단(MapSidePanel) 상세 뷰 — 스택으로 뒤로가기 시 이전 상세로 복귀
- * @typedef {{ type: 'location', location: object } | { type: 'task', task: object } | { type: 'plant', plant: object } | { type: 'task-create' } | { type: 'plant-create' } | { type: 'location-create' }} DetailEntry
+ * @typedef {{ type: 'zone', zone: object } | { type: 'task', task: object } | { type: 'plant', plant: object } | { type: 'task-create' } | { type: 'plant-create' } | { type: 'zone-create' }} DetailEntry
  */
 
 export function MapPanelDetailProvider({ children }) {
@@ -12,9 +11,9 @@ export function MapPanelDetailProvider({ children }) {
 
   const detail = detailStack.length ? detailStack[detailStack.length - 1] : null;
 
-  const openLocationDetail = useCallback((location, options = {}) => {
-    if (!location) return;
-    const entry = { type: 'location', location };
+  const openZoneDetail = useCallback((zone, options = {}) => {
+    if (!zone) return;
+    const entry = { type: 'zone', zone };
     setDetailStack((prev) => (options.push && prev.length > 0 ? [...prev, entry] : [entry]));
   }, []);
 
@@ -40,41 +39,39 @@ export function MapPanelDetailProvider({ children }) {
     setDetailStack((prev) => (options.push && prev.length > 0 ? [...prev, entry] : [entry]));
   }, []);
 
-  const openLocationCreate = useCallback((options = {}) => {
-    const entry = { type: 'location-create' };
+  const openZoneCreate = useCallback((options = {}) => {
+    const entry = { type: 'zone-create' };
     setDetailStack((prev) => (options.push && prev.length > 0 ? [...prev, entry] : [entry]));
   }, []);
 
-  /** 스택 한 단계만 닫기 */
   const closeDetail = useCallback(() => {
     setDetailStack((prev) => (prev.length <= 1 ? [] : prev.slice(0, -1)));
   }, []);
 
-  /** 탭·라우트 전환 시 전체 초기화 */
   const closeAllDetail = useCallback(() => setDetailStack([]), []);
 
   const value = useMemo(
     () => ({
       detailStack,
       detail,
-      openLocationDetail,
+      openZoneDetail,
       openTaskDetail,
       openPlantDetail,
       openTaskCreate,
       openPlantCreate,
-      openLocationCreate,
+      openZoneCreate,
       closeDetail,
       closeAllDetail,
     }),
     [
       detailStack,
       detail,
-      openLocationDetail,
+      openZoneDetail,
       openTaskDetail,
       openPlantDetail,
       openTaskCreate,
       openPlantCreate,
-      openLocationCreate,
+      openZoneCreate,
       closeDetail,
       closeAllDetail,
     ]

@@ -1,11 +1,10 @@
 import './Popover.css';
 
 /**
- * 팝오버 - hover 시 섹션 정보, 금주 할 일, 식물 목록 요약 (DB 연동)
- * CP-08, FN-04: Notion Locations · Tasks · Plants 데이터 표시
+ * 팝오버 - hover 시 구역(Zone) 정보, 금주 할 일, 식물 목록 요약 (DB 연동)
  */
-export default function Popover({ section, tasks = [], plants = [], position, onOpenDrawer }) {
-  if (!section) return null;
+export default function Popover({ zone, tasks = [], plants = [], position, onOpenDrawer }) {
+  if (!zone) return null;
 
   const formatDue = (due) => {
     if (!due) return null;
@@ -29,31 +28,30 @@ export default function Popover({ section, tasks = [], plants = [], position, on
       className="popover"
       style={{ left: position.x, top: position.y }}
       role="tooltip"
-      aria-label={`${section.name} 구역 요약`}
+      aria-label={`${zone.name} 구역 요약`}
     >
       <div className="popover__header">
         <span
           className="popover__color"
-          style={{ background: section.color_token }}
+          style={{ background: zone.color_token }}
           aria-hidden
         />
         <div className="popover__header-text">
-          <strong className="popover__title">{section.name}</strong>
-          {section.color_label && (
-            <span className="popover__color-label">{section.color_label}</span>
+          <strong className="popover__title">{zone.name}</strong>
+          {zone.color_label && (
+            <span className="popover__color-label">{zone.color_label}</span>
           )}
         </div>
       </div>
 
-      {/* 호버한 SVG_id → Location 해당 행 → 그 위치에 매칭되는 Tasks/Plants 전체 건수 (section 집계값 우선, 없으면 전달된 배열 길이 사용) */}
       <div className="popover__stats">
         <span className="popover__stat">
           <span className="popover__stat-icon">📋</span>
-          할 일 {(section.taskCount != null ? section.taskCount : tasks.length)}건
+          할 일 {(zone.taskCount != null ? zone.taskCount : tasks.length)}건
         </span>
         <span className="popover__stat">
           <span className="popover__stat-icon">🌱</span>
-          식물 {(section.plantCount != null ? section.plantCount : plants.length)}종
+          식물 {(zone.plantCount != null ? zone.plantCount : plants.length)}종
         </span>
       </div>
 

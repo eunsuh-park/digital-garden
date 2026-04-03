@@ -23,7 +23,7 @@ const SAMPLE_PLANTS = [
     Name: "장미나무",
     Species: "나무",
     Status: "관리 필요",
-    Location: ["앞뜰", "우체통 근처"],
+    Zone: ["앞뜰", "우체통 근처"],
     Color: "빨강",
     "Bloom Season": "May – Jun",
     "Pruning Season": "Feb – Mar",
@@ -35,7 +35,7 @@ const SAMPLE_PLANTS = [
     Name: "붓꽃",
     Species: "꽃",
     Status: "확인됨",
-    Location: ["뒷뜰"],
+    Zone: ["뒷뜰"],
     Color: "보라",
     "Bloom Season": "May",
     "Pruning Season": "Oct",
@@ -47,7 +47,7 @@ const SAMPLE_PLANTS = [
     Name: "회양목",
     Species: "나무",
     Status: "확인됨",
-    Location: ["앞뜰", "비닐하우스 근처"],
+    Zone: ["앞뜰", "비닐하우스 근처"],
     Color: "짙은 녹색",
     "Bloom Season": "–",
     "Pruning Season": "Jun – Jul",
@@ -211,9 +211,9 @@ export function PlantCard({ plant, onOpenDetail }) {
             )}
           </div>
 
-          {/* Location */}
+          {/* Zone (구역) */}
           <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
-            {(plant.Location || []).map((loc) => (
+            {(plant.Zone || []).map((loc) => (
               <span
                 key={loc}
                 style={{

@@ -1,5 +1,5 @@
 /**
- * 우측 패널 — 탭 목록(Location/Tasks/Plants)과 상세·편집 화면이 같은 뼈대(panel-view)를 씁니다.
+ * 우측 패널 — 탭 목록(Zone/Tasks/Plants)과 상세·편집 화면이 같은 뼈대(panel-view)를 씁니다.
  * 데이터만 바뀌고 스타일은 여기서만 정의합니다.
  */
 
@@ -67,7 +67,7 @@
   flex-direction: column;
 }
 
-/* ----- Location 요약 / 공통 본문 ----- */
+/* ----- Zone 요약 / 공통 본문 ----- */
 .panel-view__h1 {
   font-size: 1.45rem;
   font-weight: 700;

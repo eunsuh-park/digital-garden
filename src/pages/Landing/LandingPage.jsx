@@ -1,4 +1,4 @@
-import { useLocations } from '@/app/providers/LocationsContext';
+import { useZones } from '@/app/providers/ZonesContext';
 import GardenMap from '@/features/garden-map/GardenMap';
 import ErrorState from '@/shared/ui/error-state/ErrorState';
 import './LandingPage.css';
@@ -6,20 +6,20 @@ import './LandingPage.css';
 /**
  * PG-01: 랜딩 페이지(지도) - 실제 대지 간이 지도 중심 정원 탐색
  */
-function getTasksByLocation(tasks, locationId) {
-  return tasks.filter((t) => t.section_id === locationId && t.status !== 'completed');
+function getTasksByZone(tasks, zoneId) {
+  return tasks.filter((t) => t.zone_id === zoneId && t.status !== 'completed');
 }
 
-function getPlantsByLocation(plants, locationId) {
-  return plants.filter((p) => p.section_id === locationId);
+function getPlantsByZone(plants, zoneId) {
+  return plants.filter((p) => p.zone_id === zoneId);
 }
 
-function getLocationById(locations, id) {
-  return locations.find((l) => l.id === id);
+function getZoneById(zones, id) {
+  return zones.find((z) => z.id === id);
 }
 
 export default function LandingPage() {
-  const { locations, tasks, plants, loading, error } = useLocations();
+  const { zones, tasks, plants, loading, error } = useZones();
 
   if (loading) {
     return (
@@ -40,10 +40,10 @@ export default function LandingPage() {
   return (
     <div className="landing-page__wrap">
       <GardenMap
-        locations={locations}
-        getTasksByLocation={(locationId) => getTasksByLocation(tasks, locationId)}
-        getPlantsByLocation={(locationId) => getPlantsByLocation(plants, locationId)}
-        getLocationById={(id) => getLocationById(locations, id)}
+        zones={zones}
+        getTasksByZone={(zoneId) => getTasksByZone(tasks, zoneId)}
+        getPlantsByZone={(zoneId) => getPlantsByZone(plants, zoneId)}
+        getZoneById={(id) => getZoneById(zones, id)}
       />
     </div>
   );

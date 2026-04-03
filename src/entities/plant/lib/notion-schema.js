@@ -1,6 +1,6 @@
 /**
  * Plants DB 스키마 매핑
- * - Location → Locations (1:1, Locations.Name과 연결)
+ * - Location → Zone(구역)
  */
 import {
   getTitle,
@@ -51,7 +51,8 @@ export function parsePlantPage(page) {
     category: category || '-',
     status: statusRaw || 'planted',
     bloom_season: bloomSeason || '-',
-    section_id: sectionIds[0] || null,
+    zone_id: sectionIds[0] || null,
+    zone_ids: sectionIds || [],
     notes: notes.trim() || '',
     quantity: quantityNumber != null ? quantityNumber : (quantityText || '').trim() || null,
   };

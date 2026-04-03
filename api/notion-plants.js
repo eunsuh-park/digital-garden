@@ -73,8 +73,9 @@ export default async function handler(req, res) {
       const notes = String(body.notes ?? '').trim();
       const quantityRaw = body.quantity;
       const quantity = quantityRaw === '' || quantityRaw == null ? null : Number(quantityRaw);
-      const locationIds = Array.isArray(body.location_ids) ? body.location_ids : [];
-      const relLocationIds = locationIds.map((id) => String(id || '').trim()).filter(Boolean);
+      const zoneIdsRaw = Array.isArray(body.zone_ids) ? body.zone_ids : body.location_ids;
+      const zoneIds = Array.isArray(zoneIdsRaw) ? zoneIdsRaw : [];
+      const relZoneIds = zoneIds.map((id) => String(id || '').trim()).filter(Boolean);
 
       const properties = {
         Name: { title: [{ text: { content: name } }] },
@@ -96,8 +97,8 @@ export default async function handler(req, res) {
       if (Number.isFinite(quantity)) {
         properties.Quantity = { number: quantity };
       }
-      if (relLocationIds.length > 0) {
-        properties.Location = { relation: relLocationIds.map((id) => ({ id })) };
+      if (relZoneIds.length > 0) {
+        properties.Location = { relation: relZoneIds.map((id) => ({ id })) };
       }
 
       const response = await fetch('https://api.notion.com/v1/pages', {
@@ -162,8 +163,10 @@ export default async function handler(req, res) {
           if (Number.isFinite(q)) properties.Quantity = { number: q };
         }
       }
-      if (body.location_ids !== undefined && Array.isArray(body.location_ids)) {
-        const relIds = body.location_ids.map((x) => String(x || '').trim()).filter(Boolean);
+      const zoneIdsUpdate =
+        body.zone_ids !== undefined ? body.zone_ids : body.location_ids;
+      if (zoneIdsUpdate !== undefined && Array.isArray(zoneIdsUpdate)) {
+        const relIds = zoneIdsUpdate.map((x) => String(x || '').trim()).filter(Boolean);
         properties.Location = { relation: relIds.map((rid) => ({ id: rid })) };
       }
 

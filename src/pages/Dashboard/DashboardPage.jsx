@@ -1,15 +1,9 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import addLine from '@iconify-icons/mingcute/add-line';
 import rightLine from '@iconify-icons/mingcute/right-line';
+import { useProjects } from '@/app/providers/ProjectsContext';
 import './DashboardPage.css';
-
-// TODO: loadProjects()로 교체
-const MOCK_PROJECTS = [
-  { id: '1', name: '베란다 미니 정원', space: 's', purpose: 'indoor', createdAt: '2025-03-10' },
-  { id: '2', name: '뒷뜰 조경', space: 'l', purpose: 'outdoor', createdAt: '2025-03-12' },
-];
 
 const purposeLabel = {
   indoor: '실내 정원',
@@ -21,7 +15,7 @@ const purposeLabel = {
 const spaceLabel = { s: 'S', m: 'M', l: 'L' };
 
 export default function DashboardPage() {
-  const [projects] = useState(MOCK_PROJECTS);
+  const { projects, loading, error } = useProjects();
   const count = projects.length;
 
   return (
@@ -34,39 +28,53 @@ export default function DashboardPage() {
 
       <section className="dashboard-page__summary">
         <div className="dashboard-page__stat-card">
-          <span className="dashboard-page__stat-value">{count}</span>
+          <span className="dashboard-page__stat-value">{loading ? '…' : count}</span>
           <span className="dashboard-page__stat-label">프로젝트</span>
         </div>
       </section>
 
+      {error ? (
+        <p className="dashboard-page__error" role="alert">
+          {error}
+        </p>
+      ) : null}
+
       <section className="dashboard-page__section">
         <div className="dashboard-page__section-head">
           <h2 className="dashboard-page__section-title">내 프로젝트</h2>
-          <Link to="/project" className="dashboard-page__link">
+          <Link to="/project/new" className="dashboard-page__link">
             <Icon icon={addLine} className="dashboard-page__link-icon" aria-hidden />
             새 프로젝트
           </Link>
         </div>
 
-        {projects.length === 0 ? (
+        {loading && projects.length === 0 ? (
+          <p className="dashboard-page__hint">프로젝트 목록을 불러오는 중입니다…</p>
+        ) : null}
+
+        {!loading && projects.length === 0 ? (
           <div className="dashboard-page__empty">
             <p className="dashboard-page__empty-text">아직 프로젝트가 없어요.</p>
-            <Link to="/project" className="dashboard-page__btn dashboard-page__btn--primary">
+            <Link to="/project/new" className="dashboard-page__btn dashboard-page__btn--primary">
               프로젝트 만들기
             </Link>
           </div>
-        ) : (
+        ) : null}
+
+        {projects.length > 0 ? (
           <ul className="dashboard-page__list">
             {projects.map((project) => (
               <li key={project.id}>
                 <Link to={`/project/${project.id}`} className="dashboard-page__card">
                   <div className="dashboard-page__card-accent" aria-hidden />
                   <div className="dashboard-page__card-body">
-                    <h3 className="dashboard-page__card-title">{project.name}</h3>
+                    <h3 className="dashboard-page__card-title">{project.name || '(이름 없음)'}</h3>
                     <div className="dashboard-page__card-meta">
-                      <span className="dashboard-page__card-badge">{spaceLabel[project.space]}</span>
+                      <span className="dashboard-page__card-badge">
+                        {project.space_size != null ? spaceLabel[project.space_size] ?? project.space_size : '—'}
+                      </span>
                       <span className="dashboard-page__card-badge dashboard-page__card-badge--purpose">
-                        {purposeLabel[project.purpose]}
+                        {project.purpose != null ? purposeLabel[project.purpose] ?? project.purpose : '—'}
                       </span>
                     </div>
                   </div>
@@ -75,7 +83,7 @@ export default function DashboardPage() {
               </li>
             ))}
           </ul>
-        )}
+        ) : null}
       </section>
     </div>
   );

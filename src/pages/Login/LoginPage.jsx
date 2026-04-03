@@ -86,11 +86,7 @@ export default function LoginPage() {
         setMessage(result.reason || '회원가입에 실패했습니다.');
         return;
       }
-      setIsError(false);
-      setMessage('회원가입 성공! 이제 로그인해 주세요.');
-      setSetupMode(false);
-      setPassword('');
-      setConfirmPassword('');
+      navigate(redirectTo, { replace: true });
     } finally {
       setSubmitting(false);
     }

@@ -4,3 +4,9 @@ dist
 .env.local
 *.log
 .DS_Store
+
+# Cursor MCP — Access Token 포함, 저장소에 올리지 않음
+.cursor/mcp.json
+
+# Supabase CLI 캐시
+supabase/.temp/

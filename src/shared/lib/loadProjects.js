@@ -8,6 +8,6 @@ export async function loadProjects() {
   const { data, error } = await supabase
     .from('projects')
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('id', { ascending: false });
   return { data, error };
 }

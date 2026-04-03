@@ -4,6 +4,20 @@
  */
 const NOTION_VERSION = '2022-06-28';
 
+const ALLOWED_DIFFICULTY = new Set(['Easy', 'Medium', 'Hard']);
+
+function requireDifficultyOr400(raw, res) {
+  const v = String(raw ?? '').trim();
+  if (!ALLOWED_DIFFICULTY.has(v)) {
+    res.status(400).json({
+      error: 'difficulty must be one of: Easy, Medium, Hard',
+      code: 'invalid_difficulty',
+    });
+    return null;
+  }
+  return v;
+}
+
 function setCors(res, methods) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', methods);
@@ -68,14 +82,16 @@ export default async function handler(req, res) {
 
       const notes = String(body.notes ?? '').trim();
       const taskType = String(body.task_type ?? 'Observation').trim() || 'Observation';
-      const difficultyRaw = String(body.difficulty ?? 'Easy').trim();
-      const difficulty = ['Easy', 'Medium', 'Hard'].includes(difficultyRaw) ? difficultyRaw : 'Easy';
+      const difficulty = requireDifficultyOr400(body.difficulty ?? 'Easy', res);
+      if (!difficulty) return;
       const estimatedDuration = String(body.estimated_duration ?? '').trim();
       const scheduledDate = String(body.scheduled_date ?? '').trim();
       const plantIds = Array.isArray(body.target_plant_ids) ? body.target_plant_ids : [];
       const relationPlantIds = plantIds.map((id) => String(id || '').trim()).filter(Boolean);
-      const locationIds = Array.isArray(body.target_location_ids) ? body.target_location_ids : [];
-      const relationLocationIds = locationIds.map((id) => String(id || '').trim()).filter(Boolean);
+      const zoneIdsRaw =
+        Array.isArray(body.target_zone_ids) ? body.target_zone_ids : body.target_location_ids;
+      const zoneIds = Array.isArray(zoneIdsRaw) ? zoneIdsRaw : [];
+      const relationZoneIds = zoneIds.map((id) => String(id || '').trim()).filter(Boolean);
 
       const properties = {
         Title: { title: [{ text: { content: title } }] },
@@ -104,8 +120,8 @@ export default async function handler(req, res) {
         properties.Target_Plant = { relation: relationPlantIds.map((id) => ({ id })) };
       }
 
-      if (relationLocationIds.length > 0) {
-        properties.Target_Location = { relation: relationLocationIds.map((id) => ({ id })) };
+      if (relationZoneIds.length > 0) {
+        properties.Target_Location = { relation: relationZoneIds.map((id) => ({ id })) };
       }
 
       const response = await fetch('https://api.notion.com/v1/pages', {
@@ -138,6 +154,7 @@ export default async function handler(req, res) {
         estimated_duration,
         scheduled_date,
         target_plant_ids,
+        target_zone_ids,
         target_location_ids,
         status_name,
       } = body;
@@ -158,7 +175,16 @@ export default async function handler(req, res) {
       }
       if (difficulty !== undefined) {
         const v = String(difficulty ?? '').trim();
-        properties.Difficulty = v ? { select: { name: v } } : undefined;
+        if (!v) {
+          properties.Difficulty = undefined;
+        } else if (!ALLOWED_DIFFICULTY.has(v)) {
+          return res.status(400).json({
+            error: 'difficulty must be one of: Easy, Medium, Hard',
+            code: 'invalid_difficulty',
+          });
+        } else {
+          properties.Difficulty = { select: { name: v } };
+        }
       }
       if (estimated_duration !== undefined) {
         const v = String(estimated_duration ?? '');
@@ -179,11 +205,13 @@ export default async function handler(req, res) {
         properties.Target_Plant = { relation: [] };
       }
 
-      const locIds = Array.isArray(target_location_ids) ? target_location_ids : [];
-      if (locIds.length) {
-        const relIds = locIds.map((x) => String(x || '').trim()).filter(Boolean);
-        properties.Target_Location = { relation: relIds.map((lid) => ({ id: lid })) };
-      } else if (target_location_ids && Array.isArray(target_location_ids)) {
+      const zoneIdsUpdate =
+        target_zone_ids !== undefined ? target_zone_ids : target_location_ids;
+      const zoneIdsForRel = Array.isArray(zoneIdsUpdate) ? zoneIdsUpdate : [];
+      if (zoneIdsForRel.length) {
+        const relIds = zoneIdsForRel.map((x) => String(x || '').trim()).filter(Boolean);
+        properties.Target_Location = { relation: relIds.map((zid) => ({ id: zid })) };
+      } else if (zoneIdsUpdate !== undefined && Array.isArray(zoneIdsUpdate)) {
         properties.Target_Location = { relation: [] };
       }
 

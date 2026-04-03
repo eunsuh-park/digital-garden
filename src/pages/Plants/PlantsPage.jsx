@@ -3,15 +3,15 @@ import { Icon } from '@iconify/react';
 import arrowUpLine from '@iconify-icons/mingcute/arrow-up-line';
 import arrowDownLine from '@iconify-icons/mingcute/arrow-down-line';
 import addLine from '@iconify-icons/mingcute/add-line';
-import { fetchLocations, fetchPlants } from '@/shared/api/notionApi';
-import { parseLocationsResponse } from '@/entities/location/lib/notion-schema';
+import { fetchZones, fetchPlants } from '@/shared/api/notionApi';
+import { parseZonesResponse } from '@/entities/zone/lib/notion-schema';
 import { parsePlantsResponse } from '@/entities/plant/lib/notion-schema';
 import FullPage from '@/shared/ui/full-page/FullPage';
 import FullPageFilter from '@/shared/ui/full-page/FullPageFilter';
 import FullPageSorter from '@/shared/ui/full-page/FullPageSorter';
 import ErrorState from '@/shared/ui/error-state/ErrorState';
 import PlantCard from '@/shared/ui/plant-card/PlantCard';
-import { useLocations } from '@/app/providers/LocationsContext';
+import { useZones } from '@/app/providers/ZonesContext';
 import { useMapPanelDetail } from '@/app/providers/MapPanelDetailContext';
 import { usePlantsPanelUi, PLANTS_PANEL_DEFAULT_SORT } from '@/app/providers/PlantsPanelUiContext';
 import { getPlantSpeciesKind } from '@/shared/lib/plantSpeciesKind';
@@ -126,7 +126,7 @@ function PlantsEmbeddedAccordion({ plantsList }) {
 export default function PlantsPage({ variant = 'default' }) {
   const { openPlantCreate } = useMapPanelDetail();
   const panelUi = usePlantsPanelUi();
-  const ctx = useLocations();
+  const ctx = useZones();
   const isEmbedded = variant === 'embedded';
 
   const [localFilter, setLocalFilter] = useState({});
@@ -140,7 +140,7 @@ export default function PlantsPage({ variant = 'default' }) {
 
   const defaultSort = PLANTS_PANEL_DEFAULT_SORT;
 
-  const [locations, setLocations] = useState([]);
+  const [zonesLocal, setZonesLocal] = useState([]);
   const [plants, setPlants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -152,12 +152,12 @@ export default function PlantsPage({ variant = 'default' }) {
         setLoading(true);
       }
       setError(null);
-      const [locationsRes, plantsRes] = await Promise.all([fetchLocations(), fetchPlants()]);
+      const [zonesRes, plantsRes] = await Promise.all([fetchZones(), fetchPlants()]);
 
       const plantsList = parsePlantsResponse(plantsRes);
-      const locationsList = parseLocationsResponse(locationsRes);
+      const zonesList = parseZonesResponse(zonesRes);
       setPlants(plantsList);
-      setLocations(locationsList);
+      setZonesLocal(zonesList);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -174,17 +174,17 @@ export default function PlantsPage({ variant = 'default' }) {
   }, [isEmbedded, loadStandalone]);
 
   const plantsData = isEmbedded ? ctx.plants : plants;
-  const locationsData = isEmbedded ? ctx.locations : locations;
+  const zonesData = isEmbedded ? ctx.zones : zonesLocal;
   const loadingData = isEmbedded ? ctx.loading : loading;
   const errorData = isEmbedded ? ctx.error : error;
 
-  const locationMap = useMemo(
-    () => Object.fromEntries(locationsData.map((l) => [l.id, l])),
-    [locationsData]
+  const zoneMap = useMemo(
+    () => Object.fromEntries(zonesData.map((z) => [z.id, z])),
+    [zonesData]
   );
 
   const plantsFilters = useMemo(() => {
-    const locationOptions = locationsData.map((l) => ({ value: l.id, label: l.name }));
+    const zoneOptions = zonesData.map((z) => ({ value: z.id, label: z.name }));
     const filters = [
       {
         key: 'status',
@@ -196,16 +196,16 @@ export default function PlantsPage({ variant = 'default' }) {
         ],
       },
     ];
-    if (locationOptions.length > 0) {
-      filters.push({ key: 'section_id', label: '구역', options: locationOptions });
+    if (zoneOptions.length > 0) {
+      filters.push({ key: 'zone_id', label: '구역', options: zoneOptions });
     }
     return filters;
-  }, [locationsData]);
+  }, [zonesData]);
 
   const filteredAndSortedPlants = useMemo(() => {
     let list = plantsData;
     if (filterValues.status) list = list.filter((p) => (p.status || '') === filterValues.status);
-    if (filterValues.section_id) list = list.filter((p) => (p.section_id || '') === filterValues.section_id);
+    if (filterValues.zone_id) list = list.filter((p) => (p.zone_id || '') === filterValues.zone_id);
     const field = sortValue.field || 'name';
     const dir = sortValue.dir === 'desc' ? -1 : 1;
     list = [...list].sort((a, b) => {
@@ -296,7 +296,7 @@ export default function PlantsPage({ variant = 'default' }) {
       <div className="plants-page plants-page--standalone">
         <div className="plants-page__scroll plants-page__scroll--standalone">
         <p className="notion-db-badge" aria-label="연동된 Notion DB">
-          Notion DB: Locations(구역) · 식물
+          Notion DB: Zones(구역) · 식물
         </p>
         <div className="plants-page__sticky-top">
           <div className="plants-page__controls">
@@ -319,14 +319,14 @@ export default function PlantsPage({ variant = 'default' }) {
         </div>
         <div className="plants-page__cards">
         {filteredAndSortedPlants.map((p) => {
-          const location = p.section_id ? locationMap[p.section_id] : null;
+          const zoneRow = p.zone_id ? zoneMap[p.zone_id] : null;
           const cardPlant = {
             Name: p.name,
             Species: toCardSpecies(p),
             SpeciesRaw: p.species && p.species !== '-' ? p.species : undefined,
             Category: p.category && p.category !== '-' ? p.category : undefined,
             Status: toCardStatus(p.status),
-            Location: location ? [location.name] : [],
+            Zone: zoneRow ? [zoneRow.name] : [],
             Color: undefined,
             'Bloom Season': p.bloom_season && p.bloom_season !== '-' ? p.bloom_season : undefined,
             'Pruning Season': undefined,

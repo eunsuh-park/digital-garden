@@ -1,16 +1,16 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { fetchLocations, fetchTasks, fetchPlants } from '@/shared/api/notionApi';
-import { parseLocationsResponse } from '@/entities/location/lib/notion-schema';
+import { fetchZones, fetchTasks, fetchPlants } from '@/shared/api/notionApi';
+import { parseZonesResponse } from '@/entities/zone/lib/notion-schema';
 import { parseTasksResponse } from '@/entities/task/lib/notion-schema';
 import { parsePlantsResponse } from '@/entities/plant/lib/notion-schema';
 
-const LocationsContext = createContext(null);
+const ZonesContext = createContext(null);
 
 /**
- * 구역(locations)·할 일·식물 데이터 — AppShell 하위(지도·우측 패널)에서 공유
+ * 구역(zones)·할 일·식물 데이터 — AppShell 하위(지도·우측 패널)에서 공유
  */
-export function LocationsProvider({ children }) {
-  const [locations, setLocations] = useState([]);
+export function ZonesProvider({ children }) {
+  const [zones, setZones] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [plants, setPlants] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,8 +26,8 @@ export function LocationsProvider({ children }) {
         setLoading(true);
       }
       setError(null);
-      const [locationsRes, tasksRes, plantsRes] = await Promise.all([
-        fetchLocations(),
+      const [zonesRes, tasksRes, plantsRes] = await Promise.all([
+        fetchZones(),
         fetchTasks(),
         fetchPlants(),
       ]);
@@ -40,25 +40,21 @@ export function LocationsProvider({ children }) {
       const plantCountMap = {};
       const normId = (id) => (id == null ? '' : String(id).trim());
       tasksList.filter((t) => t.status !== 'completed').forEach((t) => {
-        const sid = normId(t.section_id);
-        if (sid) taskCountMap[sid] = (taskCountMap[sid] || 0) + 1;
+        const zid = normId(t.zone_id);
+        if (zid) taskCountMap[zid] = (taskCountMap[zid] || 0) + 1;
       });
       plantsList.forEach((p) => {
-        const sid = normId(p.section_id);
-        if (sid) plantCountMap[sid] = (plantCountMap[sid] || 0) + 1;
+        const zid = normId(p.zone_id);
+        if (zid) plantCountMap[zid] = (plantCountMap[zid] || 0) + 1;
       });
 
-      let locationsList = parseLocationsResponse(
-        locationsRes,
-        taskCountMap,
-        plantCountMap
-      );
-      locationsList = locationsList.map((loc) => ({
-        ...loc,
-        taskCount: taskCountMap[normId(loc.id)] ?? loc.taskCount ?? 0,
-        plantCount: plantCountMap[normId(loc.id)] ?? loc.plantCount ?? 0,
+      let zonesList = parseZonesResponse(zonesRes, taskCountMap, plantCountMap);
+      zonesList = zonesList.map((z) => ({
+        ...z,
+        taskCount: taskCountMap[normId(z.id)] ?? z.taskCount ?? 0,
+        plantCount: plantCountMap[normId(z.id)] ?? z.plantCount ?? 0,
       }));
-      setLocations(locationsList);
+      setZones(zonesList);
       setTasks(tasksList);
       setPlants(plantsList);
     } catch (e) {
@@ -74,23 +70,22 @@ export function LocationsProvider({ children }) {
     load();
   }, [load]);
 
-  /** 삭제·수정 후 데이터만 갱신 — 전역 로딩 화면을 띄우지 않음 */
   const reload = useCallback(() => {
     load({ silent: true });
   }, [load]);
 
   const value = useMemo(
-    () => ({ locations, tasks, plants, loading, error, reload }),
-    [locations, tasks, plants, loading, error, reload]
+    () => ({ zones, tasks, plants, loading, error, reload }),
+    [zones, tasks, plants, loading, error, reload]
   );
 
-  return <LocationsContext.Provider value={value}>{children}</LocationsContext.Provider>;
+  return <ZonesContext.Provider value={value}>{children}</ZonesContext.Provider>;
 }
 
-export function useLocations() {
-  const ctx = useContext(LocationsContext);
+export function useZones() {
+  const ctx = useContext(ZonesContext);
   if (!ctx) {
-    throw new Error('useLocations는 LocationsProvider 안에서만 사용할 수 있습니다.');
+    throw new Error('useZones는 ZonesProvider 안에서만 사용할 수 있습니다.');
   }
   return ctx;
 }

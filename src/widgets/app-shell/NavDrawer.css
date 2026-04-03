@@ -100,6 +100,13 @@
   gap: 0.4rem;
 }
 
+.nav-drawer__projects-loading {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin: 0 0 0.5rem;
+  padding: 0 0.25rem;
+}
+
 .nav-drawer__project {
   display: flex;
   align-items: center;
@@ -107,6 +114,9 @@
   padding: 0.55rem 0.65rem;
   border-radius: var(--radius-lg);
   background: var(--color-bg);
+  text-decoration: none;
+  color: inherit;
+  box-sizing: border-box;
 }
 
 .nav-drawer__project--active {

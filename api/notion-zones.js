@@ -1,5 +1,5 @@
 /**
- * Vercel Serverless: Locations DB — 조회(GET) + 변경(POST, body.action)
+ * Vercel Serverless: Notion Locations DB(앱에서는 Zone/구역) — 조회(GET) + 변경(POST, body.action)
  * action: create | update | delete
  */
 const NOTION_VERSION = '2022-06-28';

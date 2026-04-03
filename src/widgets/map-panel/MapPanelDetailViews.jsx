@@ -2,18 +2,18 @@ import { useEffect, useMemo, useState } from 'react';
 import { Icon } from '@iconify/react';
 import arrowLeftLine from '@iconify-icons/mingcute/arrow-left-line';
 import { TaskDetailLayout, PlantDetailLayout } from './PanelDocLayouts';
-import { useLocations } from '@/app/providers/LocationsContext';
+import { useZones } from '@/app/providers/ZonesContext';
 import { useMapPanelDetail } from '@/app/providers/MapPanelDetailContext';
 import {
   createPlant,
   createTask,
-  createLocation,
-  updateLocation,
+  createZone,
+  updateZone,
   updatePlant,
   updateTask,
   deletePlant,
   deleteTask,
-  deleteLocation,
+  deleteZone,
 } from '@/shared/api/notionApi';
 import { useToast } from '@/app/providers/ToastContext';
 import { TASK_TYPE_KEYS, TASK_TYPE_LABEL_KO } from '@/entities/task/lib/notion-schema';
@@ -22,6 +22,18 @@ import trashLine from '@iconify-icons/mingcute/delete-2-line';
 import edit2Line from '@iconify-icons/mingcute/edit-2-line';
 import closeLine from '@iconify-icons/mingcute/close-line';
 import './panel-view.css';
+
+/** Notion 관계에서 온 다중 ID + 대표 zone_id를 중복 없이 순서 유지 */
+function uniqueZoneIds(multi, primary) {
+  const ids = [...(Array.isArray(multi) ? multi : []), primary].filter(Boolean);
+  const seen = new Set();
+  return ids.filter((id) => {
+    const k = String(id);
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+}
 
 function ConfirmDeleteDialog({
   open,
@@ -70,49 +82,49 @@ function ConfirmDeleteDialog({
   );
 }
 
-/** @param {{ location: object, onBack: () => void }} props */
-export function MapPanelLocationDetail({ location, onBack }) {
-  const { locations, tasks, plants, reload } = useLocations();
+/** @param {{ zone: object, onBack: () => void }} props */
+export function MapPanelZoneDetail({ zone, onBack }) {
+  const { zones, tasks, plants, reload } = useZones();
   const { openPlantDetail, openTaskDetail } = useMapPanelDetail();
   const { showToast } = useToast();
 
-  const currentLocation = useMemo(() => {
-    return locations.find((l) => l.id === location?.id) || location;
-  }, [locations, location]);
+  const currentZone = useMemo(() => {
+    return zones.find((zRow) => zRow.id === zone?.id) || zone;
+  }, [zones, zone]);
 
   const [isEditing, setIsEditing] = useState(false);
-  const [draftName, setDraftName] = useState(currentLocation?.name || '');
-  const [draftDescription, setDraftDescription] = useState(currentLocation?.description || '');
+  const [draftName, setDraftName] = useState(currentZone?.name || '');
+  const [draftDescription, setDraftDescription] = useState(currentZone?.description || '');
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   const { sectionTasks, sectionPlants } = useMemo(() => {
-    const sid = currentLocation?.id;
-    const pending = tasks.filter((t) => t.section_id === sid && t.status !== 'completed');
-    const pls = plants.filter((p) => p.section_id === sid);
+    const sid = currentZone?.id;
+    const pending = tasks.filter((t) => t.zone_id === sid && t.status !== 'completed');
+    const pls = plants.filter((p) => p.zone_id === sid);
     return { sectionTasks: pending, sectionPlants: pls };
-  }, [tasks, plants, currentLocation?.id]);
+  }, [tasks, plants, currentZone?.id]);
 
   const description = useMemo(() => {
-    const colorHint = currentLocation?.color_label ? `색상: ${currentLocation.color_label}.` : '';
-    return `${currentLocation?.name} 구역입니다. ${colorHint} 할 일 ${sectionTasks.length}건, 식물 ${sectionPlants.length}종이 이 구역에 연결되어 있습니다.`.trim();
-  }, [currentLocation?.name, currentLocation?.color_label, sectionTasks.length, sectionPlants.length]);
+    const colorHint = currentZone?.color_label ? `색상: ${currentZone.color_label}.` : '';
+    return `${currentZone?.name} 구역입니다. ${colorHint} 할 일 ${sectionTasks.length}건, 식물 ${sectionPlants.length}종이 이 구역에 연결되어 있습니다.`.trim();
+  }, [currentZone?.name, currentZone?.color_label, sectionTasks.length, sectionPlants.length]);
 
   const previewPlants = sectionPlants.slice(0, 9);
 
   useEffect(() => {
     if (isEditing) return;
-    setDraftName(currentLocation?.name || '');
-    setDraftDescription(currentLocation?.description || '');
+    setDraftName(currentZone?.name || '');
+    setDraftDescription(currentZone?.description || '');
     setSaveError(null);
-  }, [currentLocation?.id, isEditing, currentLocation?.name, currentLocation?.description]);
+  }, [currentZone?.id, isEditing, currentZone?.name, currentZone?.description]);
 
   const viewDescription = useMemo(() => {
-    const d = (currentLocation?.description || '').trim();
+    const d = (currentZone?.description || '').trim();
     return d ? d : description;
-  }, [currentLocation?.description, description]);
+  }, [currentZone?.description, description]);
 
   const handleSave = async () => {
     if (saving) return;
@@ -121,7 +133,7 @@ export function MapPanelLocationDetail({ location, onBack }) {
     try {
       const name = (draftName || '').trim();
       const descriptionValue = (draftDescription || '').trim();
-      await updateLocation(currentLocation.id, { name, description: descriptionValue });
+      await updateZone(currentZone.id, { name, description: descriptionValue });
       await reload();
       setIsEditing(false);
     } catch (e) {
@@ -156,9 +168,9 @@ export function MapPanelLocationDetail({ location, onBack }) {
       <div className="panel-view__scroll">
         {!isEditing ? (
           <>
-            <h1 className="panel-view__h1">{currentLocation.name}</h1>
-            {currentLocation.color_label ? (
-              <p className="panel-view__meta">{currentLocation.color_label}</p>
+            <h1 className="panel-view__h1">{currentZone.name}</h1>
+            {currentZone.color_label ? (
+              <p className="panel-view__meta">{currentZone.color_label}</p>
             ) : null}
             <p className="panel-view__lead">{viewDescription}</p>
 
@@ -225,11 +237,11 @@ export function MapPanelLocationDetail({ location, onBack }) {
         ) : (
           <div className="panel-form">
             <div className="panel-form__field">
-              <label className="panel-form__label" htmlFor="location-edit-name">
+              <label className="panel-form__label" htmlFor="zone-edit-name">
                 Name
               </label>
               <input
-                id="location-edit-name"
+                id="zone-edit-name"
                 className="panel-form__input"
                 value={draftName}
                 onChange={(e) => setDraftName(e.target.value)}
@@ -237,11 +249,11 @@ export function MapPanelLocationDetail({ location, onBack }) {
             </div>
 
             <div className="panel-form__field">
-              <label className="panel-form__label" htmlFor="location-edit-description">
+              <label className="panel-form__label" htmlFor="zone-edit-description">
                 Description
               </label>
               <textarea
-                id="location-edit-description"
+                id="zone-edit-description"
                 className="panel-form__textarea"
                 value={draftDescription}
                 onChange={(e) => setDraftDescription(e.target.value)}
@@ -267,7 +279,7 @@ export function MapPanelLocationDetail({ location, onBack }) {
       <ConfirmDeleteDialog
         open={deleteOpen}
         title="삭제 확인"
-        message={`구역 "${currentLocation?.name}"을(를) 삭제할까요? (Notion에서도 삭제됩니다)`}
+        message={`구역 "${currentZone?.name}"을(를) 삭제할까요? (Notion에서도 삭제됩니다)`}
         confirmLabel="삭제"
         cancelLabel="취소"
         deleting={deleting}
@@ -278,7 +290,7 @@ export function MapPanelLocationDetail({ location, onBack }) {
           if (deleting) return;
           setDeleting(true);
           try {
-            await deleteLocation(currentLocation.id);
+            await deleteZone(currentZone.id);
             await reload();
             showToast('구역이 삭제되었습니다.');
             setDeleteOpen(false);
@@ -297,8 +309,8 @@ export function MapPanelLocationDetail({ location, onBack }) {
 const LOCATION_CREATE_COLORS = ['초록', '연두', '노랑', '파랑', '보라', '주황', '빨강', '회색'];
 
 /** @param {{ onBack: () => void }} props */
-export function MapPanelLocationCreate({ onBack }) {
-  const { reload } = useLocations();
+export function MapPanelZoneCreate({ onBack }) {
+  const { reload } = useZones();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [color, setColor] = useState('초록');
@@ -311,7 +323,7 @@ export function MapPanelLocationCreate({ onBack }) {
     setSaving(true);
     setSaveError(null);
     try {
-      await createLocation({
+      await createZone({
         name: trimmed,
         description: description.trim(),
         color,
@@ -337,11 +349,11 @@ export function MapPanelLocationCreate({ onBack }) {
       <div className="panel-view__scroll">
         <div className="panel-form">
           <div className="panel-form__field">
-            <label className="panel-form__label" htmlFor="location-create-name">
+            <label className="panel-form__label" htmlFor="zone-create-name">
               이름
             </label>
             <input
-              id="location-create-name"
+              id="zone-create-name"
               className="panel-form__input"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -349,11 +361,11 @@ export function MapPanelLocationCreate({ onBack }) {
             />
           </div>
           <div className="panel-form__field">
-            <label className="panel-form__label" htmlFor="location-create-description">
+            <label className="panel-form__label" htmlFor="zone-create-description">
               설명
             </label>
             <textarea
-              id="location-create-description"
+              id="zone-create-description"
               className="panel-form__textarea panel-form__textarea--sm"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -402,16 +414,16 @@ const PLANT_SPECIES_OPTIONS = ['나무', '풀', '꽃'];
 
 /** 할 일 생성(상세와 동일 툴바·폼 레이아웃) */
 export function MapPanelTaskCreate({ onBack }) {
-  const { locations, plants, reload } = useLocations();
+  const { zones, plants, reload } = useZones();
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
   const [taskType, setTaskType] = useState('Observation');
   const [difficultyIdx, setDifficultyIdx] = useState(0);
   const [estimatedDuration, setEstimatedDuration] = useState('');
   const [scheduledDate, setScheduledDate] = useState('');
-  const [locationQuery, setLocationQuery] = useState('');
-  const [locationMenuOpen, setLocationMenuOpen] = useState(false);
-  const [selectedLocationIds, setSelectedLocationIds] = useState([]);
+  const [zoneQuery, setZoneQuery] = useState('');
+  const [zoneMenuOpen, setZoneMenuOpen] = useState(false);
+  const [selectedZoneIds, setSelectedZoneIds] = useState([]);
   const [plantQuery, setPlantQuery] = useState('');
   const [plantMenuOpen, setPlantMenuOpen] = useState(false);
   const [selectedPlantIds, setSelectedPlantIds] = useState([]);
@@ -426,11 +438,11 @@ export function MapPanelTaskCreate({ onBack }) {
       .filter(Boolean);
   }, [plants, selectedPlantIds]);
 
-  const selectedLocations = useMemo(() => {
-    return selectedLocationIds
-      .map((id) => locations.find((l) => l.id === id))
+  const selectedZones = useMemo(() => {
+    return selectedZoneIds
+      .map((id) => zones.find((l) => l.id === id))
       .filter(Boolean);
-  }, [locations, selectedLocationIds]);
+  }, [zones, selectedZoneIds]);
 
   const plantSuggestions = useMemo(() => {
     const q = plantQuery.trim().toLowerCase();
@@ -441,23 +453,23 @@ export function MapPanelTaskCreate({ onBack }) {
       .slice(0, 8);
   }, [plants, plantQuery, selectedPlantIds]);
 
-  const locationSuggestions = useMemo(() => {
-    const q = locationQuery.trim().toLowerCase();
-    const taken = new Set(selectedLocationIds);
-    return locations
+  const zoneSuggestions = useMemo(() => {
+    const q = zoneQuery.trim().toLowerCase();
+    const taken = new Set(selectedZoneIds);
+    return zones
       .filter((l) => !taken.has(l.id))
       .filter((l) => !q || String(l.name || '').toLowerCase().includes(q))
       .slice(0, 8);
-  }, [locations, locationQuery, selectedLocationIds]);
+  }, [zones, zoneQuery, selectedZoneIds]);
 
-  const addLocation = (id) => {
-    setSelectedLocationIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
-    setLocationQuery('');
-    setLocationMenuOpen(false);
+  const addZone = (id) => {
+    setSelectedZoneIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    setZoneQuery('');
+    setZoneMenuOpen(false);
   };
 
-  const removeLocation = (id) => {
-    setSelectedLocationIds((prev) => prev.filter((x) => x !== id));
+  const removeZone = (id) => {
+    setSelectedZoneIds((prev) => prev.filter((x) => x !== id));
   };
 
   const addPlant = (id) => {
@@ -483,7 +495,7 @@ export function MapPanelTaskCreate({ onBack }) {
         difficulty,
         estimated_duration: estimatedDuration.trim(),
         scheduled_date: scheduledDate || '',
-        target_location_ids: selectedLocationIds,
+        target_zone_ids: selectedZoneIds,
         target_plant_ids: selectedPlantIds,
       });
       await reload();
@@ -578,15 +590,15 @@ export function MapPanelTaskCreate({ onBack }) {
           </div>
 
           <div className="panel-form__field panel-form__field--rel">
-            <span className="panel-form__label">Target Location</span>
-            {selectedLocations.length > 0 && (
+            <span className="panel-form__label">Target Zone</span>
+            {selectedZones.length > 0 && (
               <ul className="panel-form__tags" aria-label="선택한 구역">
-                {selectedLocations.map((l) => (
+                {selectedZones.map((l) => (
                   <li key={l.id}>
                     <button
                       type="button"
                       className="panel-form__tag"
-                      onClick={() => removeLocation(l.id)}
+                      onClick={() => removeZone(l.id)}
                       aria-label={`${l.name} 제거`}
                     >
                       {l.name}
@@ -600,14 +612,14 @@ export function MapPanelTaskCreate({ onBack }) {
               <input
                 type="search"
                 className="panel-form__search-input panel-form__input"
-                value={locationQuery}
+                value={zoneQuery}
                 onChange={(e) => {
-                  setLocationQuery(e.target.value);
-                  setLocationMenuOpen(true);
+                  setZoneQuery(e.target.value);
+                  setZoneMenuOpen(true);
                 }}
-                onFocus={() => setLocationMenuOpen(true)}
+                onFocus={() => setZoneMenuOpen(true)}
                 onBlur={() => {
-                  window.setTimeout(() => setLocationMenuOpen(false), 150);
+                  window.setTimeout(() => setZoneMenuOpen(false), 150);
                 }}
                 placeholder="구역 이름 검색"
                 autoComplete="off"
@@ -620,11 +632,11 @@ export function MapPanelTaskCreate({ onBack }) {
                 aria-hidden
               />
             </div>
-            {locationMenuOpen && locationSuggestions.length > 0 ? (
+            {zoneMenuOpen && zoneSuggestions.length > 0 ? (
               <ul className="panel-form__menu" role="listbox">
-                {locationSuggestions.map((l) => (
+                {zoneSuggestions.map((l) => (
                   <li key={l.id} role="option">
-                    <button type="button" className="panel-form__menu-btn" onMouseDown={() => addLocation(l.id)}>
+                    <button type="button" className="panel-form__menu-btn" onMouseDown={() => addZone(l.id)}>
                       {l.name}
                     </button>
                   </li>
@@ -734,7 +746,7 @@ export function MapPanelTaskCreate({ onBack }) {
 
 /** 식물 생성(상세와 동일 툴바·폼 레이아웃) */
 export function MapPanelPlantCreate({ onBack }) {
-  const { locations, reload } = useLocations();
+  const { zones, reload } = useZones();
   const [name, setName] = useState('');
   const [species, setSpecies] = useState('나무');
   const [category, setCategory] = useState('');
@@ -742,34 +754,34 @@ export function MapPanelPlantCreate({ onBack }) {
   const [bloomSeason, setBloomSeason] = useState('');
   const [quantity, setQuantity] = useState('');
   const [notes, setNotes] = useState('');
-  const [locationQuery, setLocationQuery] = useState('');
-  const [locationMenuOpen, setLocationMenuOpen] = useState(false);
-  const [selectedLocationIds, setSelectedLocationIds] = useState([]);
+  const [zoneQuery, setZoneQuery] = useState('');
+  const [zoneMenuOpen, setZoneMenuOpen] = useState(false);
+  const [selectedZoneIds, setSelectedZoneIds] = useState([]);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
 
-  const selectedLocations = useMemo(
-    () => selectedLocationIds.map((id) => locations.find((l) => l.id === id)).filter(Boolean),
-    [selectedLocationIds, locations]
+  const selectedZones = useMemo(
+    () => selectedZoneIds.map((id) => zones.find((l) => l.id === id)).filter(Boolean),
+    [selectedZoneIds, zones]
   );
 
-  const locationSuggestions = useMemo(() => {
-    const q = locationQuery.trim().toLowerCase();
-    const taken = new Set(selectedLocationIds);
-    return locations
+  const zoneSuggestions = useMemo(() => {
+    const q = zoneQuery.trim().toLowerCase();
+    const taken = new Set(selectedZoneIds);
+    return zones
       .filter((l) => !taken.has(l.id))
       .filter((l) => !q || String(l.name || '').toLowerCase().includes(q))
       .slice(0, 8);
-  }, [locations, locationQuery, selectedLocationIds]);
+  }, [zones, zoneQuery, selectedZoneIds]);
 
-  const addLocation = (id) => {
-    setSelectedLocationIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
-    setLocationQuery('');
-    setLocationMenuOpen(false);
+  const addZone = (id) => {
+    setSelectedZoneIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    setZoneQuery('');
+    setZoneMenuOpen(false);
   };
 
-  const removeLocation = (id) => {
-    setSelectedLocationIds((prev) => prev.filter((x) => x !== id));
+  const removeZone = (id) => {
+    setSelectedZoneIds((prev) => prev.filter((x) => x !== id));
   };
 
   const handleSave = async () => {
@@ -786,7 +798,7 @@ export function MapPanelPlantCreate({ onBack }) {
         bloom_season: bloomSeason.trim(),
         quantity: quantity.trim(),
         notes: notes.trim(),
-        location_ids: selectedLocationIds,
+        zone_ids: selectedZoneIds,
       });
       await reload();
       onBack();
@@ -868,15 +880,15 @@ export function MapPanelPlantCreate({ onBack }) {
           </div>
 
           <div className="panel-form__field panel-form__field--rel">
-            <span className="panel-form__label">Location</span>
-            {selectedLocations.length > 0 && (
-              <ul className="panel-form__tags" aria-label="선택한 위치">
-                {selectedLocations.map((l) => (
+            <span className="panel-form__label">Zone</span>
+            {selectedZones.length > 0 && (
+              <ul className="panel-form__tags" aria-label="선택한 구역">
+                {selectedZones.map((l) => (
                   <li key={l.id}>
                     <button
                       type="button"
                       className="panel-form__tag"
-                      onClick={() => removeLocation(l.id)}
+                      onClick={() => removeZone(l.id)}
                       aria-label={`${l.name} 제거`}
                     >
                       {l.name}
@@ -890,23 +902,23 @@ export function MapPanelPlantCreate({ onBack }) {
               <input
                 type="search"
                 className="panel-form__search-input panel-form__input"
-                value={locationQuery}
+                value={zoneQuery}
                 onChange={(e) => {
-                  setLocationQuery(e.target.value);
-                  setLocationMenuOpen(true);
+                  setZoneQuery(e.target.value);
+                  setZoneMenuOpen(true);
                 }}
-                onFocus={() => setLocationMenuOpen(true)}
-                onBlur={() => window.setTimeout(() => setLocationMenuOpen(false), 150)}
+                onFocus={() => setZoneMenuOpen(true)}
+                onBlur={() => window.setTimeout(() => setZoneMenuOpen(false), 150)}
                 placeholder="구역 이름 검색"
                 autoComplete="off"
               />
               <Icon icon={searchLine} width={20} height={20} className="panel-form__search-icon" aria-hidden />
             </div>
-            {locationMenuOpen && locationSuggestions.length > 0 ? (
+            {zoneMenuOpen && zoneSuggestions.length > 0 ? (
               <ul className="panel-form__menu" role="listbox">
-                {locationSuggestions.map((l) => (
+                {zoneSuggestions.map((l) => (
                   <li key={l.id} role="option">
-                    <button type="button" className="panel-form__menu-btn" onMouseDown={() => addLocation(l.id)}>
+                    <button type="button" className="panel-form__menu-btn" onMouseDown={() => addZone(l.id)}>
                       {l.name}
                     </button>
                   </li>
@@ -974,13 +986,13 @@ export function MapPanelPlantCreate({ onBack }) {
   );
 }
 
-/** @param {{ task: object, onBack: () => void, locationMap: Record<string, object>, plantMap: Record<string, object>, taskTitleMap: Record<string, string> }} props */
-export function MapPanelTaskDetail({ task, onBack, locationMap, plantMap, taskTitleMap: _taskTitleMap }) {
-  const { tasks: allTasks, locations, plants, reload } = useLocations();
-  const { openLocationDetail, openPlantDetail, openTaskDetail } = useMapPanelDetail();
+/** @param {{ task: object, onBack: () => void, zoneMap: Record<string, object>, plantMap: Record<string, object>, taskTitleMap: Record<string, string> }} props */
+export function MapPanelTaskDetail({ task, onBack, zoneMap, plantMap, taskTitleMap: _taskTitleMap }) {
+  const { tasks: allTasks, zones, plants, reload } = useZones();
+  const { openZoneDetail, openPlantDetail, openTaskDetail } = useMapPanelDetail();
   const { showToast } = useToast();
 
-  const location = task.section_id ? locationMap[task.section_id] : null;
+  const linkedZone = task.zone_id ? zoneMap[task.zone_id] : null;
 
   const [isEditing, setIsEditing] = useState(false);
   const [draftTitle, setDraftTitle] = useState(task.title || '');
@@ -995,9 +1007,9 @@ export function MapPanelTaskDetail({ task, onBack, locationMap, plantMap, taskTi
     task.scheduled_date || task.due_date || ''
   );
 
-  const [selectedLocationIds, setSelectedLocationIds] = useState(() => (task.section_id ? [task.section_id] : []));
-  const [locationQuery, setLocationQuery] = useState('');
-  const [locationMenuOpen, setLocationMenuOpen] = useState(false);
+  const [selectedZoneIds, setSelectedZoneIds] = useState(() => uniqueZoneIds(task.target_zone_ids, task.zone_id));
+  const [zoneQuery, setZoneQuery] = useState('');
+  const [zoneMenuOpen, setZoneMenuOpen] = useState(false);
 
   const [selectedPlantIds, setSelectedPlantIds] = useState(() => (task.target_plant_ids || []));
   const [plantQuery, setPlantQuery] = useState('');
@@ -1017,11 +1029,24 @@ export function MapPanelTaskDetail({ task, onBack, locationMap, plantMap, taskTi
       setDraftDifficultyIdx(idx);
       setDraftEstimatedDuration(task.estimated_duration || '');
       setDraftScheduledDate(task.scheduled_date || task.due_date || '');
-      setSelectedLocationIds(task.section_id ? [task.section_id] : []);
+      setSelectedZoneIds(uniqueZoneIds(task.target_zone_ids, task.zone_id));
       setSelectedPlantIds(task.target_plant_ids || []);
       setSaveError(null);
     }
-  }, [task.id, isEditing, task.title, task.notes, task.task_type, task.difficulty, task.estimated_duration, task.scheduled_date, task.due_date, task.section_id, task.target_plant_ids]);
+  }, [
+    task.id,
+    isEditing,
+    task.title,
+    task.notes,
+    task.task_type,
+    task.difficulty,
+    task.estimated_duration,
+    task.scheduled_date,
+    task.due_date,
+    task.zone_id,
+    task.target_zone_ids,
+    task.target_plant_ids,
+  ]);
 
   const plantNavLinks = useMemo(() => {
     return (task.target_plant_ids || [])
@@ -1059,27 +1084,25 @@ export function MapPanelTaskDetail({ task, onBack, locationMap, plantMap, taskTi
       .filter(Boolean);
   }, [task.followup_task_ids, allTasks, openTaskDetail, _taskTitleMap]);
 
-  const onLocationNavigate =
-    location ? () => openLocationDetail(location, { push: true }) : null;
+  const onZoneNavigate =
+    linkedZone ? () => openZoneDetail(linkedZone, { push: true }) : null;
 
-  const notionStatusName = (() => {
-    if (task.status === 'completed') return '완료';
-    if (task.status === 'progress') return '진행중';
-    return '시작 전';
-  })();
+  const notionStatusName =
+    (task.notion_status && String(task.notion_status).trim()) ||
+    (task.status === 'completed' ? '완료' : task.status === 'progress' ? '진행 중' : '시작 전');
 
   const selectedPlantsForEdit = useMemo(() => {
     return selectedPlantIds.map((id) => plants.find((p) => p.id === id)).filter(Boolean);
   }, [plants, selectedPlantIds]);
 
-  const locationSuggestions = useMemo(() => {
-    const q = locationQuery.trim().toLowerCase();
-    const taken = new Set(selectedLocationIds);
-    return locations
+  const zoneSuggestions = useMemo(() => {
+    const q = zoneQuery.trim().toLowerCase();
+    const taken = new Set(selectedZoneIds);
+    return zones
       .filter((l) => !taken.has(l.id))
       .filter((l) => !q || String(l.name || '').toLowerCase().includes(q))
       .slice(0, 8);
-  }, [locations, locationQuery, selectedLocationIds]);
+  }, [zones, zoneQuery, selectedZoneIds]);
 
   const plantSuggestionsForEdit = useMemo(() => {
     const q = plantQuery.trim().toLowerCase();
@@ -1090,13 +1113,13 @@ export function MapPanelTaskDetail({ task, onBack, locationMap, plantMap, taskTi
       .slice(0, 8);
   }, [plants, plantQuery, selectedPlantIds]);
 
-  const addLocation = (id) => {
-    setSelectedLocationIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
-    setLocationQuery('');
-    setLocationMenuOpen(false);
+  const addZone = (id) => {
+    setSelectedZoneIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    setZoneQuery('');
+    setZoneMenuOpen(false);
   };
 
-  const removeLocation = (id) => setSelectedLocationIds((prev) => prev.filter((x) => x !== id));
+  const removeZone = (id) => setSelectedZoneIds((prev) => prev.filter((x) => x !== id));
 
   const addPlant = (id) => {
     setSelectedPlantIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
@@ -1122,7 +1145,7 @@ export function MapPanelTaskDetail({ task, onBack, locationMap, plantMap, taskTi
         difficulty,
         estimated_duration: draftEstimatedDuration.trim(),
         scheduled_date: draftScheduledDate || '',
-        target_location_ids: selectedLocationIds,
+        target_zone_ids: selectedZoneIds,
         target_plant_ids: selectedPlantIds,
         status_name: notionStatusName,
       });
@@ -1162,8 +1185,8 @@ export function MapPanelTaskDetail({ task, onBack, locationMap, plantMap, taskTi
           <>
             <TaskDetailLayout
               task={task}
-              locationName={location?.name ?? null}
-              onLocationNavigate={onLocationNavigate}
+              zoneName={linkedZone?.name ?? null}
+              onZoneNavigate={onZoneNavigate}
               plantLinks={plantNavLinks}
               taskLinkGroups={{
                 prerequisites: prerequisiteNavLinks,
@@ -1254,18 +1277,18 @@ export function MapPanelTaskDetail({ task, onBack, locationMap, plantMap, taskTi
             </div>
 
             <div className="panel-form__field panel-form__field--rel">
-              <span className="panel-form__label">Target Location</span>
-              {selectedLocationIds.length > 0 && (
+              <span className="panel-form__label">Target Zone</span>
+              {selectedZoneIds.length > 0 && (
                 <ul className="panel-form__tags" aria-label="선택한 구역">
-                  {selectedLocationIds.map((id) => {
-                    const l = locations.find((x) => x.id === id);
+                  {selectedZoneIds.map((id) => {
+                    const l = zones.find((x) => x.id === id);
                     if (!l) return null;
                     return (
                       <li key={id}>
                         <button
                           type="button"
                           className="panel-form__tag"
-                          onClick={() => removeLocation(id)}
+                          onClick={() => removeZone(id)}
                           aria-label={`${l.name} 제거`}
                         >
                           {l.name}
@@ -1281,14 +1304,14 @@ export function MapPanelTaskDetail({ task, onBack, locationMap, plantMap, taskTi
                 <input
                   type="search"
                   className="panel-form__search-input panel-form__input"
-                  value={locationQuery}
+                  value={zoneQuery}
                   onChange={(e) => {
-                    setLocationQuery(e.target.value);
-                    setLocationMenuOpen(true);
+                    setZoneQuery(e.target.value);
+                    setZoneMenuOpen(true);
                   }}
-                  onFocus={() => setLocationMenuOpen(true)}
+                  onFocus={() => setZoneMenuOpen(true)}
                   onBlur={() => {
-                    window.setTimeout(() => setLocationMenuOpen(false), 150);
+                    window.setTimeout(() => setZoneMenuOpen(false), 150);
                   }}
                   placeholder="구역 이름 검색"
                   autoComplete="off"
@@ -1296,11 +1319,11 @@ export function MapPanelTaskDetail({ task, onBack, locationMap, plantMap, taskTi
                 <Icon icon={searchLine} width={20} height={20} className="panel-form__search-icon" aria-hidden />
               </div>
 
-              {locationMenuOpen && locationSuggestions.length > 0 ? (
+              {zoneMenuOpen && zoneSuggestions.length > 0 ? (
                 <ul className="panel-form__menu" role="listbox">
-                  {locationSuggestions.map((l) => (
+                  {zoneSuggestions.map((l) => (
                     <li key={l.id} role="option">
-                      <button type="button" className="panel-form__menu-btn" onMouseDown={() => addLocation(l.id)}>
+                      <button type="button" className="panel-form__menu-btn" onMouseDown={() => addZone(l.id)}>
                         {l.name}
                       </button>
                     </li>
@@ -1432,12 +1455,12 @@ export function MapPanelTaskDetail({ task, onBack, locationMap, plantMap, taskTi
   );
 }
 
-/** @param {{ plant: object, onBack: () => void, locationMap: Record<string, object> }} props */
-export function MapPanelPlantDetail({ plant, onBack, locationMap }) {
-  const { locations, reload } = useLocations();
+/** @param {{ plant: object, onBack: () => void, zoneMap: Record<string, object> }} props */
+export function MapPanelPlantDetail({ plant, onBack, zoneMap }) {
+  const { zones, reload } = useZones();
   const { showToast } = useToast();
-  const { openLocationDetail } = useMapPanelDetail();
-  const location = plant.section_id ? locationMap[plant.section_id] : null;
+  const { openZoneDetail } = useMapPanelDetail();
+  const linkedZone = plant.zone_id ? zoneMap[plant.zone_id] : null;
 
   const [isEditing, setIsEditing] = useState(false);
   const [draftName, setDraftName] = useState(plant.name || '');
@@ -1450,11 +1473,11 @@ export function MapPanelPlantDetail({ plant, onBack, locationMap }) {
     plant.quantity == null ? '' : String(plant.quantity)
   );
   const [draftNotes, setDraftNotes] = useState(plant.notes || '');
-  const [selectedLocationIds, setSelectedLocationIds] = useState(() =>
-    plant.section_id ? [plant.section_id] : []
+  const [selectedZoneIds, setSelectedZoneIds] = useState(() =>
+    uniqueZoneIds(plant.zone_ids, plant.zone_id)
   );
-  const [locationQuery, setLocationQuery] = useState('');
-  const [locationMenuOpen, setLocationMenuOpen] = useState(false);
+  const [zoneQuery, setZoneQuery] = useState('');
+  const [zoneMenuOpen, setZoneMenuOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -1468,32 +1491,43 @@ export function MapPanelPlantDetail({ plant, onBack, locationMap }) {
     setDraftBloomSeason(plant.bloom_season && plant.bloom_season !== '-' ? plant.bloom_season : '');
     setDraftQuantity(plant.quantity == null ? '' : String(plant.quantity));
     setDraftNotes(plant.notes || '');
-    setSelectedLocationIds(plant.section_id ? [plant.section_id] : []);
+    setSelectedZoneIds(uniqueZoneIds(plant.zone_ids, plant.zone_id));
     setSaveError(null);
-  }, [plant.id, isEditing, plant.name, plant.species, plant.status, plant.bloom_season, plant.quantity, plant.notes, plant.section_id]);
+  }, [
+    plant.id,
+    isEditing,
+    plant.name,
+    plant.species,
+    plant.status,
+    plant.bloom_season,
+    plant.quantity,
+    plant.notes,
+    plant.zone_id,
+    plant.zone_ids,
+  ]);
 
-  const selectedLocations = useMemo(
-    () => selectedLocationIds.map((id) => locations.find((l) => l.id === id)).filter(Boolean),
-    [selectedLocationIds, locations]
+  const selectedZones = useMemo(
+    () => selectedZoneIds.map((id) => zones.find((l) => l.id === id)).filter(Boolean),
+    [selectedZoneIds, zones]
   );
 
-  const locationSuggestions = useMemo(() => {
-    const q = locationQuery.trim().toLowerCase();
-    const taken = new Set(selectedLocationIds);
-    return locations
+  const zoneSuggestions = useMemo(() => {
+    const q = zoneQuery.trim().toLowerCase();
+    const taken = new Set(selectedZoneIds);
+    return zones
       .filter((l) => !taken.has(l.id))
       .filter((l) => !q || String(l.name || '').toLowerCase().includes(q))
       .slice(0, 8);
-  }, [locations, locationQuery, selectedLocationIds]);
+  }, [zones, zoneQuery, selectedZoneIds]);
 
-  const addLocation = (id) => {
-    setSelectedLocationIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
-    setLocationQuery('');
-    setLocationMenuOpen(false);
+  const addZone = (id) => {
+    setSelectedZoneIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    setZoneQuery('');
+    setZoneMenuOpen(false);
   };
 
-  const removeLocation = (id) => {
-    setSelectedLocationIds((prev) => prev.filter((x) => x !== id));
+  const removeZone = (id) => {
+    setSelectedZoneIds((prev) => prev.filter((x) => x !== id));
   };
 
   const handleSave = async () => {
@@ -1509,7 +1543,7 @@ export function MapPanelPlantDetail({ plant, onBack, locationMap }) {
         bloom_season: draftBloomSeason.trim(),
         quantity: draftQuantity,
         notes: draftNotes.trim(),
-        location_ids: selectedLocationIds,
+        zone_ids: selectedZoneIds,
       });
       await reload();
       setIsEditing(false);
@@ -1546,9 +1580,9 @@ export function MapPanelPlantDetail({ plant, onBack, locationMap }) {
           <>
             <PlantDetailLayout
               plant={plant}
-              locationName={location?.name ?? null}
-              onLocationNavigate={
-                location ? () => openLocationDetail(location, { push: true }) : undefined
+              zoneName={linkedZone?.name ?? null}
+              onZoneNavigate={
+                linkedZone ? () => openZoneDetail(linkedZone, { push: true }) : undefined
               }
             />
             <div className="panel-view__footer">
@@ -1612,15 +1646,15 @@ export function MapPanelPlantDetail({ plant, onBack, locationMap }) {
             </div>
 
             <div className="panel-form__field panel-form__field--rel">
-              <span className="panel-form__label">Location</span>
-              {selectedLocations.length > 0 && (
-                <ul className="panel-form__tags" aria-label="선택한 위치">
-                  {selectedLocations.map((l) => (
+              <span className="panel-form__label">Zone</span>
+              {selectedZones.length > 0 && (
+                <ul className="panel-form__tags" aria-label="선택한 구역">
+                  {selectedZones.map((l) => (
                     <li key={l.id}>
                       <button
                         type="button"
                         className="panel-form__tag"
-                        onClick={() => removeLocation(l.id)}
+                        onClick={() => removeZone(l.id)}
                         aria-label={`${l.name} 제거`}
                       >
                         {l.name}
@@ -1634,23 +1668,23 @@ export function MapPanelPlantDetail({ plant, onBack, locationMap }) {
                 <input
                   type="search"
                   className="panel-form__search-input panel-form__input"
-                  value={locationQuery}
+                  value={zoneQuery}
                   onChange={(e) => {
-                    setLocationQuery(e.target.value);
-                    setLocationMenuOpen(true);
+                    setZoneQuery(e.target.value);
+                    setZoneMenuOpen(true);
                   }}
-                  onFocus={() => setLocationMenuOpen(true)}
-                  onBlur={() => window.setTimeout(() => setLocationMenuOpen(false), 150)}
+                  onFocus={() => setZoneMenuOpen(true)}
+                  onBlur={() => window.setTimeout(() => setZoneMenuOpen(false), 150)}
                   placeholder="구역 이름 검색"
                   autoComplete="off"
                 />
                 <Icon icon={searchLine} width={20} height={20} className="panel-form__search-icon" aria-hidden />
               </div>
-              {locationMenuOpen && locationSuggestions.length > 0 ? (
+              {zoneMenuOpen && zoneSuggestions.length > 0 ? (
                 <ul className="panel-form__menu" role="listbox">
-                  {locationSuggestions.map((l) => (
+                  {zoneSuggestions.map((l) => (
                     <li key={l.id} role="option">
-                      <button type="button" className="panel-form__menu-btn" onMouseDown={() => addLocation(l.id)}>
+                      <button type="button" className="panel-form__menu-btn" onMouseDown={() => addZone(l.id)}>
                         {l.name}
                       </button>
                     </li>

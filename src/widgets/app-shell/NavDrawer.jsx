@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
+import { useProjects } from '@/app/providers/ProjectsContext';
 import { Icon } from '@iconify/react';
 import mapLine from '@iconify-icons/mingcute/map-line';
 import task2Line from '@iconify-icons/mingcute/task-2-line';
@@ -18,7 +19,12 @@ import './NavDrawer.css';
  * 태블릿: 프로젝트 + 지도/할일/식물 (CSS로 하단 푸터 숨김)
  * 모바일: 위 + 설정/프로필/로그아웃
  */
+const MAX_PROJECT_SLOTS = 3;
+
 export default function NavDrawer({ isOpen, onClose, onOpenSettings, onLogout }) {
+  const { projects, loading } = useProjects();
+  const slots = Array.from({ length: MAX_PROJECT_SLOTS }, (_, i) => projects[i] ?? null);
+
   useEffect(() => {
     if (!isOpen) return undefined;
     const prev = document.body.style.overflow;
@@ -66,24 +72,42 @@ export default function NavDrawer({ isOpen, onClose, onOpenSettings, onLogout })
               프로젝트
             </h2>
             <div className="nav-drawer__projects">
-              <div className="nav-drawer__project nav-drawer__project--active">
-                <span className="nav-drawer__project-icon" aria-hidden>
-                  <Icon icon={bookmarkFill} width={20} height={20} />
-                </span>
-                <span className="nav-drawer__project-name">Garden 1</span>
-              </div>
-              <div className="nav-drawer__project nav-drawer__project--empty">
-                <span className="nav-drawer__project-icon" aria-hidden>
-                  <Icon icon={addLine} width={20} height={20} />
-                </span>
-                <span className="nav-drawer__project-name">빈 슬롯</span>
-              </div>
-              <div className="nav-drawer__project nav-drawer__project--empty">
-                <span className="nav-drawer__project-icon" aria-hidden>
-                  <Icon icon={addLine} width={20} height={20} />
-                </span>
-                <span className="nav-drawer__project-name">빈 슬롯</span>
-              </div>
+              {loading && projects.length === 0 ? (
+                <p className="nav-drawer__projects-loading">불러오는 중…</p>
+              ) : null}
+              {!(loading && projects.length === 0) &&
+                slots.map((p, idx) => {
+                  if (p) {
+                    return (
+                      <NavLink
+                        key={p.id}
+                        to={`/project/${p.id}`}
+                        className={({ isActive }) =>
+                          `nav-drawer__project ${isActive ? 'nav-drawer__project--active' : ''}`
+                        }
+                        onClick={onClose}
+                      >
+                        <span className="nav-drawer__project-icon" aria-hidden>
+                          <Icon icon={bookmarkFill} width={20} height={20} />
+                        </span>
+                        <span className="nav-drawer__project-name">{p.name || '프로젝트'}</span>
+                      </NavLink>
+                    );
+                  }
+                  return (
+                    <Link
+                      key={`empty-${idx}`}
+                      to="/project/new"
+                      className="nav-drawer__project nav-drawer__project--empty"
+                      onClick={onClose}
+                    >
+                      <span className="nav-drawer__project-icon" aria-hidden>
+                        <Icon icon={addLine} width={20} height={20} />
+                      </span>
+                      <span className="nav-drawer__project-name">새 프로젝트</span>
+                    </Link>
+                  );
+                })}
             </div>
           </section>
 

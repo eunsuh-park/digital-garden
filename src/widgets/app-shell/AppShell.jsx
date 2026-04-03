@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { LocationsProvider } from '@/app/providers/LocationsContext';
+import { ZonesProvider } from '@/app/providers/ZonesContext';
 import { ToastProvider } from '@/app/providers/ToastContext';
 import { TasksPanelUiProvider } from '@/app/providers/TasksPanelUiContext';
 import { PlantsPanelUiProvider } from '@/app/providers/PlantsPanelUiContext';
 import { MapPanelLayoutProvider } from '@/app/providers/MapPanelLayoutContext';
 import { MapPanelDetailProvider, useMapPanelDetail } from '@/app/providers/MapPanelDetailContext';
 import { useAuth } from '@/app/providers/AuthContext';
+import { ProjectsProvider } from '@/app/providers/ProjectsContext';
 import NavigationRail from './NavigationRail';
 import MapSidePanel from '@/widgets/map-panel/MapSidePanel';
 import AppBar from './AppBar';
@@ -69,18 +70,20 @@ function AppShellWithDetailSync() {
  */
 export default function AppShell() {
   return (
-    <LocationsProvider>
-      <ToastProvider>
-        <TasksPanelUiProvider>
-          <PlantsPanelUiProvider>
-            <MapPanelLayoutProvider>
-              <MapPanelDetailProvider>
-                <AppShellWithDetailSync />
-              </MapPanelDetailProvider>
-            </MapPanelLayoutProvider>
-          </PlantsPanelUiProvider>
-        </TasksPanelUiProvider>
-      </ToastProvider>
-    </LocationsProvider>
+    <ProjectsProvider>
+      <ZonesProvider>
+        <ToastProvider>
+          <TasksPanelUiProvider>
+            <PlantsPanelUiProvider>
+              <MapPanelLayoutProvider>
+                <MapPanelDetailProvider>
+                  <AppShellWithDetailSync />
+                </MapPanelDetailProvider>
+              </MapPanelLayoutProvider>
+            </PlantsPanelUiProvider>
+          </TasksPanelUiProvider>
+        </ToastProvider>
+      </ZonesProvider>
+    </ProjectsProvider>
   );
 }

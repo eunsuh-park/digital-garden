@@ -34,6 +34,18 @@
   font-family: 'DM Mono', monospace;
 }
 
+.dashboard-page__error {
+  font-size: 14px;
+  color: var(--color-danger-text-strong, #b91c1c);
+  margin-bottom: 1rem;
+}
+
+.dashboard-page__hint {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  margin: 0 0 1rem;
+}
+
 /* 요약 카드 */
 .dashboard-page__summary {
   margin-bottom: 28px;
