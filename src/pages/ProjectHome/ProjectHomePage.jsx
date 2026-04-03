@@ -3,17 +3,9 @@ import { Icon } from '@iconify/react';
 import mapLine from '@iconify-icons/mingcute/map-line';
 import arrowLeftLine from '@iconify-icons/mingcute/arrow-left-line';
 import { useProjects } from '@/app/providers/ProjectsContext';
+import { formatProjectSpaceSizeLabel } from '@/shared/lib/projectSpaceSize';
 import ErrorState from '@/shared/ui/error-state/ErrorState';
 import './ProjectHomePage.css';
-
-const purposeLabel = {
-  indoor: '실내 정원',
-  outdoor: '실외 정원',
-  landscape: '기타 조경 공간',
-  personal: '개인 공간',
-};
-
-const spaceLabel = { s: 'S', m: 'M', l: 'L' };
 
 export default function ProjectHomePage() {
   const { projectId } = useParams();
@@ -53,8 +45,8 @@ export default function ProjectHomePage() {
     );
   }
 
-  const purpose = project.purpose != null ? purposeLabel[project.purpose] ?? project.purpose : '—';
-  const space = project.space_size != null ? spaceLabel[project.space_size] ?? project.space_size : '—';
+  const space = formatProjectSpaceSizeLabel(project.space_size);
+  const desc = project.space_description?.trim();
 
   return (
     <div className="project-home">
@@ -70,8 +62,13 @@ export default function ProjectHomePage() {
 
       <section className="project-home__meta" aria-label="요약">
         <span className="project-home__badge">{space}</span>
-        <span className="project-home__badge project-home__badge--muted">{purpose}</span>
       </section>
+
+      {desc ? (
+        <p className="project-home__description" aria-label="공간 설명">
+          {desc}
+        </p>
+      ) : null}
 
       <section className="project-home__actions">
         <Link to="/" className="project-home__cta">

@@ -3,16 +3,8 @@ import { Icon } from '@iconify/react';
 import addLine from '@iconify-icons/mingcute/add-line';
 import rightLine from '@iconify-icons/mingcute/right-line';
 import { useProjects } from '@/app/providers/ProjectsContext';
+import { formatProjectSpaceSizeLabel } from '@/shared/lib/projectSpaceSize';
 import './DashboardPage.css';
-
-const purposeLabel = {
-  indoor: '실내 정원',
-  outdoor: '실외 정원',
-  landscape: '기타 조경 공간',
-  personal: '개인 공간',
-};
-
-const spaceLabel = { s: 'S', m: 'M', l: 'L' };
 
 export default function DashboardPage() {
   const { projects, loading, error } = useProjects();
@@ -71,12 +63,12 @@ export default function DashboardPage() {
                     <h3 className="dashboard-page__card-title">{project.name || '(이름 없음)'}</h3>
                     <div className="dashboard-page__card-meta">
                       <span className="dashboard-page__card-badge">
-                        {project.space_size != null ? spaceLabel[project.space_size] ?? project.space_size : '—'}
-                      </span>
-                      <span className="dashboard-page__card-badge dashboard-page__card-badge--purpose">
-                        {project.purpose != null ? purposeLabel[project.purpose] ?? project.purpose : '—'}
+                        {formatProjectSpaceSizeLabel(project.space_size)}
                       </span>
                     </div>
+                    {project.space_description?.trim() ? (
+                      <p className="dashboard-page__card-desc">{project.space_description.trim()}</p>
+                    ) : null}
                   </div>
                   <Icon icon={rightLine} className="dashboard-page__card-arrow" aria-hidden />
                 </Link>

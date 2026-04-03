@@ -2,7 +2,7 @@ import { supabase } from './supabaseClient.js';
 
 /**
  * 프로젝트 생성
- * @param {Object} project - { name, space_size, purpose, ... }
+ * @param {Object} project - { name, space_size, space_description?, ... }
  * @returns {Promise<{ data, error }>}
  */
 export async function createProject(project) {

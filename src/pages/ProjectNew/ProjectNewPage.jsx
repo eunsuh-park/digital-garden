@@ -11,27 +11,16 @@ import {
   saveProjectWizardDraft,
   clearProjectWizardDraft,
 } from '@/shared/lib/projectWizardDraft';
+import {
+  PROJECT_SPACE_SIZE_LABEL_KO,
+  PROJECT_SPACE_SIZE_TAB_ITEMS,
+} from '@/shared/lib/projectSpaceSize';
 import './ProjectNewPage.css';
 
-const SPACE_OPTIONS = [
-  { value: 's', label: 'S', desc: '소형' },
-  { value: 'm', label: 'M', desc: '중형' },
-  { value: 'l', label: 'L', desc: '대형' },
-];
-
-const PURPOSE_OPTIONS = [
-  { value: 'indoor', label: '실내 정원' },
-  { value: 'outdoor', label: '실외 정원' },
-  { value: 'landscape', label: '기타 조경 공간' },
-  { value: 'personal', label: '개인 공간' },
-];
-
-const SPACE_TAB_ITEMS = SPACE_OPTIONS.map((option) => ({
-  value: option.value,
-  label: `${option.label} · ${option.desc}`,
-}));
-
 const STEPS = ['기본 정보', '맵·구역'];
+
+const MAX_NAME_LEN = 20;
+const MAX_SPACE_DESC_LEN = 200;
 
 export default function ProjectNewPage() {
   const navigate = useNavigate();
@@ -41,7 +30,7 @@ export default function ProjectNewPage() {
   const [step, setStep] = useState(0);
   const [name, setName] = useState('');
   const [space, setSpace] = useState('');
-  const [purpose, setPurpose] = useState('');
+  const [spaceDescription, setSpaceDescription] = useState('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -49,15 +38,19 @@ export default function ProjectNewPage() {
     if (d) {
       setName(d.name);
       setSpace(d.space);
-      setPurpose(d.purpose);
+      setSpaceDescription(d.spaceDescription);
     }
   }, []);
 
   useEffect(() => {
-    saveProjectWizardDraft({ name, space, purpose });
-  }, [name, space, purpose]);
+    saveProjectWizardDraft({ name, space, spaceDescription });
+  }, [name, space, spaceDescription]);
 
-  const step1Valid = Boolean(name.trim() && space && purpose);
+  const setNameClamped = (v) => setName(String(v ?? '').slice(0, MAX_NAME_LEN));
+  const setSpaceDescriptionClamped = (v) =>
+    setSpaceDescription(String(v ?? '').slice(0, MAX_SPACE_DESC_LEN));
+
+  const step1Valid = Boolean(name.trim() && space);
 
   function handleNext(e) {
     e.preventDefault();
@@ -69,10 +62,11 @@ export default function ProjectNewPage() {
     if (!step1Valid || saving) return;
     setSaving(true);
     try {
+      const trimmedDesc = spaceDescription.trim();
       const { data, error } = await createProject({
         name: name.trim(),
         space_size: space,
-        purpose,
+        space_description: trimmedDesc || null,
       });
       if (error) {
         showToast(error.message || '프로젝트를 만들지 못했습니다.');
@@ -90,6 +84,8 @@ export default function ProjectNewPage() {
       setSaving(false);
     }
   }
+
+  const spaceLabel = space ? PROJECT_SPACE_SIZE_LABEL_KO[space] ?? space : '';
 
   return (
     <div className="project-new-page">
@@ -124,32 +120,42 @@ export default function ProjectNewPage() {
                 autoComplete="off"
                 size="m"
                 showHelperText={false}
-                placeholder="예: 우리 집 베란다 정원"
+                placeholder="최대 20자"
                 value={name}
-                onChange={setName}
+                onChange={setNameClamped}
+                maxLength={MAX_NAME_LEN}
                 className="project-new-page__field-control"
               />
             </div>
 
             <div className="project-new-page__field">
-              <span className="project-new-page__field-label">공간 넓이</span>
+              <span className="project-new-page__field-label">
+                공간 넓이<span className="project-new-page__required">*</span>
+              </span>
               <ButtonTabGroup
-                items={SPACE_TAB_ITEMS}
+                items={PROJECT_SPACE_SIZE_TAB_ITEMS}
                 value={space}
                 onChange={setSpace}
                 size="m"
-                className="project-new-page__tab-group"
+                className="project-new-page__tab-group project-new-page__tab-group--space"
               />
             </div>
 
             <div className="project-new-page__field">
-              <span className="project-new-page__field-label">활용 목적</span>
-              <ButtonTabGroup
-                items={PURPOSE_OPTIONS}
-                value={purpose}
-                onChange={setPurpose}
+              <TextField
+                label="설명"
+                inputId="project-new-space-desc"
+                inputName="project-new-space-desc"
+                type="long"
+                variant="text-area"
+                autoComplete="off"
                 size="m"
-                className="project-new-page__tab-group project-new-page__tab-group--purpose"
+                showHelperText={false}
+                placeholder="이 공간에 대한 설명을 적을 수 있어요. (선택)"
+                value={spaceDescription}
+                onChange={setSpaceDescriptionClamped}
+                maxLength={MAX_SPACE_DESC_LEN}
+                className="project-new-page__field-control"
               />
             </div>
 
@@ -170,9 +176,13 @@ export default function ProjectNewPage() {
         ) : (
           <div className="project-new-page__panel">
             <p className="project-new-page__lead">
-              <strong>{name.trim() || '프로젝트'}</strong> · 공간 {space?.toUpperCase()} ·{' '}
-              {PURPOSE_OPTIONS.find((p) => p.value === purpose)?.label ?? ''}
+              <strong>{name.trim() || '프로젝트'}</strong>
+              <span className="project-new-page__lead-sep"> · </span>
+              {spaceLabel}
             </p>
+            {spaceDescription.trim() ? (
+              <p className="project-new-page__lead-desc">{spaceDescription.trim()}</p>
+            ) : null}
             <div className="project-new-page__placeholder" role="status">
               <p className="project-new-page__placeholder-title">맵·구역 구성</p>
               <p className="project-new-page__placeholder-desc">

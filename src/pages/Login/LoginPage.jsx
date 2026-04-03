@@ -20,7 +20,7 @@ export default function LoginPage() {
   const [isError, setIsError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const redirectTo = useMemo(() => location.state?.from || '/', [location.state]);
+  const redirectTo = useMemo(() => location.state?.from || '/dashboard', [location.state]);
 
   if (isAuthenticated) {
     return <Navigate to={redirectTo} replace />;
