@@ -79,5 +79,5 @@ tech = [
 ]
 add_sheet("기술스택", tech)
 
-wb.save("doc/진행사항.xlsx")
-print("doc/진행사항.xlsx 생성 완료")
+wb.save("docs/진행사항.xlsx")
+print("docs/진행사항.xlsx 생성 완료")
