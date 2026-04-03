@@ -1,0 +1,13 @@
+---
+description: Shared breakpoints sm/md/lg, mobile-first CSS
+globs: "**/*.{css,jsx}"
+alwaysApply: false
+---
+
+# Responsive layout
+
+- **Mobile-first**: base styles = below **640px**; enhance with `min-width` media queries.
+- **Breakpoints**: **sm** ≥640px, **md** ≥768px, **lg** ≥1024px (`src/index.css` has comments).
+- **`max-width` queries** when needed: **639px**, **767px**, **1023px** (one pixel below each step).
+- Card grids (e.g. tasks/plants pages): scale **gap** with breakpoints; columns can use `minmax(min(280px, 100%), 1fr)` for consistency.
+- New components should follow the same breakpoints as existing ones (Header, FullPage, GardenMap, Drawer, cards, etc.).

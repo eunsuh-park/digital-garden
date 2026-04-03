@@ -1,7 +1,10 @@
 ---
-description: 
+description: Feature-Sliced Design layout, reuse vs new files, confirm before duplicating
 alwaysApply: true
 ---
 
-모든 작업에서 FSD 구조가 깨지지 않는지 점검하고 진행해.
-새로운 파일을 생성하려 할 때, 그 파일이 FSD 구조 내에서 위치해야하는 폴더 내에 유사한 다른 컴포넌트가 있는지 확인해. 유사도가 높은 경우에는 새 파일을 생성하지 않고 해당 파일의 범용성을 높여서 재사용할지 여부를 판단해서 내게 설명하고 컨펌을 요청해.
+# Feature-Sliced Design (FSD)
+
+- Keep the FSD layout intact: do not place new code in layers or slices that break the project’s structure.
+- Before adding a **new** file, check whether a **similar** component or module already exists in the correct FSD folder.
+- If overlap is high, **do not** add a parallel file by default: propose **extending** the existing one for reuse, explain the tradeoff, and **ask for confirmation** before proceeding.

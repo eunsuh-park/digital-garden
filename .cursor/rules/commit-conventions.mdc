@@ -1,0 +1,22 @@
+---
+description: Conventional Commits for titles and optional body
+alwaysApply: true
+---
+
+# Commit messages (Conventional Commits)
+
+Format: `<type>(<scope>): <subject>` then optional blank line and body.
+
+- **Subject**: imperative mood, **≤ ~50 chars**, no trailing period.
+- **Scope** (optional): area touched (e.g. Tasks, PlantCard, GardenMap).
+
+| Type | Use |
+|------|-----|
+| `feat` | New feature |
+| `fix` | Bug fix |
+| `docs` | Docs / comments only |
+| `style` | Formatting, no behavior change |
+| `refactor` | Structure change, same behavior |
+| `chore` | Tooling, deps, misc maintenance |
+
+Examples: `feat(Tasks): sync Task_Type with Notion`, `fix(Popover): guard zero-length arrays`, `docs: add commit convention`.

@@ -1,0 +1,18 @@
+---
+description: Consolidated Vercel serverless Notion routes and POST actions
+globs: "**/notion*.js"
+alwaysApply: false
+---
+
+# Notion API on Vercel (consolidated functions)
+
+- **Three** serverless files under `api/`: `notion-locations.js`, `notion-tasks.js`, `notion-plants.js` (under Vercel Hobby function count limits).
+- **GET**: query the matching Notion DB (same JSON shape as before).
+- **POST**: `Content-Type: application/json`, body **must** include **`action`**:
+  - `create` — new page
+  - `update` — patch page properties
+  - `delete` — archive page (`archived: true`)
+- Do **not** reintroduce separate `*-create`, `*-update`, `*-delete` routes; use one path + `action`.
+- **`/api/notion-sections` → `/api/notion-locations`**: keep rewrite in `vercel.json` for GET compatibility.
+- Client: `src/lib/notionApi.js` — `fetch*` uses GET; `create*` / `update*` / `delete*` POST to the single path with `action` + payload.
+- **Local**: `scripts/local-api.mjs` is **GET-oriented** for quick read-only tests; use **`vercel dev`** for full CRUD parity.

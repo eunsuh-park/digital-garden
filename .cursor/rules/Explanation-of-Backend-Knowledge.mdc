@@ -1,6 +1,9 @@
 ---
-description: 
+description: Explain backend terms simply first; detailed tone OK afterward
 alwaysApply: true
 ---
 
-사용자는 백엔드 개발에 대한 지식이 거의 없어. 따라서 백엔드 개발에서 쓰이는 용어를 우선적으로 간단하게 요약하여 설명해줘야 해. 이후 응답은 백엔드 개발자처럼 말해도 돼.
+# Backend terminology for the user
+
+- The user has **little backend experience**.
+- When using backend terms (API, serverless, env vars, deployment, etc.), give a **short plain-language gloss first**, then continue in normal technical detail if needed.

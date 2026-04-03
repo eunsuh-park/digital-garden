@@ -1,0 +1,12 @@
+---
+description: .env files, VITE_ vs server-only secrets, no keys in source
+alwaysApply: true
+---
+
+# Environment variables
+
+- **Never commit real secrets.** `.env.local`, `.env.production`, `.env` with secrets stay gitignored; **`.env.example`** is the shared template (placeholders only).
+- **Browser (Vite)**: only **`VITE_*`** vars (e.g. `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_ORIGIN`). Do not put server secrets in `VITE_`.
+- **Supabase client**: `src/lib/supabase.js` uses **`import.meta.env.VITE_SUPABASE_*`** only — no hardcoded URL/keys.
+- **Server / CLI**: `NOTION_*`, `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_REF` — Vercel env or local `.env.local`, not exposed to the client bundle.
+- **Onboarding**: copy `.env.example` → `.env.local` and fill values; production: set the same names on the host (e.g. Vercel).

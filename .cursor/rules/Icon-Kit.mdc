@@ -1,5 +1,16 @@
 ---
+description: MingCute icons via Iconify, imports, sizing, color, a11y
 alwaysApply: true
 ---
 
-UI 컴포넌트를 생성할 때, 아이콘으로 여겨지는 것이 있으면 이것을 mingcute 아이콘으로 넣어. 그런다음 어떤 아이콘을 어떤 것으로 넣었는지를 응답 마지막에 정리해서 설명해.
+# Icons (MingCute + Iconify)
+
+- Use **`@iconify/react`** with **`@iconify-icons/mingcute`** (named imports per icon).
+- Prefer **named imports** from `@iconify-icons/mingcute/<name>-line` or `<name>-fill`; avoid standalone string IDs like `"mingcute:..."` (bundle/tree-shaking).
+- **Consistency**: Within one block (header, card, modal), keep **line vs fill** coherent; **nav / toolbar / filters** default to **line**.
+- **Color**: Prefer inheriting from parent text (`currentColor`) via CSS over hardcoding `color` on `<Icon>` when possible.
+- **Alignment**: With labels, use `inline-flex`, `align-items: center`, and a small `gap`.
+- **Size**: Tabs / toolbar / filters typically **16–20px**; match surrounding type and tap targets.
+- **A11y**: Meaningful controls get `aria-label`; decorative icons can use `aria-hidden` when appropriate.
+- **States**: Style default / hover / active / disabled so icon affordances stay clear (opacity, contrast, pointer).
+- After adding or changing icons in UI work, **summarize at the end of the reply** which icon was used for what.
