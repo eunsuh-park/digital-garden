@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Icon } from "@iconify/react";
 import searchLine from "@iconify-icons/mingcute/search-line";
 import closeLine from "@iconify-icons/mingcute/close-line";
-import arrowUpLine from "@iconify-icons/mingcute/arrow-up-line";
-import arrowDownLine from "@iconify-icons/mingcute/arrow-down-line";
+import up from "@iconify-icons/mingcute/arrow-up-line";
+import down from "@iconify-icons/mingcute/arrow-down-line";
 import checkLine from "@iconify-icons/mingcute/check-line";
 import "./TextField.css";
 
@@ -179,10 +179,10 @@ export function TextField({
         {normalizedVariant === "stepper" ? (
           <span className="text-field__stepper">
             <button type="button" onClick={increaseStepper} disabled={disabled} aria-label="증가">
-              <Icon icon={arrowUpLine} />
+              <Icon icon={up} />
             </button>
             <button type="button" onClick={decreaseStepper} disabled={disabled} aria-label="감소">
-              <Icon icon={arrowDownLine} />
+              <Icon icon={down} />
             </button>
           </span>
         ) : null}

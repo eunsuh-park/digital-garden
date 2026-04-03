@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Icon } from '@iconify/react';
-import arrowUpLine from '@iconify-icons/mingcute/arrow-up-line';
-import arrowDownLine from '@iconify-icons/mingcute/arrow-down-line';
+import up from '@iconify-icons/mingcute/arrow-up-line';
+import down from '@iconify-icons/mingcute/arrow-down-line';
 import addLine from '@iconify-icons/mingcute/add-line';
 import { fetchZones, fetchPlants } from '@/shared/api/notionApi';
 import { parseZonesResponse } from '@/entities/zone/lib/notion-schema';
@@ -15,7 +15,7 @@ import { useZones } from '@/app/providers/ZonesContext';
 import { useMapPanelDetail } from '@/app/providers/MapPanelDetailContext';
 import { usePlantsPanelUi, PLANTS_PANEL_DEFAULT_SORT } from '@/app/providers/PlantsPanelUiContext';
 import { getPlantSpeciesKind } from '@/shared/lib/plantSpeciesKind';
-import './PlantsPage.css';
+import './PlantListView.css';
 
 const PLANTS_SORT_OPTIONS = [
   { value: 'name', label: '이름' },
@@ -87,7 +87,7 @@ function PlantsEmbeddedAccordion({ plantsList }) {
               <span className="plants-embedded__group-title">{label}</span>
               <span className="plants-embedded__group-count">{items.length}</span>
               <Icon
-                icon={isOpen ? arrowUpLine : arrowDownLine}
+                icon={isOpen ? up : down}
                 width={18}
                 height={18}
                 className="plants-embedded__group-chevron"
@@ -120,10 +120,10 @@ function PlantsEmbeddedAccordion({ plantsList }) {
 }
 
 /**
- * PG-07: Plants 전체 페이지 - 식물 DB 전체 조회
- * variant="embedded": 하단 시트 — 종(species)별 아코디언 + 타일 (상세는 layouts/PanelDocLayouts)
+ * 식물 목록 (MapSidePanel embedded / 단독 조회)
+ * variant="embedded": 하단 시트 — 종(species)별 아코디언 + 타일
  */
-export default function PlantsPage({ variant = 'default' }) {
+export default function PlantListView({ variant = 'default' }) {
   const { openPlantCreate } = useMapPanelDetail();
   const panelUi = usePlantsPanelUi();
   const ctx = useZones();

@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Icon } from '@iconify/react';
-import arrowUpLine from '@iconify-icons/mingcute/arrow-up-line';
-import arrowDownLine from '@iconify-icons/mingcute/arrow-down-line';
+import up from '@iconify-icons/mingcute/arrow-up-line';
+import down from '@iconify-icons/mingcute/arrow-down-line';
 import arrowLeftLine from '@iconify-icons/mingcute/arrow-left-line';
 import arrowRightLine from '@iconify-icons/mingcute/arrow-right-line';
 import { useZones } from '@/app/providers/ZonesContext';
@@ -14,8 +14,8 @@ import {
   setMapBuilderMode,
   subscribeMapBuilderMode,
 } from '@/shared/lib/mapBuilderMode';
-import TasksPage from '@/pages/Tasks/TasksPage';
-import PlantsPage from '@/pages/Plants/PlantsPage';
+import TaskListView from '@/features/task-list/TaskListView';
+import PlantListView from '@/features/plant-list/PlantListView';
 import {
   MapPanelZoneDetail,
   MapPanelZoneCreate,
@@ -73,7 +73,7 @@ function ZoneTabContent() {
               <span className="map-side-panel__row-label">{label}</span>
               <span className="map-side-panel__row-count">{count}</span>
               <Icon
-                icon={expanded ? arrowUpLine : arrowDownLine}
+                icon={expanded ? up : down}
                 width={16}
                 height={16}
                 className="map-side-panel__row-chevron"
@@ -160,7 +160,7 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
               <Icon icon={collapsed ? arrowRightLine : arrowLeftLine} width={14} height={14} />
             </span>
             <span className="map-side-panel__handle-icon map-side-panel__handle-icon--mobile">
-              <Icon icon={collapsed ? arrowUpLine : arrowDownLine} width={14} height={14} />
+              <Icon icon={collapsed ? up : down} width={14} height={14} />
             </span>
           </span>
         </button>
@@ -261,7 +261,7 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
                   : 'map-side-panel__page-host'
               }
             >
-              <TasksPage variant="embedded" />
+              <TaskListView variant="embedded" />
             </div>
           )}
           {tabFromPath === 'plants' && (
@@ -272,7 +272,7 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
                   : 'map-side-panel__page-host'
               }
             >
-              <PlantsPage variant="embedded" />
+              <PlantListView variant="embedded" />
             </div>
           )}
         </div>

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
-import arrowUpLine from "@iconify-icons/mingcute/arrow-up-line";
-import arrowDownLine from "@iconify-icons/mingcute/arrow-down-line";
+import up from "@iconify-icons/mingcute/arrow-up-line";
+import down from "@iconify-icons/mingcute/arrow-down-line";
 import arrowLeftLine from "@iconify-icons/mingcute/arrow-left-line";
 import arrowRightLine from "@iconify-icons/mingcute/arrow-right-line";
 import "./DatePicker.css";
@@ -176,11 +176,11 @@ export function DatePicker({
             <div className="date-picker__wheel">
               <div className="date-picker__wheel-column">
                 <button type="button" onClick={() => setViewDate(new Date(wheelYear - 1, wheelMonth - 1, wheelDay))}>
-                  <Icon icon={arrowUpLine} />
+                  <Icon icon={up} />
                 </button>
                 <span>{wheelYear}</span>
                 <button type="button" onClick={() => setViewDate(new Date(wheelYear + 1, wheelMonth - 1, wheelDay))}>
-                  <Icon icon={arrowDownLine} />
+                  <Icon icon={down} />
                 </button>
               </div>
               <div className="date-picker__wheel-column">
@@ -188,23 +188,23 @@ export function DatePicker({
                   type="button"
                   onClick={() => setViewDate(new Date(wheelYear, Math.max(0, wheelMonth - 2), wheelDay))}
                 >
-                  <Icon icon={arrowUpLine} />
+                  <Icon icon={up} />
                 </button>
                 <span>{wheelMonth}</span>
                 <button
                   type="button"
                   onClick={() => setViewDate(new Date(wheelYear, Math.min(11, wheelMonth), wheelDay))}
                 >
-                  <Icon icon={arrowDownLine} />
+                  <Icon icon={down} />
                 </button>
               </div>
               <div className="date-picker__wheel-column">
                 <button type="button" onClick={() => setViewDate(new Date(wheelYear, wheelMonth - 1, wheelDay - 1))}>
-                  <Icon icon={arrowUpLine} />
+                  <Icon icon={up} />
                 </button>
                 <span>{wheelDay}</span>
                 <button type="button" onClick={() => setViewDate(new Date(wheelYear, wheelMonth - 1, wheelDay + 1))}>
-                  <Icon icon={arrowDownLine} />
+                  <Icon icon={down} />
                 </button>
               </div>
               <button type="button" className="date-picker__wheel-confirm" onClick={() => applyDate(viewDate)}>

@@ -2,7 +2,7 @@ import './FullPage.css';
 
 /**
  * 전체 페이지 공통 템플릿
- * Tasks, Zones, Plants 페이지에서 공통 사용
+ * task-list / plant-list 뷰, Zones 등에서 공통 사용
  * headerRight: 우측 상단에 표시할 UI (FullPageFilter, FullPageSorter 등)
  * variant="embedded": 하단 시트(MapSidePanel) 등 좁은 영역용 레이아웃
  */

@@ -1,7 +1,7 @@
 import './FullPageSorter.css';
 import { Icon } from '@iconify/react';
-import arrowUpLine from '@iconify-icons/mingcute/arrow-up-line';
-import arrowDownLine from '@iconify-icons/mingcute/arrow-down-line';
+import up from '@iconify-icons/mingcute/arrow-up-line';
+import down from '@iconify-icons/mingcute/arrow-down-line';
 
 /**
  * FullPage 정렬 UI
@@ -47,7 +47,7 @@ export default function FullPageSorter({ options = [], value = {}, onChange, act
         title={currentDir === 'asc' ? '내림차순' : '오름차순'}
       >
         <Icon
-          icon={currentDir === 'asc' ? arrowUpLine : arrowDownLine}
+          icon={currentDir === 'asc' ? up : down}
           width={16}
           height={16}
         />

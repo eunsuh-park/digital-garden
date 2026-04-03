@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Icon } from '@iconify/react';
-import arrowUpLine from '@iconify-icons/mingcute/arrow-up-line';
-import arrowDownLine from '@iconify-icons/mingcute/arrow-down-line';
+import up from '@iconify-icons/mingcute/arrow-up-line';
+import down from '@iconify-icons/mingcute/arrow-down-line';
 import addLine from '@iconify-icons/mingcute/add-line';
 import { fetchTasks, updateTask } from '@/shared/api/notionApi';
 import { parseTasksResponse, TASK_TYPE_LABEL_KO } from '@/entities/task/lib/notion-schema';
@@ -14,7 +14,7 @@ import { useZones } from '@/app/providers/ZonesContext';
 import { useMapPanelDetail } from '@/app/providers/MapPanelDetailContext';
 import { useTasksPanelUi, TASKS_PANEL_DEFAULT_SORT } from '@/app/providers/TasksPanelUiContext';
 import { isTaskOverdue } from '@/shared/lib/taskDates';
-import './TasksPage.css';
+import './TaskListView.css';
 
 const TASKS_FILTERS = [
   { key: 'status', label: '상태', options: [{ value: 'progress', label: '진행 중' }, { value: 'pending', label: '시작 전' }] },
@@ -93,7 +93,7 @@ function TasksTypeAccordion({ tasks, renderCard }) {
               <span className="tasks-embedded__group-title">{label}</span>
               <span className="tasks-embedded__group-count">{items.length}</span>
               <Icon
-                icon={isOpen ? arrowUpLine : arrowDownLine}
+                icon={isOpen ? up : down}
                 width={18}
                 height={18}
                 className="tasks-embedded__group-chevron"
@@ -113,10 +113,10 @@ function TasksTypeAccordion({ tasks, renderCard }) {
 }
 
 /**
- * PG-02, PG-08: 할 일 전체 페이지
- * variant="embedded": 하단 시트
+ * 할 일 목록 (MapSidePanel embedded / 단독 조회)
+ * variant="embedded": 하단 시트 — ZonesContext 데이터 사용
  */
-export default function TasksPage({ variant = 'default' }) {
+export default function TaskListView({ variant = 'default' }) {
   const { openTaskDetail, openTaskCreate } = useMapPanelDetail();
   const panelUi = useTasksPanelUi();
   const ctx = useZones();

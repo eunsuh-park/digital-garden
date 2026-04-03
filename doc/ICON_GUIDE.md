@@ -65,12 +65,12 @@
 - JSX ??
   ```jsx
   import { Icon } from '@iconify/react';
-  import arrowUpLine from '@iconify-icons/mingcute/arrow-up-line';
-  import arrowDownLine from '@iconify-icons/mingcute/arrow-down-line';
+  import up from '@iconify-icons/mingcute/arrow-up-line';
+  import down from '@iconify-icons/mingcute/arrow-down-line';
 
   <button className="full-page-sorter__dir" ...>
     <Icon
-      icon={currentDir === 'asc' ? arrowUpLine : arrowDownLine}
+      icon={currentDir === 'asc' ? up : down}
       width={16}
       height={16}
     />
