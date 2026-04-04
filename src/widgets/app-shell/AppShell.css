@@ -41,12 +41,24 @@
   overflow-x: hidden;
 }
 
+/* 새 프로젝트 맵 빌더: 레일 옆 본문만 풀블리드 */
+.app-shell__main:has(.project-new-page--map-builder) {
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 @media (min-width: 640px) {
   .app-shell__main {
     padding: 0 1rem;
   }
 
   .app-shell__main:has(.garden-map--stacked) {
+    padding: 0;
+  }
+
+  .app-shell__main:has(.project-new-page--map-builder) {
     padding: 0;
   }
 }
@@ -57,6 +69,10 @@
   }
 
   .app-shell__main:has(.garden-map--stacked) {
+    padding: 0;
+  }
+
+  .app-shell__main:has(.project-new-page--map-builder) {
     padding: 0;
   }
 }

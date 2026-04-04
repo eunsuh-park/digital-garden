@@ -8,6 +8,7 @@ import { MapPanelLayoutProvider } from '@/app/providers/MapPanelLayoutContext';
 import { MapPanelDetailProvider, useMapPanelDetail } from '@/app/providers/MapPanelDetailContext';
 import { useAuth } from '@/app/providers/AuthContext';
 import { ProjectsProvider } from '@/app/providers/ProjectsContext';
+import { ProjectNewMapBuilderUiProvider } from '@/app/providers/ProjectNewMapBuilderUiContext';
 import NavigationRail from './NavigationRail';
 import MapSidePanel from '@/widgets/map-panel/MapSidePanel';
 import AppBar from './AppBar';
@@ -40,26 +41,28 @@ function AppShellWithDetailSync() {
   }
 
   return (
-    <div className="app-shell">
-      <NavigationRail onOpenSettings={handleOpenSettings} onLogout={handleLogout} />
-      <div className="app-shell__body">
-        <AppBar onOpenMenu={() => setDrawerOpen(true)} onOpenSettings={handleOpenSettings} onLogout={handleLogout} />
-        <main className="app-shell__main">
-          <Outlet />
-        </main>
+    <ProjectNewMapBuilderUiProvider>
+      <div className="app-shell">
+        <NavigationRail onOpenSettings={handleOpenSettings} onLogout={handleLogout} />
+        <div className="app-shell__body">
+          <AppBar onOpenMenu={() => setDrawerOpen(true)} onOpenSettings={handleOpenSettings} onLogout={handleLogout} />
+          <main className="app-shell__main">
+            <Outlet />
+          </main>
+        </div>
+        <MapSidePanel
+          collapsed={sectionNavCollapsed}
+          onToggleCollapsed={() => setSectionNavCollapsed((c) => !c)}
+        />
+        <NavDrawer
+          isOpen={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          onOpenSettings={handleOpenSettings}
+          onLogout={handleLogout}
+        />
+        <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       </div>
-      <MapSidePanel
-        collapsed={sectionNavCollapsed}
-        onToggleCollapsed={() => setSectionNavCollapsed((c) => !c)}
-      />
-      <NavDrawer
-        isOpen={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        onOpenSettings={handleOpenSettings}
-        onLogout={handleLogout}
-      />
-      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
-    </div>
+    </ProjectNewMapBuilderUiProvider>
   );
 }
 

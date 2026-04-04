@@ -8,6 +8,7 @@ import arrowRightLine from '@iconify-icons/mingcute/arrow-right-line';
 import { useZones } from '@/app/providers/ZonesContext';
 import { useMapPanelDetail } from '@/app/providers/MapPanelDetailContext';
 import { useToast } from '@/app/providers/ToastContext';
+import { useProjectNewMapBuilderUi } from '@/app/providers/ProjectNewMapBuilderUiContext';
 import { groupZonesByColor, labelForColorGroup } from '@/shared/lib/zonesGroup';
 import {
   getMapBuilderMode,
@@ -24,6 +25,7 @@ import {
   MapPanelTaskCreate,
   MapPanelTaskDetail,
 } from './MapPanelDetailViews';
+import MapBuilderInspector from '@/widgets/map-builder/MapBuilderInspector';
 import './MapSidePanel.css';
 
 function ZoneTabContent() {
@@ -110,11 +112,16 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
   const { zones, tasks, plants, loading } = useZones();
   const { detail, closeDetail, closeAllDetail } = useMapPanelDetail();
   const { showToast } = useToast();
+  const { mapBuilderOpen } = useProjectNewMapBuilderUi();
   const [mapBuilderMode, setMapBuilderModeState] = useState(() => getMapBuilderMode());
 
   useEffect(() => {
     closeAllDetail();
   }, [pathname, closeAllDetail]);
+
+  useEffect(() => {
+    if (mapBuilderOpen) closeAllDetail();
+  }, [mapBuilderOpen, closeAllDetail]);
 
   useEffect(() => {
     return subscribeMapBuilderMode(setMapBuilderModeState);
@@ -145,8 +152,10 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
     .filter(Boolean)
     .join(' ');
 
+  const ariaLabel = mapBuilderOpen ? '맵 빌더 패널' : '구역·할 일·식물 패널';
+
   return (
-    <aside className={asideClass} aria-label="구역·할 일·식물 패널">
+    <aside className={asideClass} aria-label={ariaLabel}>
       {!detail && (
         <button
           type="button"
@@ -170,6 +179,12 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
         className="map-side-panel__surface"
         aria-hidden={collapsedVisual ? true : undefined}
       >
+        {mapBuilderOpen ? (
+          <div className="map-side-panel__body map-side-panel__body--map-builder">
+            <MapBuilderInspector />
+          </div>
+        ) : (
+          <>
         {!detail && (
           <div className="map-side-panel__tabs" role="tablist" aria-label="보기 전환">
             <NavLink
@@ -276,6 +291,8 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
             </div>
           )}
         </div>
+          </>
+        )}
       </div>
     </aside>
   );

@@ -230,6 +230,12 @@
   padding: 0.65rem 0.75rem 0.85rem;
 }
 
+/* 새 프로젝트 맵 빌더: MapBuilderInspector가 스크롤·여백을 자체 관리 */
+.map-side-panel__body--map-builder {
+  padding: 0;
+  overflow: hidden;
+}
+
 .map-side-panel__page-host {
   flex: 1;
   min-height: 0;

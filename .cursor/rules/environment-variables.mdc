@@ -6,7 +6,9 @@ alwaysApply: true
 # Environment variables
 
 - **Never commit real secrets.** `.env.local`, `.env.production`, `.env` with secrets stay gitignored; **`.env.example`** is the shared template (placeholders only).
-- **Browser (Vite)**: only **`VITE_*`** vars (e.g. `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_ORIGIN`). Do not put server secrets in `VITE_`.
-- **Supabase client**: `src/lib/supabase.js` uses **`import.meta.env.VITE_SUPABASE_*`** only — no hardcoded URL/keys.
+- **Vite modes**: `npm run dev` → `development` (loads `.env.development` chain); `npm run build` → `production` (loads `.env.production` chain). See `.env.example` for merge order.
+- **Browser (Vite)**: **`VITE_*`** vars (e.g. `VITE_API_ORIGIN`) and, via `vite.config` `envPrefix`, **`SUPABASE_URL`** / **`SUPABASE_ANON_KEY`** for the Supabase client. Do not put server secrets in client-exposed vars.
+- **Supabase client**: `src/lib/supabase.js` reads **`SUPABASE_URL`** and **`SUPABASE_ANON_KEY`** (with legacy **`VITE_SUPABASE_*`** fallback) — no hardcoded URL/keys.
+- **Dev mock**: `USE_MOCK` or **`VITE_USE_MOCK`** (`true` / `1`) only when **`import.meta.env.DEV`** — uses in-memory auth + `projects` data; real Supabase env not required. Production builds ignore mock.
 - **Server / CLI**: `NOTION_*`, `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_REF` — Vercel env or local `.env.local`, not exposed to the client bundle.
 - **Onboarding**: copy `.env.example` → `.env.local` and fill values; production: set the same names on the host (e.g. Vercel).

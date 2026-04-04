@@ -15,7 +15,9 @@ import "./Select.css";
  *   disabled?: boolean,
  *   visualState?: "default" | "hover" | "active" | "selected",
  *   variant?: "box" | "list",
- *   className?: string
+ *   className?: string,
+ *   "aria-labelledby"?: string,
+ *   "aria-label"?: string,
  * }} props
  */
 export function Select({
@@ -29,6 +31,8 @@ export function Select({
   visualState = "default",
   variant = "box",
   className = "",
+  "aria-labelledby": ariaLabelledBy,
+  "aria-label": ariaLabel,
 }) {
   const isControlled = value !== undefined;
   const [internalValue, setInternalValue] = useState(defaultValue);
@@ -66,6 +70,8 @@ export function Select({
         disabled={disabled}
         aria-haspopup="listbox"
         aria-expanded={open}
+        aria-labelledby={ariaLabelledBy}
+        aria-label={ariaLabel}
       >
         <span className={`select__text ${showSelectedStyle ? "select__text--value" : ""}`}>
           {selectedOption?.label || placeholder}

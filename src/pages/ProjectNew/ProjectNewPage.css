@@ -8,6 +8,16 @@
   background: var(--color-bg);
 }
 
+/* 2단계 맵 빌더: 본문 영역을 꽉 채움 */
+.project-new-page--map-builder {
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 0;
+  min-height: 0;
+  height: 100%;
+  flex: 1;
+}
+
 .project-new-page__card {
   position: relative;
   width: 100%;
@@ -143,14 +153,9 @@
   border-radius: 10px;
 }
 
-.project-new-page__tab-group {
-  gap: 8px;
-}
-
-.project-new-page__tab-group--space {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+.project-new-page__space-select {
+  width: 100%;
+  --select-width: 100%;
 }
 
 .project-new-page__actions {

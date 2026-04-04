@@ -58,7 +58,10 @@ export function ZonesProvider({ children }) {
       setTasks(tasksList);
       setPlants(plantsList);
     } catch (e) {
-      if (requestIdRef.current === requestId) setError(e.message);
+      if (requestIdRef.current === requestId) {
+        const msg = e instanceof Error ? e.message : String(e);
+        setError(msg || '데이터를 불러오지 못했습니다.');
+      }
     } finally {
       if (requestIdRef.current === requestId && !silent) {
         setLoading(false);

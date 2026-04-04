@@ -30,15 +30,21 @@ export async function signIn(email, password) {
   return { data, error: null };
 }
 
+/** 로컬 세션이 없을 때는 getUser() 대신 조용히 null (콘솔의 "Auth session missing!" 방지) */
 export async function getCurrentUser() {
-  const { data, error } = await supabase.auth.getUser();
-
-  if (error) {
-    console.error('유저 조회 실패:', error.message);
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session?.user) {
     return null;
   }
 
-  console.log('현재 유저:', data.user);
+  const { data, error } = await supabase.auth.getUser();
+  if (error) {
+    console.error('유저 조회 실패:', error.message);
+    return session.user;
+  }
+
   return data.user;
 }
 

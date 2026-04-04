@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import ButtonTabGroup from '@/shared/ui/button-tab/ButtonTab';
 import TextButton from '@/shared/ui/text-button/TextButton';
 import TextField from '@/shared/ui/text-field/TextField';
+import Select from '@/shared/ui/select/Select';
 import { useToast } from '@/app/providers/ToastContext';
 import { useProjects } from '@/app/providers/ProjectsContext';
 import { createProject } from '@/shared/lib/createProject';
@@ -11,10 +11,9 @@ import {
   saveProjectWizardDraft,
   clearProjectWizardDraft,
 } from '@/shared/lib/projectWizardDraft';
-import {
-  PROJECT_SPACE_SIZE_LABEL_KO,
-  PROJECT_SPACE_SIZE_TAB_ITEMS,
-} from '@/shared/lib/projectSpaceSize';
+import { PROJECT_SPACE_SIZE_TAB_ITEMS } from '@/shared/lib/projectSpaceSize';
+import MapBuilderWorkspace from '@/widgets/map-builder/MapBuilderWorkspace';
+import { useProjectNewMapBuilderUi } from '@/app/providers/ProjectNewMapBuilderUiContext';
 import './ProjectNewPage.css';
 
 const STEPS = ['기본 정보', '맵·구역'];
@@ -26,6 +25,7 @@ export default function ProjectNewPage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { reload: reloadProjects } = useProjects();
+  const { setMapBuilderOpen } = useProjectNewMapBuilderUi();
 
   const [step, setStep] = useState(0);
   const [name, setName] = useState('');
@@ -45,6 +45,11 @@ export default function ProjectNewPage() {
   useEffect(() => {
     saveProjectWizardDraft({ name, space, spaceDescription });
   }, [name, space, spaceDescription]);
+
+  useEffect(() => {
+    setMapBuilderOpen(step === 1);
+    return () => setMapBuilderOpen(false);
+  }, [step, setMapBuilderOpen]);
 
   const setNameClamped = (v) => setName(String(v ?? '').slice(0, MAX_NAME_LEN));
   const setSpaceDescriptionClamped = (v) =>
@@ -69,7 +74,8 @@ export default function ProjectNewPage() {
         space_description: trimmedDesc || null,
       });
       if (error) {
-        showToast(error.message || '프로젝트를 만들지 못했습니다.');
+        const msg = [error.message, error.details, error.hint].filter(Boolean).join(' — ');
+        showToast(msg || '프로젝트를 만들지 못했습니다.');
         return;
       }
       clearProjectWizardDraft();
@@ -85,10 +91,17 @@ export default function ProjectNewPage() {
     }
   }
 
-  const spaceLabel = space ? PROJECT_SPACE_SIZE_LABEL_KO[space] ?? space : '';
-
   return (
-    <div className="project-new-page">
+    <div className={`project-new-page${step === 1 ? ' project-new-page--map-builder' : ''}`}>
+      {step === 1 ? (
+        <MapBuilderWorkspace
+          projectTitle={name.trim() || '새 프로젝트'}
+          onBack={() => setStep(0)}
+          onSaveAndContinue={handleCreate}
+          saving={saving}
+          saveDisabled={!step1Valid}
+        />
+      ) : (
       <div className="project-new-page__card">
         <div className="project-new-page__accent" aria-hidden />
         <header className="project-new-page__header">
@@ -109,8 +122,7 @@ export default function ProjectNewPage() {
           </ol>
         </header>
 
-        {step === 0 ? (
-          <form className="project-new-page__form" onSubmit={handleNext}>
+        <form className="project-new-page__form" onSubmit={handleNext}>
             <div className="project-new-page__field">
               <TextField
                 label="프로젝트 명"
@@ -129,15 +141,17 @@ export default function ProjectNewPage() {
             </div>
 
             <div className="project-new-page__field">
-              <span className="project-new-page__field-label">
+              <span className="project-new-page__field-label" id="project-new-space-label">
                 공간 넓이<span className="project-new-page__required">*</span>
               </span>
-              <ButtonTabGroup
-                items={PROJECT_SPACE_SIZE_TAB_ITEMS}
+              <Select
+                options={PROJECT_SPACE_SIZE_TAB_ITEMS}
                 value={space}
                 onChange={setSpace}
                 size="m"
-                className="project-new-page__tab-group project-new-page__tab-group--space"
+                placeholder="공간 넓이를 선택하세요"
+                className="project-new-page__space-select"
+                aria-labelledby="project-new-space-label"
               />
             </div>
 
@@ -173,44 +187,8 @@ export default function ProjectNewPage() {
               />
             </div>
           </form>
-        ) : (
-          <div className="project-new-page__panel">
-            <p className="project-new-page__lead">
-              <strong>{name.trim() || '프로젝트'}</strong>
-              <span className="project-new-page__lead-sep"> · </span>
-              {spaceLabel}
-            </p>
-            {spaceDescription.trim() ? (
-              <p className="project-new-page__lead-desc">{spaceDescription.trim()}</p>
-            ) : null}
-            <div className="project-new-page__placeholder" role="status">
-              <p className="project-new-page__placeholder-title">맵·구역 구성</p>
-              <p className="project-new-page__placeholder-desc">
-                다음 단계에서 SVG 맵과 구역(Zone)을 연결할 예정입니다. 지금은 저장만 하면 대시보드·지도에서 이어갈 수
-                있어요.
-              </p>
-            </div>
-            <div className="project-new-page__actions project-new-page__actions--footer">
-              <button
-                type="button"
-                className="project-new-page__link-secondary project-new-page__link-as-btn"
-                onClick={() => setStep(0)}
-              >
-                이전
-              </button>
-              <TextButton
-                label={saving ? '저장 중…' : '프로젝트 저장'}
-                htmlType="button"
-                styleType="primary"
-                size="m"
-                disabled={saving || !step1Valid}
-                className="project-new-page__btn-primary"
-                onClick={handleCreate}
-              />
-            </div>
-          </div>
-        )}
       </div>
+      )}
     </div>
   );
 }

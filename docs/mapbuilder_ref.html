@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NowGarden Map Builder - PC</title>
+  <style>
+    :root {
+      --bg: #f5f0ea;
+      --panel: #fbf9f6;
+      --panel-2: #f2ede7;
+      --line: #e4ddd4;
+      --text: #2f2b27;
+      --sub: #7e7469;
+      --green: #8e9b6e;
+      --green-2: #c8cfad;
+      --green-3: #dae1c8;
+      --mint: #cad3c9;
+      --sand: #e9dfbc;
+      --purple: #6c4db2;
+      --purple-soft: #eee7fb;
+      --shadow: 0 10px 30px rgba(57, 44, 28, 0.08);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-width: 1440px;
+    }
+
+    .app {
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 96px 1fr 340px;
+      gap: 22px;
+      padding: 20px;
+    }
+
+    .leftbar,
+    .rightbar,
+    .canvas-shell {
+      background: transparent;
+    }
+
+    .leftbar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px 0;
+    }
+
+    .logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 20px;
+      display: grid;
+      place-items: center;
+      color: var(--green);
+      margin-bottom: 20px;
+    }
+
+    .logo svg { width: 48px; height: 48px; }
+
+    .garden-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 80px;
+      width: 100%;
+      align-items: center;
+    }
+
+    .garden-card,
+    .garden-add {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      display: grid;
+      place-items: center;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+    }
+
+    .garden-card.active {
+      background: #a8b48b;
+      border-color: #a8b48b;
+      color: white;
+    }
+
+    .garden-label {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--sub);
+      text-align: center;
+    }
+
+    .left-bottom {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      align-items: center;
+      padding-bottom: 10px;
+      color: var(--green);
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      color: inherit;
+    }
+
+    .center {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: 76px 1fr 156px;
+      gap: 16px;
+    }
+
+    .topbar {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+    }
+
+    .top-left {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      min-width: 0;
+    }
+
+    .title-group h1 {
+      font-size: 20px;
+      margin: 0;
+      font-weight: 700;
+    }
+
+    .title-group p {
+      margin: 3px 0 0;
+      font-size: 12px;
+      color: var(--sub);
+    }
+
+    .mode-tabs {
+      display: flex;
+      gap: 8px;
+      background: var(--panel-2);
+      padding: 6px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+    }
+
+    .mode-tab {
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--sub);
+      font-weight: 600;
+    }
+
+    .mode-tab.active {
+      background: white;
+      color: var(--purple);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .top-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .ghost-btn,
+    .primary-btn,
+    .status-pill {
+      height: 42px;
+      border-radius: 999px;
+      padding: 0 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      background: white;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .status-pill {
+      background: #f7fbf1;
+      color: #55743f;
+      border-color: #d9e7c5;
+    }
+
+    .primary-btn {
+      background: var(--purple);
+      color: white;
+      border-color: var(--purple);
+    }
+
+    .canvas-shell {
+      position: relative;
+      background: linear-gradient(180deg, #f7f3ee 0%, #f3ede5 100%);
+      border: 1px solid var(--line);
+      border-radius: 34px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .canvas-toolbar-top {
+      position: absolute;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.88);
+      border: 1px solid rgba(228,221,212,0.9);
+      box-shadow: var(--shadow);
+      border-radius: 999px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      backdrop-filter: blur(10px);
+      z-index: 3;
+    }
+
+    .mini-chip {
+      height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: white;
+      border: 1px solid var(--line);
+      color: var(--sub);
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .canvas-title {
+      position: absolute;
+      top: 86px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 17px;
+      font-weight: 700;
+      z-index: 2;
+    }
+
+    .canvas {
+      position: relative;
+      width: min(820px, 92%);
+      aspect-ratio: 1.05 / 1;
+      border-radius: 42px;
+      background:
+        linear-gradient(to right, transparent 0, transparent calc(50% - 0.5px), rgba(255,255,255,0.18) calc(50% - 0.5px), rgba(255,255,255,0.18) calc(50% + 0.5px), transparent calc(50% + 0.5px), transparent 100%),
+        linear-gradient(to bottom, rgba(255,255,255,0.14) 1px, transparent 1px),
+        linear-gradient(to right, rgba(255,255,255,0.14) 1px, transparent 1px),
+        #cfd4b6;
+      background-size: 100% 100%, 48px 48px, 48px 48px, auto;
+      overflow: hidden;
+    }
+
+    .lot-border {
+      position: absolute;
+      inset: 52px 80px 56px 80px;
+      border-radius: 52px;
+      background: rgba(255,255,255,0.08);
+      outline: 2px dashed rgba(122, 132, 96, 0.32);
+      outline-offset: -10px;
+    }
+
+    .main-house {
+      position: absolute;
+      width: 280px;
+      height: 250px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -42%);
+      background: var(--sand);
+      border-radius: 24px;
+      box-shadow: inset 0 0 0 1px rgba(123, 108, 74, 0.08);
+      z-index: 1;
+    }
+
+    .roof {
+      position: absolute;
+      width: 180px;
+      height: 40px;
+      left: 50%;
+      top: calc(50% - 150px);
+      transform: translateX(-50%);
+      background: var(--mint);
+      border-radius: 18px;
+      z-index: 1;
+    }
+
+    .path {
+      position: absolute;
+      width: 34px;
+      height: 240px;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.85);
+      z-index: 0;
+    }
+
+    .tree, .bush {
+      position: absolute;
+      z-index: 1;
+    }
+
+    .tree .crown {
+      width: 118px;
+      height: 118px;
+      background: #368c3d;
+      clip-path: polygon(50% 0%, 100% 70%, 82% 70%, 100% 100%, 0 100%, 18% 70%, 0 70%);
+      border-radius: 18px;
+      filter: drop-shadow(0 8px 6px rgba(34, 85, 40, 0.15));
+    }
+
+    .tree .trunk {
+      width: 30px;
+      height: 72px;
+      background: #754214;
+      border-radius: 0 0 14px 14px;
+      margin: -10px auto 0;
+    }
+
+    .bush .leaf {
+      width: 40px;
+      height: 58px;
+      background: #2e9642;
+      border-radius: 50% 50% 45% 45%;
+      position: relative;
+    }
+
+    .bush .stick {
+      width: 10px;
+      height: 22px;
+      background: #754214;
+      border-radius: 0 0 6px 6px;
+      margin: -4px auto 0;
+    }
+
+    .tree.tl { top: 92px; left: 120px; }
+    .tree.tr { top: 98px; right: 120px; }
+    .tree.bl { bottom: 72px; left: 174px; }
+    .tree.br { bottom: 80px; right: 178px; }
+
+    .tree.small .crown { width: 82px; height: 82px; clip-path: circle(50% at 50% 50%); }
+    .tree.small .trunk { width: 20px; height: 58px; }
+    .tree.small.mid { right: 245px; top: 310px; }
+    .tree.small.back { left: 192px; top: 86px; }
+
+    .hedge-left, .hedge-right {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 1;
+    }
+
+    .hedge-left { left: 150px; top: 220px; }
+    .hedge-right { right: 150px; top: 210px; }
+
+    .selection {
+      position: absolute;
+      border: 2px solid var(--purple);
+      border-radius: 20px;
+      z-index: 2;
+      box-shadow: 0 0 0 4px rgba(108, 77, 178, 0.1);
+    }
+
+    .selection.house {
+      width: 296px;
+      height: 266px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -42%);
+    }
+
+    .handle {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: white;
+      border: 2px solid var(--purple);
+      border-radius: 50%;
+    }
+
+    .h1 { left: -6px; top: -6px; }
+    .h2 { right: -6px; top: -6px; }
+    .h3 { left: -6px; bottom: -6px; }
+    .h4 { right: -6px; bottom: -6px; }
+    .h5 {
+      left: 50%;
+      top: -24px;
+      transform: translateX(-50%);
+      width: 14px;
+      height: 14px;
+      background: var(--purple-soft);
+    }
+
+    .obj-label {
+      position: absolute;
+      top: -42px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(47, 43, 39, 0.92);
+      color: white;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .canvas-bottom-actions {
+      position: absolute;
+      right: 24px;
+      bottom: 22px;
+      display: flex;
+      gap: 10px;
+      z-index: 3;
+    }
+
+    .fab {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.88);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      display: grid;
+      place-items: center;
+      color: var(--purple);
+      backdrop-filter: blur(8px);
+    }
+
+    .bottom-area {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: start;
+      gap: 18px;
+    }
+
+    .tool-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+    }
+
+    .toolbars {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      box-shadow: var(--shadow);
+      padding: 8px 10px;
+      min-height: 58px;
+    }
+
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-right: 10px;
+      margin-right: 4px;
+      border-right: 1px solid var(--line);
+    }
+
+    .toolbar-group:last-child {
+      border-right: 0;
+      margin-right: 0;
+      padding-right: 0;
+    }
+
+    .tool {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      display: grid;
+      place-items: center;
+      color: #5f564c;
+      position: relative;
+      background: transparent;
+    }
+
+    .tool.active {
+      background: #d9dec3;
+      color: #4e5a2d;
+    }
+
+    .tool:hover::after {
+      content: attr(data-tip);
+      position: absolute;
+      bottom: -34px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #2f2b27;
+      color: #fff;
+      padding: 5px 8px;
+      border-radius: 8px;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .selectbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dropdown {
+      min-width: 230px;
+      height: 46px;
+      border-radius: 12px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      color: #5f564c;
+    }
+
+    .save-wrap {
+      padding-top: 4px;
+    }
+
+    .save-btn {
+      height: 54px;
+      padding: 0 28px;
+      border-radius: 999px;
+      background: var(--purple);
+      color: white;
+      border: 0;
+      font-size: 16px;
+      font-weight: 700;
+      box-shadow: 0 12px 24px rgba(108, 77, 178, 0.24);
+    }
+
+    .rightbar {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .right-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      padding: 16px 16px 8px;
+      gap: 8px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .right-tab {
+      text-align: center;
+      padding: 10px 8px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--sub);
+      border-bottom: 2px solid transparent;
+    }
+
+    .right-tab.active {
+      color: var(--purple);
+      border-color: var(--purple);
+    }
+
+    .search-box {
+      margin: 14px 16px 10px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      padding: 12px 14px;
+      color: #9a9084;
+      font-size: 13px;
+    }
+
+    .right-content {
+      overflow: auto;
+      padding: 0 16px 18px;
+    }
+
+    .panel-section {
+      margin-top: 12px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      color: var(--sub);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .library-card,
+    .layer-item,
+    .property-card {
+      background: var(--panel-2);
+      border: 1px solid #ebe4dc;
+      border-radius: 16px;
+    }
+
+    .library-card {
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 40px 1fr 20px;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .thumb {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: #d7dfc2;
+      display: grid;
+      place-items: center;
+      color: #527339;
+      font-size: 18px;
+    }
+
+    .library-card strong,
+    .layer-item strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 3px;
+    }
+
+    .library-card span,
+    .layer-item span {
+      font-size: 12px;
+      color: var(--sub);
+    }
+
+    .layer-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .layer-item {
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 22px 1fr auto auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .layer-item.active {
+      outline: 2px solid rgba(108,77,178,0.18);
+      background: #f5f0ff;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #c8cfad;
+      justify-self: end;
+    }
+
+    .property-card {
+      padding: 14px;
+      margin-top: 10px;
+    }
+
+    .property-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .badge {
+      height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: white;
+      border: 1px solid var(--line);
+      display: inline-flex;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--purple);
+    }
+
+    .field {
+      margin-bottom: 12px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12px;
+      color: var(--sub);
+      font-weight: 700;
+    }
+
+    .input,
+    .slider,
+    .inline-box {
+      height: 42px;
+      border-radius: 12px;
+      background: white;
+      border: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      font-size: 13px;
+      color: #4d453d;
+    }
+
+    .twocol {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .danger {
+      margin-top: 14px;
+      height: 42px;
+      border-radius: 12px;
+      background: #fff4f4;
+      color: #bb4c4c;
+      border: 1px solid #f0d4d4;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="leftbar">
+      <div class="logo" aria-label="NowGarden logo">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M14 48H50" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+          <path d="M20 45V28" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+          <path d="M31 45V19" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+          <path d="M42 45V31" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+          <path d="M20 28C15 28 12 22 12 18C18 18 23 21 24 27" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M31 19C26 19 23 13 23 9C29 9 34 12 35 18" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M31 28C37 28 41 23 42 17C35 17 30 20 29 27" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M42 31C47 31 51 27 52 22C46 22 41 24 40 30" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+
+      <div class="garden-list">
+        <div>
+          <div class="garden-card active">🔖</div>
+          <div class="garden-label">Garden 1</div>
+        </div>
+        <div class="garden-add">＋</div>
+        <div class="garden-add">＋</div>
+      </div>
+
+      <div class="left-bottom">
+        <div class="icon-btn">⚙</div>
+        <div class="icon-btn">👤</div>
+        <div class="icon-btn">↪</div>
+      </div>
+    </aside>
+
+    <main class="center">
+      <header class="topbar">
+        <div class="top-left">
+          <div class="title-group">
+            <h1>양주 정원</h1>
+            <p>메인 맵 · 마지막 저장 2분 전</p>
+          </div>
+
+          <div class="mode-tabs">
+            <div class="mode-tab active">구조 편집</div>
+            <div class="mode-tab">요소 배치</div>
+            <div class="mode-tab">정보 연결</div>
+          </div>
+        </div>
+
+        <div class="top-right">
+          <div class="ghost-btn">↶</div>
+          <div class="ghost-btn">↷</div>
+          <div class="status-pill">● 저장됨</div>
+          <div class="primary-btn">저장하고 다음 단계</div>
+        </div>
+      </header>
+
+      <section class="canvas-shell">
+        <div class="canvas-toolbar-top">
+          <div class="mini-chip">flip vertically</div>
+          <div class="mini-chip">flip horizontally</div>
+          <div class="mini-chip" data-tip="복제">⧉</div>
+          <div class="mini-chip" data-tip="앞으로">⇡</div>
+          <div class="mini-chip" data-tip="뒤로">⇣</div>
+          <div class="mini-chip" data-tip="잠금">🔒</div>
+          <div class="mini-chip" data-tip="숨김">◐</div>
+          <div class="mini-chip" data-tip="삭제">⌫</div>
+
+        </div>
+
+        <div class="canvas-title">내가 관리하고 싶은 정원을 그려보세요</div>
+
+        <div class="canvas">
+          <div class="lot-border"></div>
+          <div class="roof"></div>
+          <div class="main-house"></div>
+          <div class="path"></div>
+
+          <div class="tree tl">
+            <div class="crown"></div>
+            <div class="trunk"></div>
+          </div>
+          <div class="tree tr">
+            <div class="crown"></div>
+            <div class="trunk"></div>
+          </div>
+          <div class="tree bl">
+            <div class="crown"></div>
+            <div class="trunk"></div>
+          </div>
+          <div class="tree br">
+            <div class="crown"></div>
+            <div class="trunk"></div>
+          </div>
+          <div class="tree small mid">
+            <div class="crown"></div>
+            <div class="trunk"></div>
+          </div>
+          <div class="tree small back">
+            <div class="crown"></div>
+            <div class="trunk"></div>
+          </div>
+
+          <div class="hedge-left">
+            <div class="bush"><div class="leaf"></div><div class="stick"></div></div>
+            <div class="bush"><div class="leaf"></div><div class="stick"></div></div>
+            <div class="bush"><div class="leaf"></div><div class="stick"></div></div>
+            <div class="bush"><div class="leaf"></div><div class="stick"></div></div>
+            <div class="bush"><div class="leaf"></div><div class="stick"></div></div>
+            <div class="bush"><div class="leaf"></div><div class="stick"></div></div>
+            <div class="bush"><div class="leaf"></div><div class="stick"></div></div>
+          </div>
+
+          <div class="hedge-right">
+            <div class="bush"><div class="leaf"></div><div class="stick"></div></div>
+            <div class="bush"><div class="leaf"></div><div class="stick"></div></div>
+            <div class="bush"><div class="leaf"></div><div class="stick"></div></div>
+            <div class="bush"><div class="leaf"></div><div class="stick"></div></div>
+            <div class="bush"><div class="leaf"></div><div class="stick"></div></div>
+            <div class="bush"><div class="leaf"></div><div class="stick"></div></div>
+            <div class="bush"><div class="leaf"></div><div class="stick"></div></div>
+          </div>
+
+          <div class="selection house">
+            <div class="obj-label">집 · 선택됨</div>
+            <div class="handle h1"></div>
+            <div class="handle h2"></div>
+            <div class="handle h3"></div>
+            <div class="handle h4"></div>
+            <div class="handle h5"></div>
+          </div>
+        </div>
+
+        <div class="canvas-bottom-actions">
+          <div class="fab">⛶</div>
+          <div class="fab">◎</div>
+        </div>
+      </section>
+
+      <section class="bottom-area">
+        <div class="tool-wrap">
+          <div class="toolbars">
+            <div class="toolbar">
+              <div class="toolbar-group">
+                <div class="tool active" data-tip="선택">↖</div>
+                <div class="tool" data-tip="이동">✥</div>
+              </div>
+              <div class="toolbar-group">
+                <div class="tool" data-tip="사각형">□</div>
+                <div class="tool" data-tip="원">◯</div>
+                <div class="tool" data-tip="삼각형">△</div>
+                <div class="tool" data-tip="다각형">⬡</div>
+                <div class="tool" data-tip="선">／</div>
+                <div class="tool" data-tip="자유 그리기">✎</div>
+              </div>
+              <div class="toolbar-group">
+                <div class="tool" data-tip="축소">－</div>
+                <div class="tool" data-tip="확대">＋</div>
+                <div class="tool" data-tip="맞춤 보기">⌂</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="selectbar">
+            <div class="dropdown">
+              <span>섹션 그룹 선택</span>
+              <span>⌄</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="rightbar">
+      <div class="right-tabs">
+        <div class="right-tab">라이브러리</div>
+        <div class="right-tab">레이어</div>
+        <div class="right-tab active">속성</div>
+      </div>
+
+      <div class="search-box">🔍 요소 검색</div>
+
+      <div class="right-content">
+        <div class="panel-section">
+          <div class="section-title">레이어</div>
+          <div class="layer-list">
+            <div class="layer-item active">
+              <div>👁</div>
+              <div>
+                <strong>집</strong>
+                <span>건물 & 부속물</span>
+              </div>
+              <div>🔓</div>
+              <div class="dot"></div>
+            </div>
+            <div class="property-card">
+              <div class="twocol">
+                <div class="field">
+                  <label>이름</label>
+                  <div class="input">100%</div>
+                </div>
+                <div class="field">
+                  <label>설명</label>
+                  <div class="input">집입니다.</div>
+                </div>
+              </div>
+              <div class="twocol">
+                <div class="field">
+                  <label>크기</label>
+                  <div class="input">100%</div>
+                </div>
+                <div class="field">
+                  <label>회전</label>
+                  <div class="input">0°</div>
+                </div>
+              </div>
+              <div class="danger">요소 삭제</div>
+              <div class="primary-btn">저장</div>
+
+            </div>
+            <div class="layer-item">
+              <div>👁</div>
+              <div>
+                <strong>기본 영역</strong>
+                <span>텃밭, 뜰 등</span>
+              </div>
+              <div>🔓</div>
+              <div class="dot"></div>
+            </div>
+            <div class="layer-item">
+              <div>👁</div>
+              <div>
+                <strong>창고</strong>
+                <span>기타 자투리 공간</span>
+              </div>
+              <div>🔒</div>
+              <div class="dot" style="background:#c5d0c4;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-section">
+        </div>
+      </div>
+    </aside>
+  </div>
+</body>
+</html>

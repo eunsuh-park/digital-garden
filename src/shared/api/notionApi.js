@@ -1,7 +1,6 @@
 /**
- * Notion API 프록시 호출 (Vercel Serverless 경유)
- * 로컬: vercel dev 사용 시 /api 동작
- * 콘솔에서 [Notion API] 로그로 연동 상태 확인
+ * Notion API 프록시 호출 (로컬: Vite → /api 프록시, 배포: VITE_API_ORIGIN)
+ * 개발 시 콘솔에 [Notion API] 요청·응답 요약이 출력됩니다.
  */
 const LOG_PREFIX = '[Notion API]';
 
@@ -11,73 +10,72 @@ function joinUrl(origin, path) {
   return o ? `${o}${p}` : p;
 }
 
-async function fetchApi(path, label) {
-  // For GitHub Pages 등 정적 호스팅: VITE_API_ORIGIN을 Vercel 도메인으로 설정하면 됩니다.
-  // 예) VITE_API_ORIGIN=https://<project>.vercel.app
+/**
+ * @param {string} path '/notion-zones' 등 (앞 /api 제외)
+ * @param {string} label 로그용 라벨
+ * @param {RequestInit} [init]
+ */
+async function apiFetch(path, label, init = {}) {
   const apiOrigin = import.meta.env.VITE_API_ORIGIN;
   const url = joinUrl(apiOrigin, `/api${path}`);
-  console.log(`${LOG_PREFIX} 요청: ${label || path} → ${url}`);
-  try {
-    const res = await fetch(url);
-    const contentType = res.headers.get('content-type') || '';
-    const isJson = contentType.includes('application/json');
-    const data = isJson ? await res.json().catch(() => null) : null;
+  const method = (init.method || 'GET').toUpperCase();
+  const t0 = typeof performance !== 'undefined' ? performance.now() : 0;
 
-    // 정적 호스팅에서 /api 요청이 index.html(200)로 떨어지는 케이스를 조기에 감지
-    if (!isJson || data == null) {
-      const hint = apiOrigin
-        ? 'API 응답 형식이 올바르지 않습니다.'
-        : '정적 호스팅에서는 /api가 동작하지 않습니다. `VITE_API_ORIGIN`을 Vercel 도메인으로 설정하세요.';
-      throw new Error(`${hint} (${label || path})`);
-    }
-    if (!res.ok) {
-      console.warn(`${LOG_PREFIX} 실패: ${label || path}`, res.status, data);
-      throw new Error(data.error || `API error: ${res.status}`);
-    }
-    const count = data.results?.length ?? '?';
-    console.log(`${LOG_PREFIX} 성공: ${label || path} (${count}건)`);
-    return data;
-  } catch (e) {
-    console.error(`${LOG_PREFIX} 오류: ${label || path}`, e.message);
-    throw e;
+  if (import.meta.env.DEV) {
+    console.info(`${LOG_PREFIX} ${method} ${label || path} → ${url}`);
   }
+
+  let res;
+  try {
+    res = await fetch(url, init);
+  } catch (e) {
+    const hint =
+      e instanceof TypeError
+        ? '네트워크 오류(연결 실패). 로컬에서는 `npm run dev`로 웹+API를 같이 띄우거나 `npm run dev:api`로 8787 포트를 확인하세요.'
+        : e.message;
+    console.error(`${LOG_PREFIX} 요청 실패: ${label || path}`, e);
+    throw new Error(`${hint} (${label || path})`);
+  }
+
+  const contentType = res.headers.get('content-type') || '';
+  const isJson = contentType.includes('application/json');
+  const data = isJson ? await res.json().catch(() => null) : null;
+
+  if (!isJson || data == null) {
+    const hint = apiOrigin
+      ? 'API 응답 형식이 올바르지 않습니다.'
+      : '정적 호스팅에서는 /api가 동작하지 않습니다. `VITE_API_ORIGIN`을 Vercel 도메인으로 설정하세요.';
+    throw new Error(`${hint} (${label || path})`);
+  }
+
+  if (!res.ok) {
+    const errMsg = data.error || data.message || `HTTP ${res.status}`;
+    console.warn(`${LOG_PREFIX} HTTP ${res.status}: ${label || path}`, data);
+    throw new Error(`${errMsg} (${label || path})`);
+  }
+
+  if (import.meta.env.DEV) {
+    const ms = Math.round(performance.now() - t0);
+    const n = data.results?.length;
+    const extra = n != null ? `, ${n}건` : '';
+    console.info(`${LOG_PREFIX} OK ${res.status} ${label || path} (${ms}ms${extra})`);
+  }
+
+  return data;
+}
+
+async function fetchApi(path, label) {
+  return apiFetch(path, label, { method: 'GET' });
 }
 
 async function mutateApi(path, label, options = {}) {
-  const apiOrigin = import.meta.env.VITE_API_ORIGIN;
-  const url = joinUrl(apiOrigin, `/api${path}`);
-  console.log(`${LOG_PREFIX} 요청: ${label || path} → ${url}`);
-
-  try {
-    const res = await fetch(url, {
-      method: options.method || 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: options.body != null ? JSON.stringify(options.body) : undefined,
-    });
-
-    const contentType = res.headers.get('content-type') || '';
-    const isJson = contentType.includes('application/json');
-    const data = isJson ? await res.json().catch(() => null) : null;
-
-    if (!isJson || data == null) {
-      const hint = apiOrigin
-        ? 'API 응답 형식이 올바르지 않습니다.'
-        : '정적 호스팅에서는 /api가 동작하지 않습니다. `VITE_API_ORIGIN`을 Vercel 도메인으로 설정하세요.';
-      throw new Error(`${hint} (${label || path})`);
-    }
-
-    if (!res.ok) {
-      console.warn(`${LOG_PREFIX} 실패: ${label || path}`, res.status, data);
-      throw new Error(data.error || `API error: ${res.status}`);
-    }
-
-    return data;
-  } catch (e) {
-    console.error(`${LOG_PREFIX} 오류: ${label || path}`, e.message);
-    throw e;
-  }
+  return apiFetch(path, label, {
+    method: options.method || 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: options.body != null ? JSON.stringify(options.body) : undefined,
+  });
 }
 
 export async function fetchSections() {
