@@ -9,6 +9,9 @@ import Popover from './Popover';
 import './GardenMap.css';
 import gardenMapSvg from '@/gardenMap.svg?raw';
 
+/** 구역 클릭 시 자동 줌 강도. 1=기존과 동일, 0.75면 확대 배율이 약 75%(viewBox를 더 넓게) */
+const ZONE_FOCUS_ZOOM_INTENSITY = 0.75;
+
 /**
  * SVG 간이 지도 - 실제 대지를 반영한 핵심 인터페이스
  * CP-04: Zone 좌표/SVG id, hover/click → 팝오버·하이라이트·드로어 연결
@@ -486,8 +489,16 @@ export default function GardenMap({ zones = [], getTasksByZone, getPlantsByZone,
     );
 
     const padding = 48;
-    const targetW = Math.min(orig.w, Math.max(220, bounds.maxX - bounds.minX + padding * 2));
-    const targetH = Math.min(orig.h, Math.max(180, bounds.maxY - bounds.minY + padding * 2));
+    const spanW = bounds.maxX - bounds.minX + padding * 2;
+    const spanH = bounds.maxY - bounds.minY + padding * 2;
+    const targetW = Math.min(
+      orig.w,
+      Math.max(220, spanW / ZONE_FOCUS_ZOOM_INTENSITY)
+    );
+    const targetH = Math.min(
+      orig.h,
+      Math.max(180, spanH / ZONE_FOCUS_ZOOM_INTENSITY)
+    );
     const next = clampViewBox({
       x: bounds.minX - padding,
       y: bounds.minY - padding,

@@ -1,3 +1,20 @@
+.login-page {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.login-page--loading {
+  align-items: center;
+  justify-content: center;
+  min-height: 50dvh;
+}
+
+.login-page--loading p {
+  color: var(--color-text-muted);
+}
+
 .login-page__container {
   min-height: calc(100vh - 60px);
 }

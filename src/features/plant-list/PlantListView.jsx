@@ -3,9 +3,8 @@ import { Icon } from '@iconify/react';
 import up from '@iconify-icons/mingcute/arrow-up-line';
 import down from '@iconify-icons/mingcute/arrow-down-line';
 import addLine from '@iconify-icons/mingcute/add-line';
-import { fetchZones, fetchPlants } from '@/shared/api/notionApi';
-import { parseZonesResponse } from '@/entities/zone/lib/notion-schema';
-import { parsePlantsResponse } from '@/entities/plant/lib/notion-schema';
+import { fetchZones, fetchPlants } from '@/shared/api/gardenApi';
+import { useGardenProjectId } from '@/app/providers/useGardenProjectId';
 import FullPage from '@/shared/ui/full-page/FullPage';
 import FullPageFilter from '@/shared/ui/full-page/FullPageFilter';
 import FullPageSorter from '@/shared/ui/full-page/FullPageSorter';
@@ -127,6 +126,7 @@ export default function PlantListView({ variant = 'default' }) {
   const { openPlantCreate } = useMapPanelDetail();
   const panelUi = usePlantsPanelUi();
   const ctx = useZones();
+  const { projectId, loading: gpLoading, ready: gpReady } = useGardenProjectId();
   const isEmbedded = variant === 'embedded';
 
   const [localFilter, setLocalFilter] = useState({});
@@ -152,10 +152,12 @@ export default function PlantListView({ variant = 'default' }) {
         setLoading(true);
       }
       setError(null);
-      const [zonesRes, plantsRes] = await Promise.all([fetchZones(), fetchPlants()]);
-
-      const plantsList = parsePlantsResponse(plantsRes);
-      const zonesList = parseZonesResponse(zonesRes);
+      if (!projectId) {
+        setPlants([]);
+        setZonesLocal([]);
+        return;
+      }
+      const [zonesList, plantsList] = await Promise.all([fetchZones(projectId), fetchPlants(projectId)]);
       setPlants(plantsList);
       setZonesLocal(zonesList);
     } catch (e) {
@@ -165,17 +167,18 @@ export default function PlantListView({ variant = 'default' }) {
         setLoading(false);
       }
     }
-  }, []);
+  }, [projectId]);
 
   useEffect(() => {
     if (isEmbedded) return undefined;
+    if (!gpReady || gpLoading) return undefined;
     loadStandalone();
     return undefined;
-  }, [isEmbedded, loadStandalone]);
+  }, [isEmbedded, loadStandalone, gpReady, gpLoading]);
 
   const plantsData = isEmbedded ? ctx.plants : plants;
   const zonesData = isEmbedded ? ctx.zones : zonesLocal;
-  const loadingData = isEmbedded ? ctx.loading : loading;
+  const loadingData = isEmbedded ? ctx.loading : loading || gpLoading || !gpReady;
   const errorData = isEmbedded ? ctx.error : error;
 
   const zoneMap = useMemo(
@@ -295,8 +298,8 @@ export default function PlantListView({ variant = 'default' }) {
     >
       <div className="plants-page plants-page--standalone">
         <div className="plants-page__scroll plants-page__scroll--standalone">
-        <p className="notion-db-badge" aria-label="연동된 Notion DB">
-          Notion DB: Zones(구역) · 식물
+        <p className="notion-db-badge" aria-label="데이터 출처">
+          Supabase · 프로젝트별 구역·식물
         </p>
         <div className="plants-page__sticky-top">
           <div className="plants-page__controls">

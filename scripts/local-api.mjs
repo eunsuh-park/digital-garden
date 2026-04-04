@@ -2,7 +2,9 @@ import http from 'node:http';
 import { URL } from 'node:url';
 import dotenv from 'dotenv';
 
+// Vite는 .env.local을 읽지만, Node 스크립트는 기본이 .env만이라 로컬 전용 설정이 빠지면 Notion 오류가 납니다.
 dotenv.config();
+dotenv.config({ path: '.env.local', override: true });
 
 const PORT = Number(process.env.LOCAL_API_PORT || 8787);
 const NOTION_VERSION = '2022-06-28';
@@ -53,6 +55,8 @@ async function queryNotionDatabase(databaseId) {
 }
 
 const routes = {
+  // 프론트(notionApi.js)는 구역을 /api/notion-zones 로 호출합니다 (Vercel: api/notion-zones.js).
+  '/api/notion-zones': () => queryNotionDatabase(process.env.NOTION_DATABASE_ID_SECTIONS),
   '/api/notion-locations': () => queryNotionDatabase(process.env.NOTION_DATABASE_ID_SECTIONS),
   '/api/notion-sections': () => queryNotionDatabase(process.env.NOTION_DATABASE_ID_SECTIONS),
   '/api/notion-tasks': () => queryNotionDatabase(process.env.NOTION_DATABASE_ID_TASKS),

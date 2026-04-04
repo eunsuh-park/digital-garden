@@ -12,10 +12,16 @@ export function AuthProvider({ children }) {
     let isMounted = true;
 
     async function bootstrapAuth() {
-      const user = await getCurrentUser();
-      if (!isMounted) return;
-      setCurrentUser(user ?? null);
-      setIsAuthReady(true);
+      try {
+        const user = await getCurrentUser();
+        if (!isMounted) return;
+        setCurrentUser(user ?? null);
+      } catch (e) {
+        console.error('[Auth] 세션 확인 실패', e);
+        if (isMounted) setCurrentUser(null);
+      } finally {
+        if (isMounted) setIsAuthReady(true);
+      }
     }
 
     bootstrapAuth();

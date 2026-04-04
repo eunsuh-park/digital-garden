@@ -14,7 +14,7 @@ import {
   deletePlant,
   deleteTask,
   deleteZone,
-} from '@/shared/api/notionApi';
+} from '@/shared/api/gardenApi';
 import { useToast } from '@/app/providers/ToastContext';
 import { TASK_TYPE_KEYS, TASK_TYPE_LABEL_KO } from '@/entities/task/lib/notion-schema';
 import searchLine from '@iconify-icons/mingcute/search-line';
@@ -23,7 +23,7 @@ import edit2Line from '@iconify-icons/mingcute/edit-2-line';
 import closeLine from '@iconify-icons/mingcute/close-line';
 import './panel-view.css';
 
-/** Notion 관계에서 온 다중 ID + 대표 zone_id를 중복 없이 순서 유지 */
+/** 다중 구역 ID + 대표 zone_id를 중복 없이 순서 유지 */
 function uniqueZoneIds(multi, primary) {
   const ids = [...(Array.isArray(multi) ? multi : []), primary].filter(Boolean);
   const seen = new Set();
@@ -84,7 +84,7 @@ function ConfirmDeleteDialog({
 
 /** @param {{ zone: object, onBack: () => void }} props */
 export function MapPanelZoneDetail({ zone, onBack }) {
-  const { zones, tasks, plants, reload } = useZones();
+  const { zones, tasks, plants, reload, projectId } = useZones();
   const { openPlantDetail, openTaskDetail } = useMapPanelDetail();
   const { showToast } = useToast();
 
@@ -133,7 +133,7 @@ export function MapPanelZoneDetail({ zone, onBack }) {
     try {
       const name = (draftName || '').trim();
       const descriptionValue = (draftDescription || '').trim();
-      await updateZone(currentZone.id, { name, description: descriptionValue });
+      await updateZone(projectId, currentZone.id, { name, description: descriptionValue });
       await reload();
       setIsEditing(false);
     } catch (e) {
@@ -279,7 +279,7 @@ export function MapPanelZoneDetail({ zone, onBack }) {
       <ConfirmDeleteDialog
         open={deleteOpen}
         title="삭제 확인"
-        message={`구역 "${currentZone?.name}"을(를) 삭제할까요? (Notion에서도 삭제됩니다)`}
+        message={`구역 "${currentZone?.name}"을(를) 삭제할까요?`}
         confirmLabel="삭제"
         cancelLabel="취소"
         deleting={deleting}
@@ -290,7 +290,7 @@ export function MapPanelZoneDetail({ zone, onBack }) {
           if (deleting) return;
           setDeleting(true);
           try {
-            await deleteZone(currentZone.id);
+            await deleteZone(projectId, currentZone.id);
             await reload();
             showToast('구역이 삭제되었습니다.');
             setDeleteOpen(false);
@@ -310,7 +310,7 @@ const LOCATION_CREATE_COLORS = ['초록', '연두', '노랑', '파랑', '보라'
 
 /** @param {{ onBack: () => void }} props */
 export function MapPanelZoneCreate({ onBack }) {
-  const { reload } = useZones();
+  const { reload, projectId } = useZones();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [color, setColor] = useState('초록');
@@ -323,7 +323,7 @@ export function MapPanelZoneCreate({ onBack }) {
     setSaving(true);
     setSaveError(null);
     try {
-      await createZone({
+      await createZone(projectId, {
         name: trimmed,
         description: description.trim(),
         color,
@@ -414,7 +414,7 @@ const PLANT_SPECIES_OPTIONS = ['나무', '풀', '꽃'];
 
 /** 할 일 생성(상세와 동일 툴바·폼 레이아웃) */
 export function MapPanelTaskCreate({ onBack }) {
-  const { zones, plants, reload } = useZones();
+  const { zones, plants, reload, projectId } = useZones();
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
   const [taskType, setTaskType] = useState('Observation');
@@ -488,7 +488,7 @@ export function MapPanelTaskCreate({ onBack }) {
     setSaving(true);
     setSaveError(null);
     try {
-      await createTask({
+      await createTask(projectId, {
         title: t,
         notes: notes.trim(),
         task_type: taskType,
@@ -746,7 +746,7 @@ export function MapPanelTaskCreate({ onBack }) {
 
 /** 식물 생성(상세와 동일 툴바·폼 레이아웃) */
 export function MapPanelPlantCreate({ onBack }) {
-  const { zones, reload } = useZones();
+  const { zones, reload, projectId } = useZones();
   const [name, setName] = useState('');
   const [species, setSpecies] = useState('나무');
   const [category, setCategory] = useState('');
@@ -790,7 +790,7 @@ export function MapPanelPlantCreate({ onBack }) {
     setSaving(true);
     setSaveError(null);
     try {
-      await createPlant({
+      await createPlant(projectId, {
         name: v,
         species: species.trim(),
         category: category.trim(),
@@ -988,7 +988,7 @@ export function MapPanelPlantCreate({ onBack }) {
 
 /** @param {{ task: object, onBack: () => void, zoneMap: Record<string, object>, plantMap: Record<string, object>, taskTitleMap: Record<string, string> }} props */
 export function MapPanelTaskDetail({ task, onBack, zoneMap, plantMap, taskTitleMap: _taskTitleMap }) {
-  const { tasks: allTasks, zones, plants, reload } = useZones();
+  const { tasks: allTasks, zones, plants, reload, projectId } = useZones();
   const { openZoneDetail, openPlantDetail, openTaskDetail } = useMapPanelDetail();
   const { showToast } = useToast();
 
@@ -1138,7 +1138,7 @@ export function MapPanelTaskDetail({ task, onBack, zoneMap, plantMap, taskTitleM
     setSaveError(null);
     try {
       const difficulty = DIFFICULTY_ORDER[draftDifficultyIdx] ?? 'Easy';
-      await updateTask(task.id, {
+      await updateTask(projectId, task.id, {
         title: t,
         notes: draftNotes,
         task_type: draftTaskType,
@@ -1428,7 +1428,7 @@ export function MapPanelTaskDetail({ task, onBack, zoneMap, plantMap, taskTitleM
       <ConfirmDeleteDialog
         open={deleteOpen}
         title="삭제 확인"
-        message={`이 할 일을 삭제할까요? (Notion에서도 삭제됩니다)`}
+        message="이 할 일을 삭제할까요?"
         confirmLabel="삭제"
         cancelLabel="취소"
         deleting={deleting}
@@ -1439,7 +1439,7 @@ export function MapPanelTaskDetail({ task, onBack, zoneMap, plantMap, taskTitleM
           if (deleting) return;
           setDeleting(true);
           try {
-            await deleteTask(task.id);
+            await deleteTask(projectId, task.id);
             await reload();
             showToast('할 일이 삭제되었습니다.');
             setDeleteOpen(false);
@@ -1457,7 +1457,7 @@ export function MapPanelTaskDetail({ task, onBack, zoneMap, plantMap, taskTitleM
 
 /** @param {{ plant: object, onBack: () => void, zoneMap: Record<string, object> }} props */
 export function MapPanelPlantDetail({ plant, onBack, zoneMap }) {
-  const { zones, reload } = useZones();
+  const { zones, reload, projectId } = useZones();
   const { showToast } = useToast();
   const { openZoneDetail } = useMapPanelDetail();
   const linkedZone = plant.zone_id ? zoneMap[plant.zone_id] : null;
@@ -1536,7 +1536,7 @@ export function MapPanelPlantDetail({ plant, onBack, zoneMap }) {
     setSaving(true);
     setSaveError(null);
     try {
-      await updatePlant(plant.id, {
+      await updatePlant(projectId, plant.id, {
         name: v,
         species: draftSpecies,
         status: draftStatus,
@@ -1752,7 +1752,7 @@ export function MapPanelPlantDetail({ plant, onBack, zoneMap }) {
       <ConfirmDeleteDialog
         open={deleteOpen}
         title="삭제 확인"
-        message={`이 식물을 삭제할까요? (Notion에서도 삭제됩니다)`}
+        message="이 식물을 삭제할까요?"
         confirmLabel="삭제"
         cancelLabel="취소"
         deleting={deleting}
@@ -1763,7 +1763,7 @@ export function MapPanelPlantDetail({ plant, onBack, zoneMap }) {
           if (deleting) return;
           setDeleting(true);
           try {
-            await deletePlant(plant.id);
+            await deletePlant(projectId, plant.id);
             await reload();
             showToast('식물이 삭제되었습니다.');
             setDeleteOpen(false);

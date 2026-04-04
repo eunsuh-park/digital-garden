@@ -13,6 +13,15 @@ let mockSessionActive = true;
 
 let mockProjects = [
   {
+    id: 999001,
+    name: '데모 정원 (샘플)',
+    space_size: 'medium',
+    space_description: 'USE_MOCK일 때 gardenDemoSeed와 같은 예시 구역·할 일·식물을 씁니다.',
+    owner_id: null,
+    is_demo: true,
+    created_at: '2025-12-01T00:00:00.000Z',
+  },
+  {
     id: '11111111-1111-1111-1111-111111111111',
     name: '모의 텃밭 (USE_MOCK)',
     space_size: 'medium',

@@ -6,7 +6,11 @@ export default function RequireAuth() {
   const location = useLocation();
 
   if (!isAuthReady) {
-    return null;
+    return (
+      <div className="auth-gate-loading" role="status" aria-live="polite">
+        <p>세션을 확인하는 중입니다.</p>
+      </div>
+    );
   }
 
   if (!isAuthenticated) {

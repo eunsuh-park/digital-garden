@@ -9,6 +9,18 @@
   box-sizing: border-box;
 }
 
+/* RequireAuth: 인증 준비 전 null 대신 표시 (빈 화면 방지) */
+.auth-gate-loading {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+}
+
 @media (max-width: 1023px) {
   .app {
     width: 100dvw;

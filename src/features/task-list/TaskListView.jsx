@@ -3,8 +3,9 @@ import { Icon } from '@iconify/react';
 import up from '@iconify-icons/mingcute/arrow-up-line';
 import down from '@iconify-icons/mingcute/arrow-down-line';
 import addLine from '@iconify-icons/mingcute/add-line';
-import { fetchTasks, updateTask } from '@/shared/api/notionApi';
-import { parseTasksResponse, TASK_TYPE_LABEL_KO } from '@/entities/task/lib/notion-schema';
+import { fetchTasks, updateTask } from '@/shared/api/gardenApi';
+import { TASK_TYPE_LABEL_KO } from '@/entities/task/lib/notion-schema';
+import { useGardenProjectId } from '@/app/providers/useGardenProjectId';
 import FullPage from '@/shared/ui/full-page/FullPage';
 import FullPageFilter from '@/shared/ui/full-page/FullPageFilter';
 import FullPageSorter from '@/shared/ui/full-page/FullPageSorter';
@@ -120,6 +121,7 @@ export default function TaskListView({ variant = 'default' }) {
   const { openTaskDetail, openTaskCreate } = useMapPanelDetail();
   const panelUi = useTasksPanelUi();
   const ctx = useZones();
+  const { projectId, loading: gpLoading, ready: gpReady } = useGardenProjectId();
   const isEmbedded = variant === 'embedded';
 
   const [localFilter, setLocalFilter] = useState({});
@@ -149,8 +151,11 @@ export default function TaskListView({ variant = 'default' }) {
         setLoading(true);
       }
       setError(null);
-      const tasksRes = await fetchTasks();
-      const tasksList = parseTasksResponse(tasksRes);
+      if (!projectId) {
+        setTasks([]);
+        return;
+      }
+      const tasksList = await fetchTasks(projectId);
       setTasks(tasksList);
     } catch (e) {
       setError(e.message);
@@ -159,16 +164,17 @@ export default function TaskListView({ variant = 'default' }) {
         setLoading(false);
       }
     }
-  }, []);
+  }, [projectId]);
 
   useEffect(() => {
     if (isEmbedded) return undefined;
+    if (!gpReady || gpLoading) return undefined;
     loadStandalone();
     return undefined;
-  }, [isEmbedded, loadStandalone]);
+  }, [isEmbedded, loadStandalone, gpReady, gpLoading]);
 
   const tasksData = isEmbedded ? ctx.tasks : tasks;
-  const loadingData = isEmbedded ? ctx.loading : loading;
+  const loadingData = isEmbedded ? ctx.loading : loading || gpLoading || !gpReady;
   const errorData = isEmbedded ? ctx.error : error;
 
   const pendingTasks = useMemo(() => {
@@ -222,7 +228,7 @@ export default function TaskListView({ variant = 'default' }) {
     setCompletingId(t.id);
     setHiddenIds((prev) => new Set(prev).add(t.id));
     try {
-      await updateTask(t.id, { status_name: '완료' });
+      await updateTask(isEmbedded ? ctx.projectId : projectId, t.id, { status_name: '완료' });
       if (isEmbedded) await ctx.reload();
       else await loadStandalone({ silent: true });
       setHiddenIds((prev) => {
@@ -282,11 +288,11 @@ export default function TaskListView({ variant = 'default' }) {
     <FullPage variant={variant} title="이번 주 할 일" subtitle="완료 제외, 예정일 순">
       <div className={variant === 'embedded' ? 'tasks-page tasks-page--embedded-with-footer' : 'tasks-page tasks-page--standalone'}>
         <div className="tasks-page__scroll">
-          {variant !== 'embedded' && (
-            <p className="notion-db-badge" aria-label="연동된 Notion DB">
-              Notion DB: Zones(구역) · 할 일 · 식물
+          {variant !== 'embedded' ? (
+            <p className="notion-db-badge" aria-label="데이터 출처">
+              Supabase · 프로젝트별 구역·할 일·식물
             </p>
-          )}
+          ) : null}
 
           <div className="tasks-page__sticky-top">
             {overdueCount > 0 ? (

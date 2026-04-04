@@ -44,7 +44,7 @@ export function parseZonePage(page) {
   };
 }
 
-function colorTokenFromRaw(raw) {
+export function colorTokenFromRaw(raw) {
   const v = (raw || '').trim();
   if (!v) return '#a8d5a2';
   if (/^#[0-9a-fA-F]{6}$/.test(v)) return v;

@@ -1,73 +1,83 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { fetchZones, fetchTasks, fetchPlants } from '@/shared/api/notionApi';
-import { parseZonesResponse } from '@/entities/zone/lib/notion-schema';
-import { parseTasksResponse } from '@/entities/task/lib/notion-schema';
-import { parsePlantsResponse } from '@/entities/plant/lib/notion-schema';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { isDevMockEnabled } from '@/lib/isDevMock';
+import { getDemoGardenSnapshot } from '@/shared/lib/gardenDemoSeed';
+import { loadGardenData } from '@/shared/api/gardenApi';
+import { useGardenProjectId } from '@/app/providers/useGardenProjectId';
 
 const ZonesContext = createContext(null);
 
 /**
- * 구역(zones)·할 일·식물 데이터 — AppShell 하위(지도·우측 패널)에서 공유
+ * 구역·할 일·식물 — project_id(프로젝트) 단위, Supabase garden_* 테이블
  */
 export function ZonesProvider({ children }) {
+  const { projectId, loading: projectLoading, ready: projectReady, isDemoProject } = useGardenProjectId();
+
   const [zones, setZones] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [plants, setPlants] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [internalBusy, setInternalBusy] = useState(false);
   const [error, setError] = useState(null);
 
   const requestIdRef = useRef(0);
+  const loading = projectLoading || internalBusy;
 
-  const load = useCallback(async (options = {}) => {
-    const silent = options.silent === true;
-    const requestId = ++requestIdRef.current;
-    try {
-      if (!silent) {
-        setLoading(true);
+  const load = useCallback(
+    async (options = {}) => {
+      const silent = options.silent === true;
+      const requestId = ++requestIdRef.current;
+      try {
+        if (!silent) {
+          setInternalBusy(true);
+        }
+        setError(null);
+
+        if (isDevMockEnabled()) {
+          const snap = getDemoGardenSnapshot();
+          if (requestIdRef.current !== requestId) return;
+          setZones(snap.zones);
+          setTasks(snap.tasks);
+          setPlants(snap.plants);
+          return;
+        }
+
+        if (!projectReady || projectLoading) {
+          return;
+        }
+
+        if (!projectId) {
+          if (requestIdRef.current !== requestId) return;
+          setZones([]);
+          setTasks([]);
+          setPlants([]);
+          return;
+        }
+
+        const { zones: z, tasks: t, plants: p } = await loadGardenData(projectId);
+        if (requestIdRef.current !== requestId) return;
+        setZones(z);
+        setTasks(t);
+        setPlants(p);
+      } catch (e) {
+        if (requestIdRef.current === requestId) {
+          const msg = e instanceof Error ? e.message : String(e);
+          setError(msg || '데이터를 불러오지 못했습니다.');
+        }
+      } finally {
+        if (requestIdRef.current === requestId && !silent) {
+          setInternalBusy(false);
+        }
       }
-      setError(null);
-      const [zonesRes, tasksRes, plantsRes] = await Promise.all([
-        fetchZones(),
-        fetchTasks(),
-        fetchPlants(),
-      ]);
-
-      if (requestIdRef.current !== requestId) return;
-
-      const tasksList = parseTasksResponse(tasksRes);
-      const plantsList = parsePlantsResponse(plantsRes);
-      const taskCountMap = {};
-      const plantCountMap = {};
-      const normId = (id) => (id == null ? '' : String(id).trim());
-      tasksList.filter((t) => t.status !== 'completed').forEach((t) => {
-        const zid = normId(t.zone_id);
-        if (zid) taskCountMap[zid] = (taskCountMap[zid] || 0) + 1;
-      });
-      plantsList.forEach((p) => {
-        const zid = normId(p.zone_id);
-        if (zid) plantCountMap[zid] = (plantCountMap[zid] || 0) + 1;
-      });
-
-      let zonesList = parseZonesResponse(zonesRes, taskCountMap, plantCountMap);
-      zonesList = zonesList.map((z) => ({
-        ...z,
-        taskCount: taskCountMap[normId(z.id)] ?? z.taskCount ?? 0,
-        plantCount: plantCountMap[normId(z.id)] ?? z.plantCount ?? 0,
-      }));
-      setZones(zonesList);
-      setTasks(tasksList);
-      setPlants(plantsList);
-    } catch (e) {
-      if (requestIdRef.current === requestId) {
-        const msg = e instanceof Error ? e.message : String(e);
-        setError(msg || '데이터를 불러오지 못했습니다.');
-      }
-    } finally {
-      if (requestIdRef.current === requestId && !silent) {
-        setLoading(false);
-      }
-    }
-  }, []);
+    },
+    [projectId, projectLoading, projectReady]
+  );
 
   useEffect(() => {
     load();
@@ -78,8 +88,17 @@ export function ZonesProvider({ children }) {
   }, [load]);
 
   const value = useMemo(
-    () => ({ zones, tasks, plants, loading, error, reload }),
-    [zones, tasks, plants, loading, error, reload]
+    () => ({
+      zones,
+      tasks,
+      plants,
+      loading,
+      error,
+      reload,
+      projectId,
+      isReadOnlyGarden: Boolean(isDemoProject),
+    }),
+    [zones, tasks, plants, loading, error, reload, projectId, isDemoProject]
   );
 
   return <ZonesContext.Provider value={value}>{children}</ZonesContext.Provider>;

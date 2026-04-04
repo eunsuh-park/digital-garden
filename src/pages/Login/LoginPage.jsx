@@ -10,7 +10,7 @@ import './LoginPage.css';
 export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, login, register } = useAuth();
+  const { isAuthenticated, login, register, isAuthReady } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,6 +21,14 @@ export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const redirectTo = useMemo(() => location.state?.from || '/dashboard', [location.state]);
+
+  if (!isAuthReady) {
+    return (
+      <div className="login-page login-page--loading">
+        <p>세션을 확인하는 중입니다.</p>
+      </div>
+    );
+  }
 
   if (isAuthenticated) {
     return <Navigate to={redirectTo} replace />;
