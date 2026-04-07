@@ -7,6 +7,8 @@
   flex-shrink: 0;
   padding: 0.75rem 0.4rem;
   box-sizing: border-box;
+  overflow: visible;
+  z-index: 2;
 }
 
 @media (min-width: 1024px) {
@@ -67,11 +69,6 @@
   padding: 0 0.1rem;
 }
 
-.navigation-rail__project-label--muted {
-  color: var(--color-text-muted);
-  font-weight: 500;
-}
-
 .navigation-rail__project-btn {
   display: inline-flex;
   align-items: center;
@@ -128,6 +125,16 @@
   box-shadow: none;
 }
 
+/* 비활성 빈 슬롯: 툴팁용 호버는 래퍼가 받도록 */
+.navigation-rail__slot-disabled-wrap {
+  display: inline-flex;
+  cursor: not-allowed;
+}
+
+.navigation-rail__project--empty .navigation-rail__slot-disabled-wrap .navigation-rail__project-btn:disabled {
+  pointer-events: none;
+}
+
 .navigation-rail__bottom {
   display: flex;
   flex-direction: column;
@@ -136,6 +143,32 @@
   padding-top: 0.5rem;
   border-top: 1px solid var(--color-border);
   width: 100%;
+}
+
+/* 레일 안 모든 Tooltip: 최상단 레이어 + 내용 너비(hug). 좁은 트리거 폭 때문에 글자가 세로로 쌓이는 현상 방지 */
+.navigation-rail .tooltip {
+  max-width: none;
+}
+
+.navigation-rail .tooltip .tooltip__bubble {
+  z-index: 10000;
+  box-sizing: border-box;
+  width: max-content;
+  min-width: min-content;
+  max-width: min(320px, calc(100vw - 96px));
+  white-space: nowrap;
+  word-break: normal;
+}
+
+/* 프로젝트명·이메일 등 여러 줄 */
+.navigation-rail .tooltip.navigation-rail__tooltip--project .tooltip__bubble,
+.navigation-rail .tooltip.navigation-rail__tooltip--account .tooltip__bubble {
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  width: fit-content;
+  min-width: min-content;
+  max-width: min(280px, calc(100vw - 96px));
 }
 
 .navigation-rail__icon-btn {

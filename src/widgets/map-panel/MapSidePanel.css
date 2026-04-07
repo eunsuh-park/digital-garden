@@ -1,6 +1,10 @@
 /* MapSidePanel — src/layouts/MapSidePanel.jsx
  * <1024px: 본문 아래 하단 시트(상하 분할) / ≥1024px: 본문 우측 세로 패널 */
 
+.map-side-panel--inactive {
+  display: none !important;
+}
+
 .map-side-panel {
   --map-panel-accent: var(--color-primary);
   --map-panel-handle-w: 26px;

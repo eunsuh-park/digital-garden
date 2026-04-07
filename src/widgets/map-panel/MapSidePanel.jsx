@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useMatch } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import up from '@iconify-icons/mingcute/arrow-up-line';
 import down from '@iconify-icons/mingcute/arrow-down-line';
@@ -109,6 +109,9 @@ function ZoneTabContent() {
 
 export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
   const { pathname } = useLocation();
+  const projectMatch = useMatch({ path: '/project/:projectId', end: true });
+  const projectIdParam = projectMatch?.params?.projectId;
+  const isProjectOpen = Boolean(projectIdParam && projectIdParam !== 'new');
   const { zones, tasks, plants, loading } = useZones();
   const { detail, closeDetail, closeAllDetail } = useMapPanelDetail();
   const { showToast } = useToast();
@@ -146,6 +149,7 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
   const collapsedVisual = collapsed && !detail;
   const asideClass = [
     'map-side-panel',
+    !isProjectOpen ? 'map-side-panel--inactive' : '',
     collapsedVisual ? 'map-side-panel--collapsed' : '',
     detail ? 'map-side-panel--detail-expanded' : '',
   ]
@@ -155,7 +159,11 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
   const ariaLabel = mapBuilderOpen ? '맵 빌더 패널' : '구역·할 일·식물 패널';
 
   return (
-    <aside className={asideClass} aria-label={ariaLabel}>
+    <aside
+      className={asideClass}
+      aria-label={ariaLabel}
+      aria-hidden={!isProjectOpen}
+    >
       {!detail && (
         <button
           type="button"

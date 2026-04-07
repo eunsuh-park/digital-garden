@@ -1,5 +1,5 @@
 ---
-description: MingCute icons via Iconify, imports, sizing, color, a11y
+description: MingCute icons via Iconify, line/fill on hover, imports, a11y
 alwaysApply: true
 ---
 
@@ -7,10 +7,12 @@ alwaysApply: true
 
 - Use **`@iconify/react`** with **`@iconify-icons/mingcute`** (named imports per icon).
 - Prefer **named imports** from `@iconify-icons/mingcute/<name>-line` or `<name>-fill`; avoid standalone string IDs like `"mingcute:..."` (bundle/tree-shaking).
-- **Consistency**: Within one block (header, card, modal), keep **line vs fill** coherent; **nav / toolbar / filters** default to **line**.
+- **Naming**: The path suffix is **`-fill`** (not `filled`). “Filled” describes the look; imports always use the **`-fill`** module (pair with the same base name as `-line`, e.g. `add-line` ↔ `add-fill`).
+- **Hover**: For any **interactive** control that shows an icon (button, link, tab, list row, etc.), default the icon to **`-line`**, and on **`:hover` (and `:focus-visible` when it is focusable)** swap to the matching **`-fill`** icon so the affordance strengthens. Hide/show or swap `icon={...}` in React; keep both imports. Non-interactive decorative icons can stay single-variant.
+- **Consistency**: Within one block (header, card, modal), keep **line vs fill** coherent; **nav / toolbar / filters** default to **line** at rest, **fill** on hover/focus as above.
 - **Color**: Prefer inheriting from parent text (`currentColor`) via CSS over hardcoding `color` on `<Icon>` when possible.
 - **Alignment**: With labels, use `inline-flex`, `align-items: center`, and a small `gap`.
 - **Size**: Tabs / toolbar / filters typically **16–20px**; match surrounding type and tap targets.
 - **A11y**: Meaningful controls get `aria-label`; decorative icons can use `aria-hidden` when appropriate.
-- **States**: Style default / hover / active / disabled so icon affordances stay clear (opacity, contrast, pointer).
+- **States**: Style default / hover / active / disabled so icon affordances stay clear (opacity, contrast, pointer). Prefer **line → fill** on hover/focus for icons per **Hover** above; use opacity or `pointer-events` for disabled.
 - After adding or changing icons in UI work, **summarize at the end of the reply** which icon was used for what.

@@ -1,6 +1,8 @@
 /* LoginPage·ProjectPage·카드 컴포넌트와 동일한 톤 */
 .dashboard-page {
   min-height: calc(100vh - 60px);
+  max-width: 1400px;
+  margin: 0 auto;
   padding: 1.5rem;
   background: var(--color-bg);
 }
@@ -87,7 +89,7 @@
 
 /* 섹션 */
 .dashboard-page__section {
-  max-width: 560px;
+  width: 100%;
 }
 
 .dashboard-page__section-head {

@@ -1,3 +1,4 @@
+import { useGardenProjectId } from '@/app/providers/useGardenProjectId';
 import { useZones } from '@/app/providers/ZonesContext';
 import GardenMap from '@/features/garden-map/GardenMap';
 import ErrorState from '@/shared/ui/error-state/ErrorState';
@@ -19,7 +20,21 @@ function getZoneById(zones, id) {
 }
 
 export default function LandingPage() {
+  const { invalidProject } = useGardenProjectId();
   const { zones, tasks, plants, loading, error } = useZones();
+
+  if (invalidProject) {
+    return (
+      <div className="landing-page landing-page--centered">
+        <ErrorState
+          variant="404"
+          title="프로젝트를 찾을 수 없습니다"
+          message="목록에 없거나 삭제된 프로젝트일 수 있어요."
+          showHomeLink
+        />
+      </div>
+    );
+  }
 
   if (loading) {
     return (

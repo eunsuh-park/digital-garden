@@ -1,3 +1,8 @@
+/**
+ * Supabase garden_* CRUD
+ * DB: garden_zones, garden_tasks(zone_id FK), garden_plants(zone_id FK)
+ * 관계는 단순 FK — 필터/소트는 프론트엔드에서 처리
+ */
 import { supabase } from '@/lib/supabase';
 import { colorTokenFromRaw } from '@/entities/zone/lib/notion-schema';
 import {
@@ -26,15 +31,7 @@ function rwError(err, fallback) {
   throw new Error(msg || fallback);
 }
 
-const TASK_SELECT = `
-  *,
-  garden_task_zones(zone_id),
-  garden_task_plants(plant_id),
-  garden_task_prereqs(prereq_task_id),
-  garden_task_followups(followup_task_id)
-`;
-
-const PLANT_SELECT = `*, garden_plant_zones(zone_id)`;
+// ── 조회 ─────────────────────────────────────────────────
 
 export async function fetchZones(projectId) {
   const p = pid(projectId);
@@ -53,7 +50,7 @@ export async function fetchTasks(projectId) {
   if (p == null) return [];
   const { data, error } = await supabase
     .from('garden_tasks')
-    .select(TASK_SELECT)
+    .select('*')
     .eq('project_id', p)
     .order('created_at', { ascending: false });
   rwError(error, '할 일을 불러오지 못했습니다.');
@@ -65,7 +62,7 @@ export async function fetchPlants(projectId) {
   if (p == null) return [];
   const { data, error } = await supabase
     .from('garden_plants')
-    .select(PLANT_SELECT)
+    .select('*')
     .eq('project_id', p)
     .order('name');
   rwError(error, '식물을 불러오지 못했습니다.');
@@ -82,6 +79,8 @@ export async function loadGardenData(projectId) {
   return { zones, tasks, plants };
 }
 
+// ── Zone CRUD ─────────────────────────────────────────────
+
 export async function createZone(projectId, { name, description, color }) {
   const p = pid(projectId);
   if (p == null) throw new Error('프로젝트가 없습니다.');
@@ -97,71 +96,44 @@ export async function createZone(projectId, { name, description, color }) {
   rwError(error, '구역을 만들지 못했습니다.');
 }
 
-export async function updateZone(projectId, zoneId, { name, description }) {
-  void projectId;
-  const patch = {};
+export async function updateZone(_projectId, zoneId, { name, description }) {
+  const patch = { updated_at: new Date().toISOString() };
   if (name !== undefined) patch.name = name;
   if (description !== undefined) patch.description = description;
-  patch.updated_at = new Date().toISOString();
   const { error } = await supabase.from('garden_zones').update(patch).eq('id', zoneId);
   rwError(error, '구역을 수정하지 못했습니다.');
 }
 
-export async function deleteZone(projectId, zoneId) {
-  void projectId;
+export async function deleteZone(_projectId, zoneId) {
   const { error } = await supabase.from('garden_zones').delete().eq('id', zoneId);
   rwError(error, '구역을 삭제하지 못했습니다.');
 }
 
+// ── Task CRUD ─────────────────────────────────────────────
+
 export async function createTask(projectId, payload) {
   const p = pid(projectId);
   if (p == null) throw new Error('프로젝트가 없습니다.');
-  const { data: row, error } = await supabase
-    .from('garden_tasks')
-    .insert({
-      project_id: p,
-      title: payload.title,
-      status: 'pending',
-      status_label: '시작 전',
-      notes: payload.notes || '',
-      difficulty: payload.difficulty || null,
-      task_type: payload.task_type || 'Observation',
-      estimated_duration: payload.estimated_duration || '',
-      scheduled_date: payload.scheduled_date ? payload.scheduled_date : null,
-      due_date: null,
-    })
-    .select('id')
-    .single();
+  const { error } = await supabase.from('garden_tasks').insert({
+    project_id: p,
+    title: payload.title,
+    status: 'pending',
+    status_label: '시작 전',
+    zone_id: payload.zone_id || null,
+    notes: payload.notes || '',
+    difficulty: payload.difficulty || null,
+    task_type: payload.task_type || 'Observation',
+    estimated_duration: payload.estimated_duration || '',
+    scheduled_date: payload.scheduled_date ? payload.scheduled_date : null,
+  });
   rwError(error, '할 일을 만들지 못했습니다.');
-  const id = row.id;
-  const zids = payload.target_zone_ids || [];
-  const pids = payload.target_plant_ids || [];
-  if (zids.length) {
-    const { error: e2 } = await supabase
-      .from('garden_task_zones')
-      .insert(zids.map((zone_id) => ({ task_id: id, zone_id })));
-    rwError(e2, '구역 연결에 실패했습니다.');
-  }
-  if (pids.length) {
-    const { error: e3 } = await supabase
-      .from('garden_task_plants')
-      .insert(pids.map((plant_id) => ({ task_id: id, plant_id })));
-    rwError(e3, '식물 연결에 실패했습니다.');
-  }
 }
 
-export async function updateTask(projectId, taskId, updates) {
-  void projectId;
+export async function updateTask(_projectId, taskId, updates) {
   const {
-    title,
-    notes,
-    task_type,
-    difficulty,
-    estimated_duration,
-    scheduled_date,
-    target_zone_ids,
-    target_plant_ids,
-    status_name,
+    title, notes, task_type, difficulty,
+    estimated_duration, scheduled_date,
+    zone_id, status_name,
   } = updates;
 
   const patch = { updated_at: new Date().toISOString() };
@@ -170,7 +142,8 @@ export async function updateTask(projectId, taskId, updates) {
   if (task_type !== undefined) patch.task_type = task_type;
   if (difficulty !== undefined) patch.difficulty = difficulty;
   if (estimated_duration !== undefined) patch.estimated_duration = estimated_duration;
-  if (scheduled_date !== undefined) patch.scheduled_date = scheduled_date ? scheduled_date : null;
+  if (scheduled_date !== undefined) patch.scheduled_date = scheduled_date || null;
+  if (zone_id !== undefined) patch.zone_id = zone_id || null;
   if (status_name != null && String(status_name).trim()) {
     const sn = String(status_name).trim();
     patch.status_label = sn;
@@ -179,35 +152,14 @@ export async function updateTask(projectId, taskId, updates) {
 
   const { error } = await supabase.from('garden_tasks').update(patch).eq('id', taskId);
   rwError(error, '할 일을 수정하지 못했습니다.');
-
-  if (Array.isArray(target_zone_ids)) {
-    const { error: d1 } = await supabase.from('garden_task_zones').delete().eq('task_id', taskId);
-    rwError(d1, '구역 연결을 갱신하지 못했습니다.');
-    if (target_zone_ids.length) {
-      const { error: i1 } = await supabase
-        .from('garden_task_zones')
-        .insert(target_zone_ids.map((zone_id) => ({ task_id: taskId, zone_id })));
-      rwError(i1, '구역 연결을 갱신하지 못했습니다.');
-    }
-  }
-
-  if (Array.isArray(target_plant_ids)) {
-    const { error: d2 } = await supabase.from('garden_task_plants').delete().eq('task_id', taskId);
-    rwError(d2, '식물 연결을 갱신하지 못했습니다.');
-    if (target_plant_ids.length) {
-      const { error: i2 } = await supabase
-        .from('garden_task_plants')
-        .insert(target_plant_ids.map((plant_id) => ({ task_id: taskId, plant_id })));
-      rwError(i2, '식물 연결을 갱신하지 못했습니다.');
-    }
-  }
 }
 
-export async function deleteTask(projectId, taskId) {
-  void projectId;
+export async function deleteTask(_projectId, taskId) {
   const { error } = await supabase.from('garden_tasks').delete().eq('id', taskId);
   rwError(error, '할 일을 삭제하지 못했습니다.');
 }
+
+// ── Plant CRUD ────────────────────────────────────────────
 
 function parseQuantity(q) {
   if (q == null || q === '') return null;
@@ -218,34 +170,22 @@ function parseQuantity(q) {
 export async function createPlant(projectId, payload) {
   const p = pid(projectId);
   if (p == null) throw new Error('프로젝트가 없습니다.');
-  const { data: row, error } = await supabase
-    .from('garden_plants')
-    .insert({
-      project_id: p,
-      name: payload.name,
-      species: payload.species || '-',
-      category: (payload.category || '').trim() || '-',
-      status: payload.status || 'planted',
-      bloom_season: (payload.bloom_season || '').trim() || '-',
-      notes: payload.notes || '',
-      quantity: parseQuantity(payload.quantity),
-    })
-    .select('id')
-    .single();
+  const { error } = await supabase.from('garden_plants').insert({
+    project_id: p,
+    name: payload.name,
+    species: payload.species || '-',
+    category: (payload.category || '').trim() || '-',
+    status: payload.status || 'planted',
+    bloom_season: (payload.bloom_season || '').trim() || '-',
+    notes: payload.notes || '',
+    quantity: parseQuantity(payload.quantity),
+    zone_id: payload.zone_id || null,
+  });
   rwError(error, '식물을 만들지 못했습니다.');
-  const id = row.id;
-  const zids = payload.zone_ids || [];
-  if (zids.length) {
-    const { error: e2 } = await supabase
-      .from('garden_plant_zones')
-      .insert(zids.map((zone_id) => ({ plant_id: id, zone_id })));
-    rwError(e2, '구역 연결에 실패했습니다.');
-  }
 }
 
-export async function updatePlant(projectId, plantId, updates) {
-  void projectId;
-  const { name, species, status, bloom_season, quantity, notes, zone_ids } = updates;
+export async function updatePlant(_projectId, plantId, updates) {
+  const { name, species, status, bloom_season, quantity, notes, zone_id } = updates;
   const patch = { updated_at: new Date().toISOString() };
   if (name !== undefined) patch.name = name;
   if (species !== undefined) patch.species = species;
@@ -253,24 +193,13 @@ export async function updatePlant(projectId, plantId, updates) {
   if (bloom_season !== undefined) patch.bloom_season = bloom_season;
   if (notes !== undefined) patch.notes = notes;
   if (quantity !== undefined) patch.quantity = parseQuantity(quantity);
+  if (zone_id !== undefined) patch.zone_id = zone_id || null;
 
   const { error } = await supabase.from('garden_plants').update(patch).eq('id', plantId);
   rwError(error, '식물을 수정하지 못했습니다.');
-
-  if (Array.isArray(zone_ids)) {
-    const { error: d1 } = await supabase.from('garden_plant_zones').delete().eq('plant_id', plantId);
-    rwError(d1, '구역 연결을 갱신하지 못했습니다.');
-    if (zone_ids.length) {
-      const { error: i1 } = await supabase
-        .from('garden_plant_zones')
-        .insert(zone_ids.map((zone_id) => ({ plant_id: plantId, zone_id })));
-      rwError(i1, '구역 연결을 갱신하지 못했습니다.');
-    }
-  }
 }
 
-export async function deletePlant(projectId, plantId) {
-  void projectId;
+export async function deletePlant(_projectId, plantId) {
   const { error } = await supabase.from('garden_plants').delete().eq('id', plantId);
   rwError(error, '식물을 삭제하지 못했습니다.');
 }
