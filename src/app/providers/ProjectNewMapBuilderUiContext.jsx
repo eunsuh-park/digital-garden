@@ -24,6 +24,7 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
   const [mapLayerDetailOpenId, setMapLayerDetailOpenId] = useState(null);
   const [mapPresentLayerIds, setMapPresentLayerIds] = useState(() => [...MAP_BUILDER_INITIAL_PRESENT_IDS]);
   const [mapLayerLocked, setMapLayerLocked] = useState(initialLockedMap);
+  const [mapLayerTypes, setMapLayerTypes] = useState({});
   const prevMapBuilderOpenRef = useRef(false);
   const expandSidePanelRef = useRef(null);
 
@@ -48,6 +49,10 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
     }));
   }, []);
 
+  const setMapLayerType = useCallback((layerId, type) => {
+    setMapLayerTypes((prev) => ({ ...prev, [layerId]: type }));
+  }, []);
+
   useEffect(() => {
     if (!mapBuilderOpen) {
       prevMapBuilderOpenRef.current = false;
@@ -58,6 +63,7 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
     if (!prevMapBuilderOpenRef.current) {
       setMapPresentLayerIds([...MAP_BUILDER_INITIAL_PRESENT_IDS]);
       setMapLayerLocked(initialLockedMap());
+      setMapLayerTypes({});
     }
     prevMapBuilderOpenRef.current = true;
   }, [mapBuilderOpen]);
@@ -81,6 +87,8 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
       setMapPresentLayerIds,
       mapLayerLocked,
       setMapLayerLocked,
+      mapLayerTypes,
+      setMapLayerType,
       removeMapPresentLayer,
       toggleMapLayerLock,
       expandMapSidePanel,
@@ -92,6 +100,8 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
       mapLayerDetailOpenId,
       mapPresentLayerIds,
       mapLayerLocked,
+      mapLayerTypes,
+      setMapLayerType,
       removeMapPresentLayer,
       toggleMapLayerLock,
       expandMapSidePanel,
@@ -119,6 +129,8 @@ export function useProjectNewMapBuilderUi() {
       setMapPresentLayerIds: () => {},
       mapLayerLocked: {},
       setMapLayerLocked: () => {},
+      mapLayerTypes: {},
+      setMapLayerType: () => {},
       removeMapPresentLayer: () => {},
       toggleMapLayerLock: () => {},
       expandMapSidePanel: () => {},

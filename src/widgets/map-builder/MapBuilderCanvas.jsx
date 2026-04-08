@@ -13,9 +13,11 @@ import targetLine from '@iconify-icons/mingcute/target-line';
 import unlockLine from '@iconify-icons/mingcute/unlock-line';
 import { useProjectNewMapBuilderUi } from '@/app/providers/ProjectNewMapBuilderUiContext';
 import {
-  clampZoom,
   fitBoundsInView,
   getLayerHitBoundsPx,
+  MAP_BUILDER_ZOOM_MAX,
+  MAP_BUILDER_ZOOM_MIN,
+  maxScaleToFitLayerInView,
   zoomWithWheel,
 } from '@/shared/lib/mapBuilderLayerBounds';
 import { getMapBuilderLayer, mapBuilderRemoveConfirmMessage } from '@/shared/lib/mapBuilderLayers';
@@ -48,9 +50,10 @@ function MapLayerSelectionChrome({
 
   return (
     <div className={rootClass} onClick={(e) => e.stopPropagation()}>
-      <div className="map-builder-canvas__selection-head">
-        <span className="map-builder-canvas__obj-label">{labelText}</span>
-        <div className="map-builder-canvas__selection-tools">
+      <div className="map-builder-canvas__selection-head-neg">
+        <div className="map-builder-canvas__selection-head">
+          <span className="map-builder-canvas__obj-label">{labelText}</span>
+          <div className="map-builder-canvas__selection-tools">
           <button
             type="button"
             className="map-builder-canvas__selection-tool"
@@ -96,6 +99,7 @@ function MapLayerSelectionChrome({
               <Icon icon={delete2Line} width={18} height={18} />
             </button>
           )}
+          </div>
         </div>
       </div>
       {showHandles ? (
@@ -155,6 +159,8 @@ export default function MapBuilderCanvas() {
   selectedRef.current = selectedMapLayerId;
 
   viewRef.current = view;
+
+  const invZoomUi = 1 / Math.max(view.scale, MAP_BUILDER_ZOOM_MIN);
 
   const selectedLayer = getMapBuilderLayer(selectedMapLayerId);
   const labelText = selectedLayer ? `${selectedLayer.name} · 선택됨` : '선택됨';
@@ -267,6 +273,18 @@ export default function MapBuilderCanvas() {
     const vb = viewBoxRef.current;
     if (!vb) return;
 
+    function zoomCapForInteraction() {
+      const st = stageRef.current;
+      const vr = vb.getBoundingClientRect();
+      if (!st || !Number.isFinite(vr.width) || !Number.isFinite(vr.height)) return MAP_BUILDER_ZOOM_MAX;
+      const sw = st.offsetWidth;
+      const sh = st.offsetHeight;
+      if (selectedMapLayerId && mapPresentLayerIds.includes(selectedMapLayerId)) {
+        return maxScaleToFitLayerInView(vr.width, vr.height, sw, sh, selectedMapLayerId);
+      }
+      return MAP_BUILDER_ZOOM_MAX;
+    }
+
     function onWheelCapture(e) {
       if (!vb.contains(e.target)) return;
       e.preventDefault();
@@ -276,7 +294,8 @@ export default function MapBuilderCanvas() {
         selectedMapLayerId && mapPresentLayerIds.includes(selectedMapLayerId)
           ? focalForZoom()
           : getFocalInView(e.clientX, e.clientY);
-      const next = zoomWithWheel(vr.width, vr.height, tx, ty, scale, focal.x, focal.y, e.deltaY);
+      const cap = zoomCapForInteraction();
+      const next = zoomWithWheel(vr.width, vr.height, tx, ty, scale, focal.x, focal.y, e.deltaY, cap);
       setView(next);
     }
 
@@ -288,7 +307,8 @@ export default function MapBuilderCanvas() {
       const d = touchDistance(a, b);
       if (p.startDist <= 0) return;
       const ratio = d / p.startDist;
-      const newScale = clampZoom(p.startScale * ratio);
+      const cap = zoomCapForInteraction();
+      const newScale = Math.max(MAP_BUILDER_ZOOM_MIN, Math.min(cap, p.startScale * ratio));
       const wx = (p.cx - p.startTx) / p.startScale;
       const wy = (p.cy - p.startTy) / p.startScale;
       const nTx = p.cx - wx * newScale;
@@ -355,7 +375,8 @@ export default function MapBuilderCanvas() {
         <div
           className="map-builder-canvas__world"
           style={{
-            transform: `translate(${view.tx}px, ${view.ty}px) scale(${view.scale})`,
+            transform: `translate3d(${view.tx}px, ${view.ty}px, 0) scale(${view.scale})`,
+            '--mb-inv-zoom': invZoomUi,
           }}
         >
           <div

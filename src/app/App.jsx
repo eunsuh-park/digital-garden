@@ -6,6 +6,7 @@ import LoginPage from '@/pages/Login/LoginPage';
 import DashboardPage from '@/pages/Dashboard/DashboardPage';
 import ProjectNewPage from '@/pages/ProjectNew/ProjectNewPage';
 import ProjectMapBuilderPage from '@/pages/ProjectMapBuilder/ProjectMapBuilderPage';
+import ProjectStep3Page from '@/pages/ProjectStep3/ProjectStep3Page';
 import UiLabPage from '@/pages/UiLab/UiLabPage';
 import TokenLabPage from '@/pages/TokenLab/TokenLabPage';
 import { AuthProvider } from '@/app/providers/AuthContext';
@@ -28,6 +29,7 @@ function App() {
                 <Route path="/project" element={<Navigate to="/project/new" replace />} />
                 <Route path="/project/new" element={<ProjectNewPage />} />
                 <Route path="/project/:projectId/map-builder" element={<ProjectMapBuilderPage />} />
+                <Route path="/project/:projectId/step3" element={<ProjectStep3Page />} />
                 <Route path="/project/:projectId/tasks" element={<LandingPage />} />
                 <Route path="/project/:projectId/plants" element={<LandingPage />} />
                 <Route path="/project/:projectId" element={<LandingPage />} />

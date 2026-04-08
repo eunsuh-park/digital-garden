@@ -439,3 +439,29 @@
   cursor: pointer;
   font: inherit;
 }
+
+.map-builder-inspector__type-select {
+  flex: 1;
+  min-width: 0;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text);
+  cursor: pointer;
+  appearance: auto;
+}
+
+.map-builder-inspector__type-select:focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--color-primary) 45%, var(--color-border));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 18%, transparent);
+}
+
+.map-builder-inspector__type-select--unset {
+  color: var(--color-text-muted);
+}

@@ -1,6 +1,19 @@
 /** 맵 빌더 레이어 메타 — 패널·캔버스 동기화용. 정렬: 기본 구역 → 집 → 창고 → (추가) */
 export const MAP_BUILDER_LAYER_ORDER = ['base', 'house', 'shed', 'terrace', 'lawn'];
 
+/** 도형 유형 목록 */
+export const SHAPE_TYPES = ['ground', 'grass', 'zone', 'path', 'circulation', 'building'];
+
+/** 도형 유형 한국어 레이블 */
+export const SHAPE_TYPE_LABELS = {
+  ground: '땅',
+  grass: '잔디',
+  zone: '구역',
+  path: '길',
+  circulation: '동선',
+  building: '건축물',
+};
+
 export const MAP_BUILDER_LAYERS = [
   {
     id: 'base',
@@ -12,6 +25,7 @@ export const MAP_BUILDER_LAYERS = [
     desc: '삭제할 수 없는 기본 토지 구역입니다.',
     size: '100%',
     rotation: '0°',
+    type: null,
   },
   {
     id: 'house',
@@ -23,6 +37,7 @@ export const MAP_BUILDER_LAYERS = [
     desc: '집입니다.',
     size: '100%',
     rotation: '0°',
+    type: null,
   },
   {
     id: 'shed',
@@ -34,6 +49,7 @@ export const MAP_BUILDER_LAYERS = [
     desc: '창고·창고형 공간입니다.',
     size: '100%',
     rotation: '0°',
+    type: null,
   },
   {
     id: 'terrace',
@@ -45,6 +61,7 @@ export const MAP_BUILDER_LAYERS = [
     desc: '남향 데크(샘플)',
     size: '100%',
     rotation: '0°',
+    type: null,
   },
   {
     id: 'lawn',
@@ -56,6 +73,7 @@ export const MAP_BUILDER_LAYERS = [
     desc: '스크롤 테스트용 잔디 구역',
     size: '100%',
     rotation: '0°',
+    type: null,
   },
 ];
 

@@ -11,6 +11,8 @@ import {
   mapBuilderRemoveConfirmMessage,
   MAP_BUILDER_LAYERS,
   sortLayersByMapOrder,
+  SHAPE_TYPES,
+  SHAPE_TYPE_LABELS,
 } from '@/shared/lib/mapBuilderLayers';
 import './MapBuilderInspector.css';
 
@@ -20,7 +22,7 @@ function mergeLayerLocked(layer, mapLayerLocked) {
   return { ...layer, locked };
 }
 
-function LayerDetailPane({ layer, onDeleteLayer }) {
+function LayerDetailPane({ layer, onDeleteLayer, layerType, onTypeChange }) {
   if (!layer) return null;
   return (
     <div className="map-builder-inspector__layer-panel map-builder-inspector__layer-panel--full">
@@ -51,6 +53,32 @@ function LayerDetailPane({ layer, onDeleteLayer }) {
       <div className="map-builder-inspector__inline-field-row">
         <span className="map-builder-inspector__inline-field-label">설명</span>
         <div className="map-builder-inspector__inline-value">{layer.desc}</div>
+      </div>
+      <div className="map-builder-inspector__inline-field-row">
+        <label
+          className="map-builder-inspector__inline-field-label"
+          htmlFor={`mb-split-type-${layer.id}`}
+        >
+          유형
+        </label>
+        <select
+          id={`mb-split-type-${layer.id}`}
+          className={[
+            'map-builder-inspector__type-select',
+            !layerType ? 'map-builder-inspector__type-select--unset' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          value={layerType ?? ''}
+          onChange={(e) => onTypeChange(e.target.value || null)}
+        >
+          <option value="">유형 선택…</option>
+          {SHAPE_TYPES.map((t) => (
+            <option key={t} value={t}>
+              {SHAPE_TYPE_LABELS[t]}
+            </option>
+          ))}
+        </select>
       </div>
       <div className="map-builder-inspector__actions-row">
         {layer.deletable ? (
@@ -84,6 +112,8 @@ export default function MapBuilderInspector() {
     setMapLayerDetailOpenId,
     mapPresentLayerIds,
     mapLayerLocked,
+    mapLayerTypes,
+    setMapLayerType,
     removeMapPresentLayer,
     toggleMapLayerLock,
   } = useProjectNewMapBuilderUi();
@@ -134,6 +164,7 @@ export default function MapBuilderInspector() {
             {visibleLayers.map((layer) => {
               const merged = mergeLayerLocked(layer, mapLayerLocked);
               const selected = selectedMapLayerId === layer.id;
+              const layerType = mapLayerTypes[layer.id] ?? null;
               return (
                 <li key={layer.id}>
                   <div
@@ -163,7 +194,9 @@ export default function MapBuilderInspector() {
                       </span>
                       <span className="map-builder-inspector__strip-text">
                         <span className="map-builder-inspector__strip-name">{layer.name}</span>
-                        <span className="map-builder-inspector__strip-type">{layer.meta}</span>
+                        <span className="map-builder-inspector__strip-type">
+                          {layerType ? SHAPE_TYPE_LABELS[layerType] : layer.meta}
+                        </span>
                       </span>
                     </button>
                     <button
@@ -184,7 +217,12 @@ export default function MapBuilderInspector() {
         <div className="map-builder-inspector__pane">
           {selectedLayer ? (
             <div className="map-builder-inspector__pane-inner">
-              <LayerDetailPane layer={selectedLayer} onDeleteLayer={confirmAndRemoveLayer} />
+              <LayerDetailPane
+                layer={selectedLayer}
+                onDeleteLayer={confirmAndRemoveLayer}
+                layerType={mapLayerTypes[selectedLayer.id] ?? null}
+                onTypeChange={(type) => setMapLayerType(selectedLayer.id, type)}
+              />
             </div>
           ) : (
             <div className="map-builder-inspector__pane-empty">선택된 오브젝트가 없습니다</div>
@@ -201,6 +239,7 @@ export default function MapBuilderInspector() {
               const merged = mergeLayerLocked(layer, mapLayerLocked);
               const open = mapLayerDetailOpenId === layer.id;
               const selected = selectedMapLayerId === layer.id;
+              const layerType = mapLayerTypes[layer.id] ?? null;
               return (
                 <div
                   key={layer.id}
@@ -229,7 +268,9 @@ export default function MapBuilderInspector() {
                     >
                       <span className="map-builder-inspector__layer-main">
                         <strong className="map-builder-inspector__layer-name">{layer.name}</strong>
-                        <span className="map-builder-inspector__layer-meta">{layer.meta}</span>
+                        <span className="map-builder-inspector__layer-meta">
+                          {layerType ? SHAPE_TYPE_LABELS[layerType] : layer.meta}
+                        </span>
                         {open ? (
                           <>
                             <label className="map-builder-inspector__inline-label" htmlFor={`mb-size-${layer.id}`}>
@@ -285,6 +326,33 @@ export default function MapBuilderInspector() {
                       <div className="map-builder-inspector__inline-field-row">
                         <span className="map-builder-inspector__inline-field-label">설명</span>
                         <div className="map-builder-inspector__inline-value">{layer.desc}</div>
+                      </div>
+                      <div className="map-builder-inspector__inline-field-row">
+                        <label
+                          className="map-builder-inspector__inline-field-label"
+                          htmlFor={`mb-type-${layer.id}`}
+                        >
+                          유형
+                        </label>
+                        <select
+                          id={`mb-type-${layer.id}`}
+                          className={[
+                            'map-builder-inspector__type-select',
+                            !layerType ? 'map-builder-inspector__type-select--unset' : '',
+                          ]
+                            .filter(Boolean)
+                            .join(' ')}
+                          value={layerType ?? ''}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={(e) => setMapLayerType(layer.id, e.target.value || null)}
+                        >
+                          <option value="">유형 선택…</option>
+                          {SHAPE_TYPES.map((t) => (
+                            <option key={t} value={t}>
+                              {SHAPE_TYPE_LABELS[t]}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                       <div className="map-builder-inspector__actions-row">
                         {layer.deletable ? (

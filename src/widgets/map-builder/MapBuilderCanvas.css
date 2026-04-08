@@ -31,16 +31,11 @@
   width: 100%;
   overflow: hidden;
   touch-action: none;
-  container-type: size;
-  container-name: map-builder-view;
 }
 
 .map-builder-canvas__world {
   position: absolute;
-  left: 0;
-  top: 0;
-  width: max-content;
-  height: max-content;
+  inset: 0;
   transform-origin: 0 0;
   will-change: transform;
 }
@@ -51,7 +46,9 @@
   left: 50%;
   top: calc(50% + 100px);
   bottom: auto;
-  transform: translateX(-50%);
+  /* 월드 scale 보정 — 맵만 확대되고 UI는 화면에서 일정 크기 유지 */
+  transform: translateX(-50%) scale(var(--mb-inv-zoom, 1));
+  transform-origin: center center;
   background: rgba(255, 255, 255, 0.88);
   border: 1px solid rgba(228, 221, 212, 0.9);
   box-shadow: var(--mb-shadow);
@@ -107,10 +104,9 @@
 .map-builder-canvas__stage {
   position: relative;
   z-index: 1;
-  /* 뷰포트 기준 — 부모(world) % 순환으로 너비 0 되는 문제 방지 */
-  width: min(820px, min(92vw, 760px));
-  width: min(820px, 92cqw);
-  aspect-ratio: 1.05 / 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
   border-radius: 42px;
   background:
     linear-gradient(
@@ -334,6 +330,18 @@
   border-radius: 52px;
 }
 
+.map-builder-canvas__selection-head-neg {
+  position: absolute;
+  top: -44px;
+  left: 50%;
+  /* world scale 보정 — 라벨/툴바는 화면상 크기 고정 */
+  transform: translate3d(-50%, 0, 0) scale(var(--mb-inv-zoom, 1));
+  transform-origin: bottom center;
+  z-index: 4;
+  /* 자식 레이아웃이 역스케일 후에도 선명하게 */
+  backface-visibility: hidden;
+}
+
 .map-builder-canvas__selection-head,
 .map-builder-canvas__selection-tools,
 .map-builder-canvas__selection-tool {
@@ -341,10 +349,7 @@
 }
 
 .map-builder-canvas__selection-head {
-  position: absolute;
-  top: -44px;
-  left: 50%;
-  transform: translateX(-50%);
+  position: static;
   z-index: 3;
   display: inline-flex;
   align-items: center;
@@ -391,6 +396,8 @@
   background: white;
   border: 2px solid var(--mb-purple);
   border-radius: 50%;
+  transform: scale(var(--mb-inv-zoom, 1));
+  transform-origin: center center;
 }
 
 .map-builder-canvas__handle--1 {
@@ -412,7 +419,8 @@
 .map-builder-canvas__handle--5 {
   left: 50%;
   top: -24px;
-  transform: translateX(-50%);
+  transform: translateX(-50%) scale(var(--mb-inv-zoom, 1));
+  transform-origin: center center;
   width: 14px;
   height: 14px;
   background: var(--mb-purple-soft);

@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useProjects } from '@/app/providers/ProjectsContext';
 import { useProjectNewMapBuilderUi } from '@/app/providers/ProjectNewMapBuilderUiContext';
+import { useToast } from '@/app/providers/ToastContext';
 import MapBuilderWorkspace from '@/widgets/map-builder/MapBuilderWorkspace';
 import ErrorState from '@/shared/ui/error-state/ErrorState';
 import '@/pages/ProjectNew/ProjectNewPage.css';
@@ -13,7 +14,8 @@ import './ProjectMapBuilderPage.css';
 export default function ProjectMapBuilderPage() {
   const { projectId } = useParams();
   const navigate = useNavigate();
-  const { setMapBuilderOpen } = useProjectNewMapBuilderUi();
+  const { setMapBuilderOpen, mapPresentLayerIds, mapLayerTypes } = useProjectNewMapBuilderUi();
+  const { showToast } = useToast();
   const { projects, loading, error } = useProjects();
 
   useEffect(() => {
@@ -59,15 +61,24 @@ export default function ProjectMapBuilderPage() {
     navigate(`/project/${projectId}`, { replace: false });
   }
 
+  const handleSaveAndContinue = useCallback(() => {
+    const hasNullType = mapPresentLayerIds.some((id) => !mapLayerTypes[id]);
+    if (hasNullType) {
+      showToast('도형 별로 유형을 확정해주세요');
+      return;
+    }
+    navigate(`/project/${projectId}/step3`, { replace: false });
+  }, [mapPresentLayerIds, mapLayerTypes, showToast, navigate, projectId]);
+
   return (
     <div className="project-new-page project-new-page--map-builder">
       <MapBuilderWorkspace
         projectTitle={project?.name?.trim() || '프로젝트'}
         onBack={goGarden}
-        onSaveAndContinue={goGarden}
+        onSaveAndContinue={handleSaveAndContinue}
         saving={false}
         saveDisabled={false}
-        primaryActionLabel="저장하기"
+        primaryActionLabel="저장하고 다음 단계"
       />
     </div>
   );

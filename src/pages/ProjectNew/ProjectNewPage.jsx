@@ -25,7 +25,7 @@ export default function ProjectNewPage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { reload: reloadProjects } = useProjects();
-  const { setMapBuilderOpen } = useProjectNewMapBuilderUi();
+  const { setMapBuilderOpen, mapPresentLayerIds, mapLayerTypes } = useProjectNewMapBuilderUi();
 
   const [step, setStep] = useState(0);
   const [name, setName] = useState('');
@@ -65,6 +65,13 @@ export default function ProjectNewPage() {
 
   async function handleCreate() {
     if (!step1Valid || saving) return;
+
+    const hasNullType = mapPresentLayerIds.some((id) => !mapLayerTypes[id]);
+    if (hasNullType) {
+      showToast('도형 별로 유형을 확정해주세요');
+      return;
+    }
+
     setSaving(true);
     try {
       const trimmedDesc = spaceDescription.trim();
@@ -82,7 +89,7 @@ export default function ProjectNewPage() {
       await reloadProjects();
       showToast('프로젝트가 생성되었습니다.');
       if (data?.id != null) {
-        navigate(`/project/${data.id}`, { replace: true });
+        navigate(`/project/${data.id}/step3`, { replace: true });
       } else {
         navigate('/dashboard', { replace: true });
       }

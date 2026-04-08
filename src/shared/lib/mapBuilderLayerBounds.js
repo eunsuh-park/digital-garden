@@ -45,12 +45,24 @@ export function clampZoom(s) {
   return Math.min(MAP_BUILDER_ZOOM_MAX, Math.max(MAP_BUILDER_ZOOM_MIN, s));
 }
 
+/** 선택 영역 전체가 뷰에 들어가는 최대 scale(여백 margin). 더 확대하면 잘림. */
+export function rawFitScaleForBounds(viewW, viewH, bw, bh, margin = 0.07) {
+  if (!Number.isFinite(viewW) || !Number.isFinite(viewH) || bw <= 0 || bh <= 0) return MAP_BUILDER_ZOOM_MAX;
+  const m = margin;
+  return Math.min((viewW * (1 - 2 * m)) / bw, (viewH * (1 - 2 * m)) / bh);
+}
+
+export function maxScaleToFitLayerInView(viewW, viewH, sw, sh, layerId, margin = 0.07) {
+  const b = getLayerHitBoundsPx(sw, sh, layerId);
+  if (!b || b.w <= 0 || b.h <= 0) return MAP_BUILDER_ZOOM_MAX;
+  const raw = rawFitScaleForBounds(viewW, viewH, b.w, b.h, margin);
+  return Math.max(MAP_BUILDER_ZOOM_MIN, raw);
+}
+
 /** 스테이지를 뷰에 맞춤: world 원점 = 스테이지 좌상단, transform translate(tx,ty) scale(s), origin 0 0 */
 export function fitBoundsInView(viewW, viewH, bx, by, bw, bh, margin = 0.07) {
-  const m = margin;
-  const sx = (viewW * (1 - 2 * m)) / bw;
-  const sy = (viewH * (1 - 2 * m)) / bh;
-  const scale = clampZoom(Math.min(sx, sy));
+  const raw = rawFitScaleForBounds(viewW, viewH, bw, bh, margin);
+  const scale = Math.max(MAP_BUILDER_ZOOM_MIN, raw);
   const cx = bx + bw / 2;
   const cy = by + bh / 2;
   const tx = viewW / 2 - cx * scale;
@@ -58,10 +70,11 @@ export function fitBoundsInView(viewW, viewH, bx, by, bw, bh, margin = 0.07) {
   return { scale, tx, ty };
 }
 
-/** 뷰 좌표 기준 휠 줌 (원점 스테이지 좌상단) */
-export function zoomWithWheel(viewW, viewH, tx, ty, scale, focalX, focalY, deltaY) {
+/** 뷰 좌표 기준 휠 줌 (원점 스테이지 좌상단). maxScale 주면 그 이상 확대하지 않음. */
+export function zoomWithWheel(viewW, viewH, tx, ty, scale, focalX, focalY, deltaY, maxScale = MAP_BUILDER_ZOOM_MAX) {
   const factor = Math.exp(-deltaY * 0.0012);
-  const newScale = clampZoom(scale * factor);
+  const cap = Math.max(MAP_BUILDER_ZOOM_MIN, maxScale);
+  const newScale = Math.max(MAP_BUILDER_ZOOM_MIN, Math.min(cap, scale * factor));
   const wx = (focalX - tx) / scale;
   const wy = (focalY - ty) / scale;
   const nTx = focalX - wx * newScale;
