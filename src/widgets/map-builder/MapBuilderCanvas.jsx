@@ -21,6 +21,8 @@ import {
   zoomWithWheel,
 } from '@/shared/lib/mapBuilderLayerBounds';
 import { getMapBuilderLayer, mapBuilderRemoveConfirmMessage } from '@/shared/lib/mapBuilderLayers';
+import { getShapeInspectorName } from '@/shared/lib/mapBuilderUserShapes';
+import MapBuilderUserDrawLayer from './MapBuilderUserDrawLayer';
 import './MapBuilderCanvas.css';
 
 const REGION_HIT_DEFS = [
@@ -146,6 +148,9 @@ export default function MapBuilderCanvas() {
     mapLayerLocked,
     removeMapPresentLayer,
     toggleMapLayerLock,
+    mapBuilderTool,
+    mapUserShapes,
+    registerMapCanvasControls,
   } = useProjectNewMapBuilderUi();
 
   const viewBoxRef = useRef(null);
@@ -153,6 +158,7 @@ export default function MapBuilderCanvas() {
   const viewRef = useRef({ tx: 0, ty: 0, scale: 1 });
   const lastPointerRef = useRef({ x: null, y: null });
   const pinchRef = useRef(null);
+  const panDragRef = useRef(null);
 
   const [view, setView] = useState({ tx: 0, ty: 0, scale: 1 });
   const selectedRef = useRef(selectedMapLayerId);
@@ -163,7 +169,12 @@ export default function MapBuilderCanvas() {
   const invZoomUi = 1 / Math.max(view.scale, MAP_BUILDER_ZOOM_MIN);
 
   const selectedLayer = getMapBuilderLayer(selectedMapLayerId);
-  const labelText = selectedLayer ? `${selectedLayer.name} · 선택됨` : '선택됨';
+  const selectedUserShape = mapUserShapes.find((s) => s.id === selectedMapLayerId);
+  const labelText = selectedLayer
+    ? `${selectedLayer.name} · 선택됨`
+    : selectedUserShape
+      ? `${getShapeInspectorName(selectedUserShape)} · 선택됨`
+      : '선택됨';
 
   const isPresent = useCallback((id) => mapPresentLayerIds.includes(id), [mapPresentLayerIds]);
 
@@ -198,6 +209,35 @@ export default function MapBuilderCanvas() {
     const next = fitBoundsInView(vw, vh, b.x, b.y, b.w, b.h);
     setView(next);
   }, [selectedMapLayerId, mapPresentLayerIds]);
+
+  const zoomByFactor = useCallback(
+    (factor) => {
+      const vb = viewBoxRef.current;
+      const st = stageRef.current;
+      if (!vb || !st) return;
+      const vr = vb.getBoundingClientRect();
+      if (!Number.isFinite(vr.width) || !Number.isFinite(vr.height)) return;
+      const focal = { x: vr.width / 2, y: vr.height / 2 };
+      const { tx, ty, scale } = viewRef.current;
+      let cap = MAP_BUILDER_ZOOM_MAX;
+      if (selectedMapLayerId && mapPresentLayerIds.includes(selectedMapLayerId)) {
+        cap = maxScaleToFitLayerInView(vr.width, vr.height, st.offsetWidth, st.offsetHeight, selectedMapLayerId);
+      }
+      const newScale = Math.max(MAP_BUILDER_ZOOM_MIN, Math.min(cap, scale * factor));
+      const wx = (focal.x - tx) / scale;
+      const wy = (focal.y - ty) / scale;
+      setView({ scale: newScale, tx: focal.x - wx * newScale, ty: focal.y - wy * newScale });
+    },
+    [mapPresentLayerIds, selectedMapLayerId],
+  );
+
+  useEffect(() => {
+    return registerMapCanvasControls({
+      zoomIn: () => zoomByFactor(1.15),
+      zoomOut: () => zoomByFactor(1 / 1.15),
+      fitView: () => applyViewInViewBox(),
+    });
+  }, [applyViewInViewBox, registerMapCanvasControls, zoomByFactor]);
 
   useLayoutEffect(() => {
     applyViewInViewBox();
@@ -351,6 +391,51 @@ export default function MapBuilderCanvas() {
     if (e.touches.length < 2) pinchRef.current = null;
   }
 
+  function onStagePointerDownPan(e) {
+    if (mapBuilderTool !== 'pan') return;
+    if (e.button !== 0) return;
+    if (e.target.closest('button')) return;
+    if (e.target.closest('.map-builder-canvas__toolbar-floating')) return;
+    const st = stageRef.current;
+    if (!st) return;
+    panDragRef.current = {
+      sx: e.clientX,
+      sy: e.clientY,
+      tx: viewRef.current.tx,
+      ty: viewRef.current.ty,
+      pid: e.pointerId,
+    };
+    try {
+      st.setPointerCapture(e.pointerId);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function onStagePointerMovePan(e) {
+    const p = panDragRef.current;
+    if (!p || p.pid !== e.pointerId) return;
+    const dx = e.clientX - p.sx;
+    const dy = e.clientY - p.sy;
+    setView({
+      scale: viewRef.current.scale,
+      tx: p.tx + dx,
+      ty: p.ty + dy,
+    });
+  }
+
+  function onStagePointerUpPan(e) {
+    const p = panDragRef.current;
+    if (!p || p.pid !== e.pointerId) return;
+    panDragRef.current = null;
+    const st = stageRef.current;
+    try {
+      st?.releasePointerCapture(e.pointerId);
+    } catch {
+      /* ignore */
+    }
+  }
+
   return (
     <section
       className="map-builder-canvas"
@@ -372,20 +457,30 @@ export default function MapBuilderCanvas() {
           if (e.target === e.currentTarget) clearCanvasSelection();
         }}
       >
-        <div
-          className="map-builder-canvas__world"
-          style={{
-            transform: `translate3d(${view.tx}px, ${view.ty}px, 0) scale(${view.scale})`,
-            '--mb-inv-zoom': invZoomUi,
-          }}
-        >
+        <div className="map-builder-canvas__world">
           <div
             ref={stageRef}
-            className="map-builder-canvas__stage"
+            className={[
+              'map-builder-canvas__stage',
+              mapBuilderTool === 'pan' ? 'map-builder-canvas__stage--pan' : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            onPointerDown={onStagePointerDownPan}
+            onPointerMove={onStagePointerMovePan}
+            onPointerUp={onStagePointerUpPan}
+            onPointerCancel={onStagePointerUpPan}
             onClick={(e) => {
               if (e.target === e.currentTarget) clearCanvasSelection();
             }}
           >
+            <div
+              className="map-builder-canvas__stage-scene"
+              style={{
+                transform: `translate3d(${view.tx}px, ${view.ty}px, 0) scale(${view.scale})`,
+                '--mb-inv-zoom': invZoomUi,
+              }}
+            >
             <div className="map-builder-canvas__roads" aria-hidden>
               <div className="map-builder-canvas__road map-builder-canvas__road--north" />
               <div className="map-builder-canvas__road map-builder-canvas__road--west" />
@@ -451,6 +546,8 @@ export default function MapBuilderCanvas() {
               />
             ))}
 
+            <MapBuilderUserDrawLayer stageRef={stageRef} view={view} />
+
             {showSelectionChrome ? (
               <MapLayerSelectionChrome
                 variant={selectionVariant}
@@ -466,61 +563,64 @@ export default function MapBuilderCanvas() {
               />
             ) : null}
 
-            <div
-              className="map-builder-canvas__toolbar-floating"
-              onClick={(e) => e.stopPropagation()}
-              onPointerDown={(e) => e.stopPropagation()}
-            >
-              <div className="map-builder-canvas__toolbar-group">
-                <button
-                  type="button"
-                  className="map-builder-canvas__chip map-builder-canvas__chip--icon"
-                  title="세로 뒤집기"
-                  aria-label="세로 뒤집기"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Icon icon={flipVerticalLine} width={18} height={18} />
-                </button>
-                <button
-                  type="button"
-                  className="map-builder-canvas__chip map-builder-canvas__chip--icon"
-                  title="가로 뒤집기"
-                  aria-label="가로 뒤집기"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Icon icon={flipHorizontalLine} width={18} height={18} />
-                </button>
+            {selectedMapLayerId ? (
+              <div
+                className="map-builder-canvas__toolbar-floating"
+                onClick={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
+              >
+                <div className="map-builder-canvas__toolbar-group">
+                  <button
+                    type="button"
+                    className="map-builder-canvas__chip map-builder-canvas__chip--icon"
+                    title="세로 뒤집기"
+                    aria-label="세로 뒤집기"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Icon icon={flipVerticalLine} width={18} height={18} />
+                  </button>
+                  <button
+                    type="button"
+                    className="map-builder-canvas__chip map-builder-canvas__chip--icon"
+                    title="가로 뒤집기"
+                    aria-label="가로 뒤집기"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Icon icon={flipHorizontalLine} width={18} height={18} />
+                  </button>
+                </div>
+                <span className="map-builder-canvas__toolbar-divider" aria-hidden />
+                <div className="map-builder-canvas__toolbar-group">
+                  <button
+                    type="button"
+                    className="map-builder-canvas__chip map-builder-canvas__chip--icon"
+                    title="복제"
+                    aria-label="복제"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Icon icon={copy2Line} width={18} height={18} />
+                  </button>
+                  <button
+                    type="button"
+                    className="map-builder-canvas__chip map-builder-canvas__chip--icon"
+                    title="앞으로"
+                    aria-label="앞으로 가져오기"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Icon icon={arrowUpLine} width={18} height={18} />
+                  </button>
+                  <button
+                    type="button"
+                    className="map-builder-canvas__chip map-builder-canvas__chip--icon"
+                    title="뒤로"
+                    aria-label="뒤로 보내기"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Icon icon={arrowDownLine} width={18} height={18} />
+                  </button>
+                </div>
               </div>
-              <span className="map-builder-canvas__toolbar-divider" aria-hidden />
-              <div className="map-builder-canvas__toolbar-group">
-                <button
-                  type="button"
-                  className="map-builder-canvas__chip map-builder-canvas__chip--icon"
-                  title="복제"
-                  aria-label="복제"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Icon icon={copy2Line} width={18} height={18} />
-                </button>
-                <button
-                  type="button"
-                  className="map-builder-canvas__chip map-builder-canvas__chip--icon"
-                  title="앞으로"
-                  aria-label="앞으로 가져오기"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Icon icon={arrowUpLine} width={18} height={18} />
-                </button>
-                <button
-                  type="button"
-                  className="map-builder-canvas__chip map-builder-canvas__chip--icon"
-                  title="뒤로"
-                  aria-label="뒤로 보내기"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Icon icon={arrowDownLine} width={18} height={18} />
-                </button>
-              </div>
+            ) : null}
             </div>
           </div>
         </div>

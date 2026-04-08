@@ -7,7 +7,12 @@ import {
   useRef,
   useState,
 } from 'react';
-import { MAP_BUILDER_INITIAL_PRESENT_IDS } from '@/shared/lib/mapBuilderLayers';
+import {
+  initialMapLayerTypes,
+  MAP_BUILDER_INITIAL_PRESENT_IDS,
+} from '@/shared/lib/mapBuilderLayers';
+
+/** @typedef {'select'|'pan'|'rect'|'ellipse'|'triangle'|'polygon'|'polyline'|'pen'} MapBuilderToolId */
 
 const ProjectNewMapBuilderUiContext = createContext(undefined);
 
@@ -24,9 +29,12 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
   const [mapLayerDetailOpenId, setMapLayerDetailOpenId] = useState(null);
   const [mapPresentLayerIds, setMapPresentLayerIds] = useState(() => [...MAP_BUILDER_INITIAL_PRESENT_IDS]);
   const [mapLayerLocked, setMapLayerLocked] = useState(initialLockedMap);
-  const [mapLayerTypes, setMapLayerTypes] = useState({});
+  const [mapLayerTypes, setMapLayerTypes] = useState(() => initialMapLayerTypes());
+  const [mapBuilderTool, setMapBuilderTool] = useState(/** @type {MapBuilderToolId} */ ('select'));
+  const [mapUserShapes, setMapUserShapes] = useState([]);
   const prevMapBuilderOpenRef = useRef(false);
   const expandSidePanelRef = useRef(null);
+  const mapCanvasControlsRef = useRef(null);
 
   const registerExpandMapSidePanel = useCallback((fn) => {
     expandSidePanelRef.current = fn;
@@ -53,6 +61,46 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
     setMapLayerTypes((prev) => ({ ...prev, [layerId]: type }));
   }, []);
 
+  const addMapUserShape = useCallback((shape) => {
+    setMapUserShapes((prev) => [...prev, shape]);
+  }, []);
+
+  const removeMapUserShape = useCallback((shapeId) => {
+    setMapUserShapes((prev) => prev.filter((s) => s.id !== shapeId));
+    setMapLayerTypes((prev) => {
+      const next = { ...prev };
+      delete next[shapeId];
+      return next;
+    });
+    setSelectedMapLayerId((cur) => (cur === shapeId ? null : cur));
+    setMapLayerDetailOpenId((cur) => (cur === shapeId ? null : cur));
+  }, []);
+
+  const updateMapUserShape = useCallback((shapeId, patch) => {
+    setMapUserShapes((prev) =>
+      prev.map((s) => (s.id === shapeId ? { ...s, ...patch } : s)),
+    );
+  }, []);
+
+  const registerMapCanvasControls = useCallback((api) => {
+    mapCanvasControlsRef.current = api;
+    return () => {
+      mapCanvasControlsRef.current = null;
+    };
+  }, []);
+
+  const zoomMapIn = useCallback(() => {
+    mapCanvasControlsRef.current?.zoomIn?.();
+  }, []);
+
+  const zoomMapOut = useCallback(() => {
+    mapCanvasControlsRef.current?.zoomOut?.();
+  }, []);
+
+  const fitMapView = useCallback(() => {
+    mapCanvasControlsRef.current?.fitView?.();
+  }, []);
+
   useEffect(() => {
     if (!mapBuilderOpen) {
       prevMapBuilderOpenRef.current = false;
@@ -63,17 +111,22 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
     if (!prevMapBuilderOpenRef.current) {
       setMapPresentLayerIds([...MAP_BUILDER_INITIAL_PRESENT_IDS]);
       setMapLayerLocked(initialLockedMap());
-      setMapLayerTypes({});
+      setMapLayerTypes(initialMapLayerTypes());
+      setMapUserShapes([]);
+      setMapBuilderTool('select');
     }
     prevMapBuilderOpenRef.current = true;
   }, [mapBuilderOpen]);
 
   useEffect(() => {
-    if (selectedMapLayerId && !mapPresentLayerIds.includes(selectedMapLayerId)) {
+    if (!selectedMapLayerId) return;
+    const inPresent = mapPresentLayerIds.includes(selectedMapLayerId);
+    const inUserShapes = mapUserShapes.some((s) => s.id === selectedMapLayerId);
+    if (!inPresent && !inUserShapes) {
       setSelectedMapLayerId(null);
       setMapLayerDetailOpenId(null);
     }
-  }, [mapPresentLayerIds, selectedMapLayerId]);
+  }, [mapPresentLayerIds, mapUserShapes, selectedMapLayerId]);
 
   const value = useMemo(
     () => ({
@@ -89,10 +142,20 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
       setMapLayerLocked,
       mapLayerTypes,
       setMapLayerType,
+      mapBuilderTool,
+      setMapBuilderTool,
+      mapUserShapes,
+      addMapUserShape,
+      updateMapUserShape,
+      removeMapUserShape,
       removeMapPresentLayer,
       toggleMapLayerLock,
       expandMapSidePanel,
       registerExpandMapSidePanel,
+      registerMapCanvasControls,
+      zoomMapIn,
+      zoomMapOut,
+      fitMapView,
     }),
     [
       mapBuilderOpen,
@@ -102,10 +165,19 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
       mapLayerLocked,
       mapLayerTypes,
       setMapLayerType,
+      mapBuilderTool,
+      mapUserShapes,
+      addMapUserShape,
+      updateMapUserShape,
+      removeMapUserShape,
       removeMapPresentLayer,
       toggleMapLayerLock,
       expandMapSidePanel,
       registerExpandMapSidePanel,
+      registerMapCanvasControls,
+      zoomMapIn,
+      zoomMapOut,
+      fitMapView,
     ],
   );
 
@@ -131,10 +203,20 @@ export function useProjectNewMapBuilderUi() {
       setMapLayerLocked: () => {},
       mapLayerTypes: {},
       setMapLayerType: () => {},
+      mapBuilderTool: 'select',
+      setMapBuilderTool: () => {},
+      mapUserShapes: [],
+      addMapUserShape: () => {},
+      updateMapUserShape: () => {},
+      removeMapUserShape: () => {},
       removeMapPresentLayer: () => {},
       toggleMapLayerLock: () => {},
       expandMapSidePanel: () => {},
       registerExpandMapSidePanel: () => {},
+      registerMapCanvasControls: () => () => {},
+      zoomMapIn: () => {},
+      zoomMapOut: () => {},
+      fitMapView: () => {},
     }
   );
 }

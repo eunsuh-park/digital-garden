@@ -14,6 +14,10 @@ import {
   SHAPE_TYPES,
   SHAPE_TYPE_LABELS,
 } from '@/shared/lib/mapBuilderLayers';
+import {
+  inspectorLayerFromUserShape,
+  userShapeDisplayName,
+} from '@/shared/lib/mapBuilderUserShapes';
 import './MapBuilderInspector.css';
 
 function mergeLayerLocked(layer, mapLayerLocked) {
@@ -22,8 +26,9 @@ function mergeLayerLocked(layer, mapLayerLocked) {
   return { ...layer, locked };
 }
 
-function LayerDetailPane({ layer, onDeleteLayer, layerType, onTypeChange }) {
+function LayerDetailPane({ layer, userShape, onUserShapePatch, onDeleteLayer, layerType, onTypeChange }) {
   if (!layer) return null;
+  const isUser = !!layer.isUserShape && userShape;
   return (
     <div className="map-builder-inspector__layer-panel map-builder-inspector__layer-panel--full">
       <div className="map-builder-inspector__inline-field-row map-builder-inspector__inline-field-row--wrap">
@@ -35,6 +40,8 @@ function LayerDetailPane({ layer, onDeleteLayer, layerType, onTypeChange }) {
           type="text"
           className="map-builder-inspector__mini-field map-builder-inspector__mini-field--grow"
           defaultValue={layer.size}
+          readOnly={isUser}
+          title={isUser ? '그린 도형은 크기를 여기서 바꾸지 않습니다' : undefined}
         />
         <label className="map-builder-inspector__inline-label" htmlFor={`mb-split-rot-${layer.id}`}>
           회전
@@ -44,16 +51,51 @@ function LayerDetailPane({ layer, onDeleteLayer, layerType, onTypeChange }) {
           type="text"
           className="map-builder-inspector__mini-field map-builder-inspector__mini-field--grow"
           defaultValue={layer.rotation}
+          readOnly={isUser}
+          title={isUser ? '그린 도형은 회전을 여기서 바꾸지 않습니다' : undefined}
         />
       </div>
-      <div className="map-builder-inspector__inline-field-row">
-        <span className="map-builder-inspector__inline-field-label">이름</span>
-        <div className="map-builder-inspector__inline-value">{layer.name}</div>
-      </div>
-      <div className="map-builder-inspector__inline-field-row">
-        <span className="map-builder-inspector__inline-field-label">설명</span>
-        <div className="map-builder-inspector__inline-value">{layer.desc}</div>
-      </div>
+      {isUser ? (
+        <div className="map-builder-inspector__inline-field-row map-builder-inspector__inline-field-row--stack">
+          <label className="map-builder-inspector__inline-field-label" htmlFor={`mb-split-name-${layer.id}`}>
+            이름
+          </label>
+          <input
+            id={`mb-split-name-${layer.id}`}
+            type="text"
+            className="map-builder-inspector__text-field"
+            value={userShape.label ?? ''}
+            placeholder={userShapeDisplayName(userShape)}
+            onChange={(e) => onUserShapePatch({ label: e.target.value })}
+            autoComplete="off"
+          />
+        </div>
+      ) : (
+        <div className="map-builder-inspector__inline-field-row">
+          <span className="map-builder-inspector__inline-field-label">이름</span>
+          <div className="map-builder-inspector__inline-value">{layer.name}</div>
+        </div>
+      )}
+      {isUser ? (
+        <div className="map-builder-inspector__inline-field-row map-builder-inspector__inline-field-row--stack">
+          <label className="map-builder-inspector__inline-field-label" htmlFor={`mb-split-desc-${layer.id}`}>
+            설명
+          </label>
+          <textarea
+            id={`mb-split-desc-${layer.id}`}
+            className="map-builder-inspector__text-area"
+            value={userShape.description ?? ''}
+            placeholder="설명을 입력할 수 있어요."
+            rows={3}
+            onChange={(e) => onUserShapePatch({ description: e.target.value })}
+          />
+        </div>
+      ) : (
+        <div className="map-builder-inspector__inline-field-row">
+          <span className="map-builder-inspector__inline-field-label">설명</span>
+          <div className="map-builder-inspector__inline-value">{layer.desc}</div>
+        </div>
+      )}
       <div className="map-builder-inspector__inline-field-row">
         <label
           className="map-builder-inspector__inline-field-label"
@@ -114,23 +156,34 @@ export default function MapBuilderInspector() {
     mapLayerLocked,
     mapLayerTypes,
     setMapLayerType,
+    mapUserShapes,
+    updateMapUserShape,
     removeMapPresentLayer,
+    removeMapUserShape,
     toggleMapLayerLock,
   } = useProjectNewMapBuilderUi();
 
-  const visibleLayers = useMemo(
-    () => sortLayersByMapOrder(MAP_BUILDER_LAYERS.filter((l) => mapPresentLayerIds.includes(l.id))),
-    [mapPresentLayerIds],
-  );
+  const visibleLayers = useMemo(() => {
+    const staticLayers = sortLayersByMapOrder(
+      MAP_BUILDER_LAYERS.filter((l) => mapPresentLayerIds.includes(l.id)),
+    );
+    const userLayers = mapUserShapes.map((s) => inspectorLayerFromUserShape(s));
+    return [...staticLayers, ...userLayers];
+  }, [mapPresentLayerIds, mapUserShapes]);
 
   const confirmAndRemoveLayer = useCallback(
     (layer) => {
+      if (layer.isUserShape) {
+        if (!window.confirm('이 도형을 삭제할까요?')) return;
+        removeMapUserShape(layer.id);
+        return;
+      }
       const msg = mapBuilderRemoveConfirmMessage(layer, mapLayerLocked);
       if (!msg) return;
       if (!window.confirm(msg)) return;
       removeMapPresentLayer(layer.id);
     },
-    [mapLayerLocked, removeMapPresentLayer],
+    [mapLayerLocked, removeMapPresentLayer, removeMapUserShape],
   );
 
   const cardRefs = useRef({});
@@ -152,7 +205,18 @@ export default function MapBuilderInspector() {
     setSelectedMapLayerId(layerId);
   }
 
-  const selectedLayer = getMapBuilderLayer(selectedMapLayerId);
+  const selectedLayer = useMemo(() => {
+    if (!selectedMapLayerId) return null;
+    const builtIn = getMapBuilderLayer(selectedMapLayerId);
+    if (builtIn) return builtIn;
+    const userShape = mapUserShapes.find((s) => s.id === selectedMapLayerId);
+    return userShape ? inspectorLayerFromUserShape(userShape) : null;
+  }, [mapUserShapes, selectedMapLayerId]);
+
+  const selectedUserShape = useMemo(
+    () => mapUserShapes.find((s) => s.id === selectedMapLayerId) ?? null,
+    [mapUserShapes, selectedMapLayerId],
+  );
 
   return (
     <div className="map-builder-inspector">
@@ -219,6 +283,10 @@ export default function MapBuilderInspector() {
             <div className="map-builder-inspector__pane-inner">
               <LayerDetailPane
                 layer={selectedLayer}
+                userShape={selectedLayer.isUserShape ? selectedUserShape : null}
+                onUserShapePatch={(patch) => {
+                  if (selectedUserShape) updateMapUserShape(selectedUserShape.id, patch);
+                }}
                 onDeleteLayer={confirmAndRemoveLayer}
                 layerType={mapLayerTypes[selectedLayer.id] ?? null}
                 onTypeChange={(type) => setMapLayerType(selectedLayer.id, type)}
@@ -240,6 +308,9 @@ export default function MapBuilderInspector() {
               const open = mapLayerDetailOpenId === layer.id;
               const selected = selectedMapLayerId === layer.id;
               const layerType = mapLayerTypes[layer.id] ?? null;
+              const rowUserShape = layer.isUserShape
+                ? mapUserShapes.find((s) => s.id === layer.id)
+                : null;
               return (
                 <div
                   key={layer.id}
@@ -281,6 +352,8 @@ export default function MapBuilderInspector() {
                               type="text"
                               className="map-builder-inspector__mini-field"
                               defaultValue={layer.size}
+                              readOnly={!!layer.isUserShape}
+                              title={layer.isUserShape ? '그린 도형은 크기를 여기서 바꾸지 않습니다' : undefined}
                             />
                             <label className="map-builder-inspector__inline-label" htmlFor={`mb-rot-${layer.id}`}>
                               회전
@@ -290,6 +363,8 @@ export default function MapBuilderInspector() {
                               type="text"
                               className="map-builder-inspector__mini-field"
                               defaultValue={layer.rotation}
+                              readOnly={!!layer.isUserShape}
+                              title={layer.isUserShape ? '그린 도형은 회전을 여기서 바꾸지 않습니다' : undefined}
                             />
                           </>
                         ) : null}
@@ -319,14 +394,55 @@ export default function MapBuilderInspector() {
 
                   {open ? (
                     <div className="map-builder-inspector__layer-panel">
-                      <div className="map-builder-inspector__inline-field-row">
-                        <span className="map-builder-inspector__inline-field-label">이름</span>
-                        <div className="map-builder-inspector__inline-value">{layer.name}</div>
-                      </div>
-                      <div className="map-builder-inspector__inline-field-row">
-                        <span className="map-builder-inspector__inline-field-label">설명</span>
-                        <div className="map-builder-inspector__inline-value">{layer.desc}</div>
-                      </div>
+                      {rowUserShape ? (
+                        <div className="map-builder-inspector__inline-field-row map-builder-inspector__inline-field-row--stack">
+                          <label
+                            className="map-builder-inspector__inline-field-label"
+                            htmlFor={`mb-name-${layer.id}`}
+                          >
+                            이름
+                          </label>
+                          <input
+                            id={`mb-name-${layer.id}`}
+                            type="text"
+                            className="map-builder-inspector__text-field"
+                            value={rowUserShape.label ?? ''}
+                            placeholder={userShapeDisplayName(rowUserShape)}
+                            onChange={(e) => updateMapUserShape(layer.id, { label: e.target.value })}
+                            onClick={(e) => e.stopPropagation()}
+                            autoComplete="off"
+                          />
+                        </div>
+                      ) : (
+                        <div className="map-builder-inspector__inline-field-row">
+                          <span className="map-builder-inspector__inline-field-label">이름</span>
+                          <div className="map-builder-inspector__inline-value">{layer.name}</div>
+                        </div>
+                      )}
+                      {rowUserShape ? (
+                        <div className="map-builder-inspector__inline-field-row map-builder-inspector__inline-field-row--stack">
+                          <label
+                            className="map-builder-inspector__inline-field-label"
+                            htmlFor={`mb-desc-${layer.id}`}
+                          >
+                            설명
+                          </label>
+                          <textarea
+                            id={`mb-desc-${layer.id}`}
+                            className="map-builder-inspector__text-area"
+                            value={rowUserShape.description ?? ''}
+                            placeholder="설명을 입력할 수 있어요."
+                            rows={3}
+                            onChange={(e) => updateMapUserShape(layer.id, { description: e.target.value })}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
+                      ) : (
+                        <div className="map-builder-inspector__inline-field-row">
+                          <span className="map-builder-inspector__inline-field-label">설명</span>
+                          <div className="map-builder-inspector__inline-value">{layer.desc}</div>
+                        </div>
+                      )}
                       <div className="map-builder-inspector__inline-field-row">
                         <label
                           className="map-builder-inspector__inline-field-label"

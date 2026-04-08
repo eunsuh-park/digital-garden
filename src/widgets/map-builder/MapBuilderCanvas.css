@@ -9,7 +9,7 @@
   --mb-shadow: 0 10px 30px rgba(57, 44, 28, 0.08);
 
   position: relative;
-  z-index: 41;
+  z-index: 0;
   background: linear-gradient(180deg, #f7f3ee 0%, #f3ede5 100%);
   border: none;
   border-radius: 0;
@@ -36,8 +36,6 @@
 .map-builder-canvas__world {
   position: absolute;
   inset: 0;
-  transform-origin: 0 0;
-  will-change: transform;
 }
 
 /* 집·도형 히트 바로 아래(스테이지 중심 기준), 하단 도크에 가리지 않도록 */
@@ -101,6 +99,28 @@
   color: var(--mb-text);
 }
 
+.map-builder-canvas__draw-svg {
+  position: absolute;
+  inset: 0;
+  z-index: 28;
+  overflow: visible;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.map-builder-canvas__draw-capture {
+  pointer-events: auto;
+}
+
+.map-builder-canvas__stage--pan {
+  cursor: grab;
+}
+
+.map-builder-canvas__stage--pan:active {
+  cursor: grabbing;
+}
+
+/* 고정 뷰포트(프레임만): 확대·축소는 자식 .stage-scene 에만 적용 */
 .map-builder-canvas__stage {
   position: relative;
   z-index: 1;
@@ -108,6 +128,19 @@
   height: 100%;
   min-height: 0;
   border-radius: 42px;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(90, 65, 40, 0.08);
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.map-builder-canvas__stage-scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: 0 0;
+  will-change: transform;
+  border-radius: inherit;
   background:
     linear-gradient(
       to right,
@@ -122,7 +155,6 @@
     linear-gradient(to right, rgba(255, 255, 255, 0.14) 1px, transparent 1px),
     #cfd4b6;
   background-size: 100% 100%, 48px 48px, 48px 48px, auto;
-  overflow: hidden;
 }
 
 .map-builder-canvas__roads {

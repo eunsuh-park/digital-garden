@@ -14,7 +14,8 @@ import './ProjectMapBuilderPage.css';
 export default function ProjectMapBuilderPage() {
   const { projectId } = useParams();
   const navigate = useNavigate();
-  const { setMapBuilderOpen, mapPresentLayerIds, mapLayerTypes } = useProjectNewMapBuilderUi();
+  const { setMapBuilderOpen, mapPresentLayerIds, mapLayerTypes, mapUserShapes } =
+    useProjectNewMapBuilderUi();
   const { showToast } = useToast();
   const { projects, loading, error } = useProjects();
 
@@ -62,13 +63,15 @@ export default function ProjectMapBuilderPage() {
   }
 
   const handleSaveAndContinue = useCallback(() => {
-    const hasNullType = mapPresentLayerIds.some((id) => !mapLayerTypes[id]);
+    const hasNullType =
+      mapPresentLayerIds.some((id) => !mapLayerTypes[id]) ||
+      mapUserShapes.some((s) => !mapLayerTypes[s.id]);
     if (hasNullType) {
       showToast('도형 별로 유형을 확정해주세요');
       return;
     }
     navigate(`/project/${projectId}/step3`, { replace: false });
-  }, [mapPresentLayerIds, mapLayerTypes, showToast, navigate, projectId]);
+  }, [mapPresentLayerIds, mapLayerTypes, mapUserShapes, showToast, navigate, projectId]);
 
   return (
     <div className="project-new-page project-new-page--map-builder">

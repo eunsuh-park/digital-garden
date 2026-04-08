@@ -25,7 +25,8 @@ export default function ProjectNewPage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { reload: reloadProjects } = useProjects();
-  const { setMapBuilderOpen, mapPresentLayerIds, mapLayerTypes } = useProjectNewMapBuilderUi();
+  const { setMapBuilderOpen, mapPresentLayerIds, mapLayerTypes, mapUserShapes } =
+    useProjectNewMapBuilderUi();
 
   const [step, setStep] = useState(0);
   const [name, setName] = useState('');
@@ -66,7 +67,9 @@ export default function ProjectNewPage() {
   async function handleCreate() {
     if (!step1Valid || saving) return;
 
-    const hasNullType = mapPresentLayerIds.some((id) => !mapLayerTypes[id]);
+    const hasNullType =
+      mapPresentLayerIds.some((id) => !mapLayerTypes[id]) ||
+      mapUserShapes.some((s) => !mapLayerTypes[s.id]);
     if (hasNullType) {
       showToast('도형 별로 유형을 확정해주세요');
       return;
