@@ -13,9 +13,16 @@ import {
   statusFromStatusName,
 } from '@/shared/lib/gardenFromDb';
 
+/** projects.id 가 숫자·문자 숫자·UUID 등일 수 있음 — Supabase project_id 타입에 맞게 그대로 전달 */
 function pid(projectId) {
-  const n = Number(projectId);
-  return Number.isFinite(n) ? n : null;
+  if (projectId == null || projectId === '') return null;
+  const s = String(projectId).trim();
+  if (!s) return null;
+  if (/^\d+$/.test(s)) {
+    const n = Number(s);
+    return Number.isSafeInteger(n) ? n : s;
+  }
+  return s;
 }
 
 function rwError(err, fallback) {

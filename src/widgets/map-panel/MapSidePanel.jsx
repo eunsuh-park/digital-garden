@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { NavLink, useLocation, useMatch } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import up from '@iconify-icons/mingcute/arrow-up-line';
 import down from '@iconify-icons/mingcute/arrow-down-line';
@@ -107,15 +107,22 @@ function ZoneTabContent() {
   );
 }
 
+function parseProjectMapPath(pathname) {
+  const m = pathname.match(/^\/project\/([^/]+)(?:\/(tasks|plants|map-builder))?$/);
+  if (!m || m[1] === 'new') return null;
+  return { projectId: m[1], suffix: m[2] };
+}
+
 export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
   const { pathname } = useLocation();
-  const projectMatch = useMatch({ path: '/project/:projectId', end: true });
-  const projectIdParam = projectMatch?.params?.projectId;
-  const isProjectOpen = Boolean(projectIdParam && projectIdParam !== 'new');
+  const { mapBuilderOpen } = useProjectNewMapBuilderUi();
+  const mapPath = useMemo(() => parseProjectMapPath(pathname), [pathname]);
+  const isProjectOpen =
+    Boolean(mapPath) || (mapBuilderOpen && pathname === '/project/new');
+  const projectBase = mapPath ? `/project/${mapPath.projectId}` : null;
   const { zones, tasks, plants, loading } = useZones();
   const { detail, closeDetail, closeAllDetail } = useMapPanelDetail();
   const { showToast } = useToast();
-  const { mapBuilderOpen } = useProjectNewMapBuilderUi();
   const [mapBuilderMode, setMapBuilderModeState] = useState(() => getMapBuilderMode());
 
   useEffect(() => {
@@ -135,7 +142,7 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
   const taskTitleMap = useMemo(() => Object.fromEntries(tasks.map((t) => [t.id, t.title])), [tasks]);
 
   const tabFromPath =
-    pathname.startsWith('/tasks') ? 'tasks' : pathname.startsWith('/plants') ? 'plants' : 'zone';
+    mapPath?.suffix === 'tasks' ? 'tasks' : mapPath?.suffix === 'plants' ? 'plants' : 'zone';
 
   const pendingTasksCount = useMemo(
     () => tasks.filter((t) => t.status !== 'completed').length,
@@ -149,6 +156,7 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
   const collapsedVisual = collapsed && !detail;
   const asideClass = [
     'map-side-panel',
+    mapBuilderOpen ? 'map-side-panel--map-builder' : '',
     !isProjectOpen ? 'map-side-panel--inactive' : '',
     collapsedVisual ? 'map-side-panel--collapsed' : '',
     detail ? 'map-side-panel--detail-expanded' : '',
@@ -193,10 +201,10 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
           </div>
         ) : (
           <>
-        {!detail && (
+        {!detail && projectBase ? (
           <div className="map-side-panel__tabs" role="tablist" aria-label="보기 전환">
             <NavLink
-              to="/"
+              to={projectBase}
               end
               role="tab"
               aria-selected={tabFromPath === 'zone'}
@@ -208,7 +216,7 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
               <span className="map-side-panel__tab-count">({zoneTotal})</span>
             </NavLink>
             <NavLink
-              to="/tasks"
+              to={`${projectBase}/tasks`}
               role="tab"
               aria-selected={tabFromPath === 'tasks'}
               className={({ isActive }) =>
@@ -218,7 +226,7 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
               Tasks <span className="map-side-panel__tab-count">({tasksCountLabel})</span>
             </NavLink>
             <NavLink
-              to="/plants"
+              to={`${projectBase}/plants`}
               role="tab"
               aria-selected={tabFromPath === 'plants'}
               className={({ isActive }) =>
@@ -228,7 +236,7 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
               Plants <span className="map-side-panel__tab-count">({plantsCountLabel})</span>
             </NavLink>
           </div>
-        )}
+        ) : null}
 
         <div
           className={`map-side-panel__body ${detail ? 'map-side-panel__body--detail' : ''}`}

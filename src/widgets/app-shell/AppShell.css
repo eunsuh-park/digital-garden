@@ -28,6 +28,13 @@
   overflow: hidden;
 }
 
+/* 맵 빌더: 모바일·태블릿에서 App Bar 대신 MapBuilderTopBar만 상단 사용 */
+@media (max-width: 1023px) {
+  .app-shell__body:has(.project-new-page--map-builder) .app-bar {
+    display: none !important;
+  }
+}
+
 .app-shell__main {
   flex: 1;
   min-height: 0;
@@ -75,4 +82,28 @@
   .app-shell__main:has(.project-new-page--map-builder) {
     padding: 0;
   }
+}
+
+/* 맵 빌더: 네비게이션 레일 완전히 숨김 */
+.app-shell--map-builder-rail-hidden .navigation-rail {
+  display: none !important;
+}
+
+/*
+ * 맵 빌더 + 모바일·태블릿: 사이드 패널을 펼치면 상단 탑바·하단 도크를 화면 밖으로 슬라이드
+ * (전환 규칙은 MapBuilderWorkspace.css / ProjectNewPage 일대 트리거와 맞춤)
+ */
+.app-shell--map-builder-mobile-chrome-hidden .project-new-page--map-builder .map-builder-workspace__header {
+  max-height: 0 !important;
+  opacity: 0;
+  pointer-events: none;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+}
+
+.app-shell--map-builder-mobile-chrome-hidden .project-new-page--map-builder .map-builder-workspace__dock-overlay {
+  transform: translateY(calc(100% + 48px));
+  opacity: 0;
+  pointer-events: none;
 }

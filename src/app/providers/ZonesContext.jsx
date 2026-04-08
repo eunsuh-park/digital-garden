@@ -40,11 +40,18 @@ export function ZonesProvider({ children }) {
         setError(null);
 
         if (isDevMockEnabled()) {
-          const snap = getDemoGardenSnapshot();
-          if (requestIdRef.current !== requestId) return;
-          setZones(snap.zones);
-          setTasks(snap.tasks);
-          setPlants(snap.plants);
+          if (isDemoProject) {
+            const snap = getDemoGardenSnapshot();
+            if (requestIdRef.current !== requestId) return;
+            setZones(snap.zones);
+            setTasks(snap.tasks);
+            setPlants(snap.plants);
+          } else {
+            if (requestIdRef.current !== requestId) return;
+            setZones([]);
+            setTasks([]);
+            setPlants([]);
+          }
           return;
         }
 
@@ -76,7 +83,7 @@ export function ZonesProvider({ children }) {
         }
       }
     },
-    [projectId, projectLoading, projectReady]
+    [projectId, projectLoading, projectReady, isDemoProject]
   );
 
   useEffect(() => {

@@ -1,6 +1,5 @@
 import { Icon } from '@iconify/react';
 import addCircleLine from '@iconify-icons/mingcute/add-circle-line';
-import arrowDownLine from '@iconify-icons/mingcute/arrow-down-line';
 import cursorLine from '@iconify-icons/mingcute/cursor-line';
 import hexagonLine from '@iconify-icons/mingcute/hexagon-line';
 import minusCircleLine from '@iconify-icons/mingcute/minus-circle-line';
@@ -58,13 +57,6 @@ export default function MapBuilderToolDock() {
             </button>
           </div>
         </div>
-      </div>
-
-      <div className="map-builder-tool-dock__selectbar">
-        <button type="button" className="map-builder-tool-dock__dropdown">
-          <span>섹션 그룹 선택</span>
-          <Icon icon={arrowDownLine} width={18} height={18} aria-hidden />
-        </button>
       </div>
     </section>
   );

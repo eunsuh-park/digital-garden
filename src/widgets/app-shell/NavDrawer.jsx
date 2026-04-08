@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { NavLink, Link } from 'react-router-dom';
+import { useEffect, useMemo } from 'react';
+import { NavLink, Link, useLocation } from 'react-router-dom';
 import { useProjects } from '@/app/providers/ProjectsContext';
 import { Icon } from '@iconify/react';
 import mapLine from '@iconify-icons/mingcute/map-line';
@@ -22,8 +22,21 @@ import './NavDrawer.css';
 const MAX_PROJECT_SLOTS = 3;
 
 export default function NavDrawer({ isOpen, onClose, onOpenSettings, onLogout }) {
+  const { pathname } = useLocation();
   const { projects, loading } = useProjects();
   const slots = Array.from({ length: MAX_PROJECT_SLOTS }, (_, i) => projects[i] ?? null);
+
+  const { mapTo, tasksTo, plantsTo } = useMemo(() => {
+    const m = pathname.match(/^\/project\/([^/]+)/);
+    const fromRoute = m && m[1] !== 'new' ? m[1] : null;
+    const fallbackPid = projects[0]?.id;
+    const pid = fromRoute ?? fallbackPid;
+    if (!pid) {
+      return { mapTo: '/', tasksTo: '/', plantsTo: '/' };
+    }
+    const base = `/project/${pid}`;
+    return { mapTo: base, tasksTo: `${base}/tasks`, plantsTo: `${base}/plants` };
+  }, [pathname, projects]);
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -117,7 +130,7 @@ export default function NavDrawer({ isOpen, onClose, onOpenSettings, onLogout })
             </h2>
             <nav className="nav-drawer__links">
               <NavLink
-                to="/"
+                to={mapTo}
                 end
                 className={({ isActive }) =>
                   `nav-drawer__link ${isActive ? 'nav-drawer__link--active' : ''}`
@@ -128,7 +141,7 @@ export default function NavDrawer({ isOpen, onClose, onOpenSettings, onLogout })
                 지도
               </NavLink>
               <NavLink
-                to="/tasks"
+                to={tasksTo}
                 className={({ isActive }) =>
                   `nav-drawer__link ${isActive ? 'nav-drawer__link--active' : ''}`
                 }
@@ -138,7 +151,7 @@ export default function NavDrawer({ isOpen, onClose, onOpenSettings, onLogout })
                 할 일
               </NavLink>
               <NavLink
-                to="/plants"
+                to={plantsTo}
                 className={({ isActive }) =>
                   `nav-drawer__link ${isActive ? 'nav-drawer__link--active' : ''}`
                 }

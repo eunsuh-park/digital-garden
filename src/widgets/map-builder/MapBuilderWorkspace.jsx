@@ -10,18 +10,26 @@ export default function MapBuilderWorkspace({
   onSaveAndContinue,
   saving,
   saveDisabled,
+  primaryActionLabel,
 }) {
   return (
     <div className="map-builder-workspace">
-      <MapBuilderTopBar
-        projectTitle={projectTitle}
-        onBack={onBack}
-        onSaveAndContinue={onSaveAndContinue}
-        saving={saving}
-        saveDisabled={saveDisabled}
-      />
-      <MapBuilderCanvas />
-      <MapBuilderToolDock />
+      <div className="map-builder-workspace__header">
+        <MapBuilderTopBar
+          projectTitle={projectTitle}
+          onBack={onBack}
+          onSaveAndContinue={onSaveAndContinue}
+          saving={saving}
+          saveDisabled={saveDisabled}
+          primaryActionLabel={primaryActionLabel}
+        />
+      </div>
+      <div className="map-builder-workspace__canvas-shell">
+        <MapBuilderCanvas />
+        <div className="map-builder-workspace__dock-overlay">
+          <MapBuilderToolDock />
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,3 +1,6 @@
+import { Link, Navigate } from 'react-router-dom';
+import { Icon } from '@iconify/react';
+import mapLine from '@iconify-icons/mingcute/map-line';
 import { useGardenProjectId } from '@/app/providers/useGardenProjectId';
 import { useZones } from '@/app/providers/ZonesContext';
 import GardenMap from '@/features/garden-map/GardenMap';
@@ -20,8 +23,17 @@ function getZoneById(zones, id) {
 }
 
 export default function LandingPage() {
-  const { invalidProject } = useGardenProjectId();
-  const { zones, tasks, plants, loading, error } = useZones();
+  const { invalidProject, projectId, ready: gpReady } = useGardenProjectId();
+  const { zones, tasks, plants, loading, error, isReadOnlyGarden } = useZones();
+
+  const showMapBuilderCta =
+    gpReady &&
+    !invalidProject &&
+    Boolean(projectId) &&
+    !isReadOnlyGarden &&
+    !loading &&
+    !error &&
+    zones.length === 0;
 
   if (invalidProject) {
     return (
@@ -36,6 +48,10 @@ export default function LandingPage() {
     );
   }
 
+  if (gpReady && !invalidProject && !projectId) {
+    return <Navigate to="/" replace />;
+  }
+
   if (loading) {
     return (
       <div className="landing-page landing-page--loading">
@@ -48,6 +64,26 @@ export default function LandingPage() {
     return (
       <div className="landing-page landing-page--centered">
         <ErrorState variant="error" message={error} showHomeLink />
+      </div>
+    );
+  }
+
+  if (showMapBuilderCta) {
+    return (
+      <div className="landing-page landing-page--map-pending">
+        <div className="landing-page__map-pending">
+          <h1 className="landing-page__map-pending-title">정원 지도를 아직 그리지 않았어요</h1>
+          <p className="landing-page__map-pending-desc">
+            맵 빌더에서 터를 그리면 이 화면에서 정원 지도와 구역·할 일·식물을 함께 쓸 수 있어요.
+          </p>
+          <Link
+            to={`/project/${projectId}/map-builder`}
+            className="landing-page__map-pending-btn"
+          >
+            <Icon icon={mapLine} width={20} height={20} aria-hidden />
+            맵 빌딩 마저하기
+          </Link>
+        </div>
       </div>
     );
   }

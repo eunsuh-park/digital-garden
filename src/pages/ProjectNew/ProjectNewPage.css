@@ -18,6 +18,31 @@
   flex: 1;
 }
 
+@media (max-width: 1023px) {
+  .project-new-page--map-builder .map-builder-workspace__header {
+    margin: 0;
+    padding: 0;
+  }
+
+  .project-new-page--map-builder .map-builder-top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 130;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 12px 14px;
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid #e4ddd4;
+    box-shadow: none;
+    transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .app-shell--map-builder-mobile-chrome-hidden .project-new-page--map-builder .map-builder-top-bar {
+    transform: translateY(-100%);
+  }
+}
+
 .project-new-page__card {
   position: relative;
   width: 100%;

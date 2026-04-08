@@ -2,19 +2,32 @@ import { useMemo } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
 import { useProjects } from '@/app/providers/ProjectsContext';
 
+const PROJECT_ROUTE_PATTERNS = [
+  { path: '/project/:projectId/tasks', end: true },
+  { path: '/project/:projectId/plants', end: true },
+  { path: '/project/:projectId', end: true },
+];
+
+function parseRouteProjectId(pathname) {
+  for (const opts of PROJECT_ROUTE_PATTERNS) {
+    const m = matchPath(opts, pathname);
+    if (m?.params?.projectId) return m.params.projectId;
+  }
+  return null;
+}
+
 /**
  * 구역·할 일·식물(garden_*)이 붙는 프로젝트 ID.
- * - /project/:projectId(단, new 제외) 가 목록에 있으면 그 프로젝트
+ * - /project/:projectId[/tasks|/plants] 가 목록에 있으면 그 프로젝트
  * - 목록에 없는 id면 invalidProject (404 처리용)
- * - 그 외 경로(/)는 데모 프로젝트(is_demo) 우선, 없으면 본인 첫 프로젝트
+ * - 그 외 경로(/, /dashboard 등)는 projectId 없음 (데모 자동 선택 없음)
  */
 export function useGardenProjectId() {
   const { pathname } = useLocation();
   const { projects, loading } = useProjects();
 
   return useMemo(() => {
-    const m = matchPath({ path: '/project/:projectId', end: true }, pathname);
-    const routeId = m?.params?.projectId;
+    const routeId = parseRouteProjectId(pathname);
 
     if (routeId && routeId !== 'new') {
       if (loading) {
@@ -54,14 +67,12 @@ export function useGardenProjectId() {
         invalidProject: false,
       };
     }
-    const demo = projects.find((pr) => pr.is_demo);
-    const owned = projects.find((pr) => !pr.is_demo);
-    const pick = demo || owned;
+
     return {
-      projectId: pick ? String(pick.id) : null,
+      projectId: null,
       loading: false,
       ready: true,
-      isDemoProject: Boolean(pick?.is_demo),
+      isDemoProject: false,
       invalidProject: false,
     };
   }, [pathname, projects, loading]);

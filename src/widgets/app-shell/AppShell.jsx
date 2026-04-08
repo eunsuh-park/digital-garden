@@ -8,7 +8,10 @@ import { MapPanelLayoutProvider } from '@/app/providers/MapPanelLayoutContext';
 import { MapPanelDetailProvider, useMapPanelDetail } from '@/app/providers/MapPanelDetailContext';
 import { useAuth } from '@/app/providers/AuthContext';
 import { ProjectsProvider } from '@/app/providers/ProjectsContext';
-import { ProjectNewMapBuilderUiProvider } from '@/app/providers/ProjectNewMapBuilderUiContext';
+import {
+  ProjectNewMapBuilderUiProvider,
+  useProjectNewMapBuilderUi,
+} from '@/app/providers/ProjectNewMapBuilderUiContext';
 import NavigationRail from './NavigationRail';
 import MapSidePanel from '@/widgets/map-panel/MapSidePanel';
 import AppBar from './AppBar';
@@ -16,17 +19,44 @@ import NavDrawer from './NavDrawer';
 import SettingsModal from './SettingsModal';
 import './AppShell.css';
 
-function AppShellWithDetailSync() {
+function AppShellChrome() {
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const { mapBuilderOpen, registerExpandMapSidePanel } = useProjectNewMapBuilderUi();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [sectionNavCollapsed, setSectionNavCollapsed] = useState(true);
+  const [narrowViewport, setNarrowViewport] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia('(max-width: 1023px)').matches : false
+  );
   const { detail } = useMapPanelDetail();
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 1023px)');
+    function onChange() {
+      setNarrowViewport(mq.matches);
+    }
+    onChange();
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
 
   useEffect(() => {
     if (detail) setSectionNavCollapsed(false);
   }, [detail]);
+
+  useEffect(() => {
+    if (!mapBuilderOpen) return;
+    const wide = window.matchMedia('(min-width: 1024px)').matches;
+    if (wide) setSectionNavCollapsed(false);
+  }, [mapBuilderOpen]);
+
+  useEffect(() => {
+    registerExpandMapSidePanel(() => {
+      setSectionNavCollapsed(false);
+    });
+    return () => registerExpandMapSidePanel(null);
+  }, [registerExpandMapSidePanel]);
 
   function handleLogout() {
     logout();
@@ -40,28 +70,45 @@ function AppShellWithDetailSync() {
     setSettingsOpen(true);
   }
 
+  const mapBuilderMobilePanelOpen =
+    mapBuilderOpen && narrowViewport && !sectionNavCollapsed;
+
+  return (
+    <div
+      className={[
+        'app-shell',
+        mapBuilderOpen ? 'app-shell--map-builder-rail-hidden' : '',
+        mapBuilderMobilePanelOpen ? 'app-shell--map-builder-mobile-chrome-hidden' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      <NavigationRail onOpenSettings={handleOpenSettings} onLogout={handleLogout} />
+      <div className="app-shell__body">
+        <AppBar onOpenMenu={() => setDrawerOpen(true)} onOpenSettings={handleOpenSettings} onLogout={handleLogout} />
+        <main className="app-shell__main">
+          <Outlet />
+        </main>
+      </div>
+      <MapSidePanel
+        collapsed={sectionNavCollapsed}
+        onToggleCollapsed={() => setSectionNavCollapsed((c) => !c)}
+      />
+      <NavDrawer
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        onOpenSettings={handleOpenSettings}
+        onLogout={handleLogout}
+      />
+      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+    </div>
+  );
+}
+
+function AppShellWithDetailSync() {
   return (
     <ProjectNewMapBuilderUiProvider>
-      <div className="app-shell">
-        <NavigationRail onOpenSettings={handleOpenSettings} onLogout={handleLogout} />
-        <div className="app-shell__body">
-          <AppBar onOpenMenu={() => setDrawerOpen(true)} onOpenSettings={handleOpenSettings} onLogout={handleLogout} />
-          <main className="app-shell__main">
-            <Outlet />
-          </main>
-        </div>
-        <MapSidePanel
-          collapsed={sectionNavCollapsed}
-          onToggleCollapsed={() => setSectionNavCollapsed((c) => !c)}
-        />
-        <NavDrawer
-          isOpen={drawerOpen}
-          onClose={() => setDrawerOpen(false)}
-          onOpenSettings={handleOpenSettings}
-          onLogout={handleLogout}
-        />
-        <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
-      </div>
+      <AppShellChrome />
     </ProjectNewMapBuilderUiProvider>
   );
 }

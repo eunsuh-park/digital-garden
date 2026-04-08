@@ -5,6 +5,7 @@ import LandingPage from '@/pages/Landing/LandingPage';
 import LoginPage from '@/pages/Login/LoginPage';
 import DashboardPage from '@/pages/Dashboard/DashboardPage';
 import ProjectNewPage from '@/pages/ProjectNew/ProjectNewPage';
+import ProjectMapBuilderPage from '@/pages/ProjectMapBuilder/ProjectMapBuilderPage';
 import UiLabPage from '@/pages/UiLab/UiLabPage';
 import TokenLabPage from '@/pages/TokenLab/TokenLabPage';
 import { AuthProvider } from '@/app/providers/AuthContext';
@@ -22,16 +23,19 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route element={<RequireAuth />}>
               <Route element={<AppShell />}>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/" element={<DashboardPage />} />
+                <Route path="/dashboard" element={<Navigate to="/" replace />} />
                 <Route path="/project" element={<Navigate to="/project/new" replace />} />
                 <Route path="/project/new" element={<ProjectNewPage />} />
+                <Route path="/project/:projectId/map-builder" element={<ProjectMapBuilderPage />} />
+                <Route path="/project/:projectId/tasks" element={<LandingPage />} />
+                <Route path="/project/:projectId/plants" element={<LandingPage />} />
                 <Route path="/project/:projectId" element={<LandingPage />} />
                 <Route path="/ui-lab" element={<UiLabPage />} />
                 <Route path="/token-lab" element={<TokenLabPage />} />
-                {/* Tasks/Plants UI는 MapSidePanel(하단 시트)에 표시, 본문은 지도 유지 */}
-                <Route path="/tasks" element={<LandingPage />} />
-                <Route path="/plants" element={<LandingPage />} />
+                {/* 레거시 경로 → 홈(대시보드) */}
+                <Route path="/tasks" element={<Navigate to="/" replace />} />
+                <Route path="/plants" element={<Navigate to="/" replace />} />
                 <Route path="*" element={<ErrorState variant="404" />} />
               </Route>
             </Route>
