@@ -50,3 +50,42 @@ export function distanceSq(ax, ay, bx, by) {
   const dy = ay - by;
   return dx * dx + dy * dy;
 }
+
+export function getShapeBounds(kind, geom) {
+  if (!geom) return null;
+  if (kind === 'rect') {
+    const x = Number(geom.x);
+    const y = Number(geom.y);
+    const w = Number(geom.w);
+    const h = Number(geom.h);
+    if (![x, y, w, h].every(Number.isFinite)) return null;
+    return { minX: x, minY: y, maxX: x + w, maxY: y + h };
+  }
+  if (kind === 'ellipse') {
+    const cx = Number(geom.cx);
+    const cy = Number(geom.cy);
+    const rx = Number(geom.rx);
+    const ry = Number(geom.ry);
+    if (![cx, cy, rx, ry].every(Number.isFinite)) return null;
+    return { minX: cx - rx, minY: cy - ry, maxX: cx + rx, maxY: cy + ry };
+  }
+  const pts = Array.isArray(geom.points) ? geom.points : [];
+  if (!pts.length) return null;
+  const xs = pts.map((p) => Number(p?.[0])).filter(Number.isFinite);
+  const ys = pts.map((p) => Number(p?.[1])).filter(Number.isFinite);
+  if (!xs.length || !ys.length) return null;
+  return {
+    minX: Math.min(...xs),
+    minY: Math.min(...ys),
+    maxX: Math.max(...xs),
+    maxY: Math.max(...ys),
+  };
+}
+
+export function rotatePoint(x, y, cx, cy, rad) {
+  const cos = Math.cos(rad);
+  const sin = Math.sin(rad);
+  const dx = x - cx;
+  const dy = y - cy;
+  return [cx + dx * cos - dy * sin, cy + dx * sin + dy * cos];
+}

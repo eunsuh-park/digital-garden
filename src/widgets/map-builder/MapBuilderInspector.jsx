@@ -165,7 +165,7 @@ export default function MapBuilderInspector() {
 
   const visibleLayers = useMemo(() => {
     const staticLayers = sortLayersByMapOrder(
-      MAP_BUILDER_LAYERS.filter((l) => mapPresentLayerIds.includes(l.id)),
+      MAP_BUILDER_LAYERS.filter((l) => l.id !== 'base' && mapPresentLayerIds.includes(l.id)),
     );
     const userLayers = mapUserShapes.map((s) => inspectorLayerFromUserShape(s));
     return [...staticLayers, ...userLayers];
@@ -207,6 +207,7 @@ export default function MapBuilderInspector() {
 
   const selectedLayer = useMemo(() => {
     if (!selectedMapLayerId) return null;
+    if (selectedMapLayerId === 'base') return null;
     const builtIn = getMapBuilderLayer(selectedMapLayerId);
     if (builtIn) return builtIn;
     const userShape = mapUserShapes.find((s) => s.id === selectedMapLayerId);

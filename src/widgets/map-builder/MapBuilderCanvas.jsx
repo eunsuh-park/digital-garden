@@ -150,6 +150,8 @@ export default function MapBuilderCanvas() {
     toggleMapLayerLock,
     mapBuilderTool,
     mapUserShapes,
+    bringForwardMapLayer,
+    sendBackwardMapLayer,
     registerMapCanvasControls,
   } = useProjectNewMapBuilderUi();
 
@@ -170,6 +172,12 @@ export default function MapBuilderCanvas() {
 
   const selectedLayer = getMapBuilderLayer(selectedMapLayerId);
   const selectedUserShape = mapUserShapes.find((s) => s.id === selectedMapLayerId);
+  const selectedUserShapeIndex = selectedUserShape
+    ? mapUserShapes.findIndex((s) => s.id === selectedUserShape.id)
+    : -1;
+  const canBringForwardUserShape =
+    selectedUserShapeIndex >= 0 && selectedUserShapeIndex < mapUserShapes.length - 1;
+  const canSendBackwardUserShape = selectedUserShapeIndex > 0;
   const labelText = selectedLayer
     ? `${selectedLayer.name} · 선택됨`
     : selectedUserShape
@@ -605,7 +613,11 @@ export default function MapBuilderCanvas() {
                     className="map-builder-canvas__chip map-builder-canvas__chip--icon"
                     title="앞으로"
                     aria-label="앞으로 가져오기"
-                    onClick={(e) => e.stopPropagation()}
+                    disabled={!canBringForwardUserShape}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (selectedMapLayerId) bringForwardMapLayer(selectedMapLayerId);
+                    }}
                   >
                     <Icon icon={arrowUpLine} width={18} height={18} />
                   </button>
@@ -614,7 +626,11 @@ export default function MapBuilderCanvas() {
                     className="map-builder-canvas__chip map-builder-canvas__chip--icon"
                     title="뒤로"
                     aria-label="뒤로 보내기"
-                    onClick={(e) => e.stopPropagation()}
+                    disabled={!canSendBackwardUserShape}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (selectedMapLayerId) sendBackwardMapLayer(selectedMapLayerId);
+                    }}
                   >
                     <Icon icon={arrowDownLine} width={18} height={18} />
                   </button>

@@ -83,6 +83,42 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
     );
   }, []);
 
+  const bringForwardMapLayer = useCallback((layerId) => {
+    if (!layerId) return;
+    setMapUserShapes((prev) => {
+      const i = prev.findIndex((s) => s.id === layerId);
+      if (i < 0 || i >= prev.length - 1) return prev;
+      const next = [...prev];
+      [next[i], next[i + 1]] = [next[i + 1], next[i]];
+      return next;
+    });
+    setMapPresentLayerIds((prev) => {
+      const i = prev.indexOf(layerId);
+      if (i < 0 || i >= prev.length - 1) return prev;
+      const next = [...prev];
+      [next[i], next[i + 1]] = [next[i + 1], next[i]];
+      return next;
+    });
+  }, []);
+
+  const sendBackwardMapLayer = useCallback((layerId) => {
+    if (!layerId) return;
+    setMapUserShapes((prev) => {
+      const i = prev.findIndex((s) => s.id === layerId);
+      if (i <= 0) return prev;
+      const next = [...prev];
+      [next[i], next[i - 1]] = [next[i - 1], next[i]];
+      return next;
+    });
+    setMapPresentLayerIds((prev) => {
+      const i = prev.indexOf(layerId);
+      if (i <= 0) return prev;
+      const next = [...prev];
+      [next[i], next[i - 1]] = [next[i - 1], next[i]];
+      return next;
+    });
+  }, []);
+
   const registerMapCanvasControls = useCallback((api) => {
     mapCanvasControlsRef.current = api;
     return () => {
@@ -173,6 +209,8 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
       mapUserShapes,
       addMapUserShape,
       updateMapUserShape,
+      bringForwardMapLayer,
+      sendBackwardMapLayer,
       removeMapUserShape,
       removeMapPresentLayer,
       toggleMapLayerLock,
@@ -196,6 +234,8 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
       mapUserShapes,
       addMapUserShape,
       updateMapUserShape,
+      bringForwardMapLayer,
+      sendBackwardMapLayer,
       removeMapUserShape,
       removeMapPresentLayer,
       toggleMapLayerLock,
@@ -236,6 +276,8 @@ export function useProjectNewMapBuilderUi() {
       mapUserShapes: [],
       addMapUserShape: () => {},
       updateMapUserShape: () => {},
+      bringForwardMapLayer: () => {},
+      sendBackwardMapLayer: () => {},
       removeMapUserShape: () => {},
       removeMapPresentLayer: () => {},
       toggleMapLayerLock: () => {},

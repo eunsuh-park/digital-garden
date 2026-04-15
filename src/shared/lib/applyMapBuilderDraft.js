@@ -6,6 +6,7 @@ import {
 import { colorTokenFromRaw } from '@/entities/zone/lib/notion-schema';
 import { encodeDgMapDescription } from '@/shared/lib/dgMapZonePayload';
 import { getMapBuilderLayer } from '@/shared/lib/mapBuilderLayers';
+import { getLayerHitBoundsPx } from '@/shared/lib/mapBuilderLayerBounds';
 import { getShapeInspectorName } from '@/shared/lib/mapBuilderUserShapes';
 import {
   loadMockGardenZones,
@@ -18,6 +19,7 @@ import {
 
 const GARDEN_W = 1920;
 const GARDEN_H = 1080;
+const PRESET_ZONE_LAYER_IDS = ['house', 'shed', 'terrace', 'lawn'];
 
 function newSvgDomId() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -161,13 +163,16 @@ export function collectZoneItemsFromDraft(draft) {
   const sh = Math.max(1, stage.h);
 
   const out = [];
-
-  if (mapPresentLayerIds.includes('base') && mapLayerTypes.base === 'zone') {
+  const presetIds = mapPresentLayerIds.filter((id) => PRESET_ZONE_LAYER_IDS.includes(id));
+  for (const layerId of presetIds) {
+    if (mapLayerTypes[layerId] !== 'zone') continue;
+    const bounds = getLayerHitBoundsPx(sw, sh, layerId);
+    if (!bounds) continue;
     out.push({
-      key: 'base',
-      name: zoneLabelForItem('base', mapUserShapes),
+      key: layerId,
+      name: zoneLabelForItem(layerId, mapUserShapes),
       kind: 'rect',
-      geom: { x: 80, y: 52, w: sw - 160, h: sh - 108 },
+      geom: { x: bounds.x, y: bounds.y, w: bounds.w, h: bounds.h },
     });
   }
 
