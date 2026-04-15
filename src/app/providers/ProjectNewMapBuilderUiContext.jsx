@@ -33,6 +33,7 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
   const [mapBuilderTool, setMapBuilderTool] = useState(/** @type {MapBuilderToolId} */ ('select'));
   const [mapUserShapes, setMapUserShapes] = useState([]);
   const prevMapBuilderOpenRef = useRef(false);
+  const pendingDraftRef = useRef(null);
   const expandSidePanelRef = useRef(null);
   const mapCanvasControlsRef = useRef(null);
 
@@ -101,6 +102,11 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
     mapCanvasControlsRef.current?.fitView?.();
   }, []);
 
+  const openWithDraft = useCallback((draft) => {
+    pendingDraftRef.current = draft || null;
+    setMapBuilderOpen(true);
+  }, []);
+
   useEffect(() => {
     if (!mapBuilderOpen) {
       prevMapBuilderOpenRef.current = false;
@@ -109,10 +115,30 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
       return;
     }
     if (!prevMapBuilderOpenRef.current) {
-      setMapPresentLayerIds([...MAP_BUILDER_INITIAL_PRESENT_IDS]);
-      setMapLayerLocked(initialLockedMap());
-      setMapLayerTypes(initialMapLayerTypes());
-      setMapUserShapes([]);
+      const draft = pendingDraftRef.current;
+      if (draft) {
+        const presentIds = Array.isArray(draft.mapPresentLayerIds)
+          ? [...draft.mapPresentLayerIds]
+          : [...MAP_BUILDER_INITIAL_PRESENT_IDS];
+        const layerTypes =
+          draft.mapLayerTypes && typeof draft.mapLayerTypes === 'object'
+            ? { ...draft.mapLayerTypes }
+            : initialMapLayerTypes();
+        const userShapes = Array.isArray(draft.mapUserShapes)
+          ? JSON.parse(JSON.stringify(draft.mapUserShapes))
+          : [];
+
+        setMapPresentLayerIds(presentIds);
+        setMapLayerLocked(initialLockedMap());
+        setMapLayerTypes(layerTypes);
+        setMapUserShapes(userShapes);
+        pendingDraftRef.current = null;
+      } else {
+        setMapPresentLayerIds([...MAP_BUILDER_INITIAL_PRESENT_IDS]);
+        setMapLayerLocked(initialLockedMap());
+        setMapLayerTypes(initialMapLayerTypes());
+        setMapUserShapes([]);
+      }
       setMapBuilderTool('select');
     }
     prevMapBuilderOpenRef.current = true;
@@ -156,6 +182,7 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
       zoomMapIn,
       zoomMapOut,
       fitMapView,
+      openWithDraft,
     }),
     [
       mapBuilderOpen,
@@ -178,6 +205,7 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
       zoomMapIn,
       zoomMapOut,
       fitMapView,
+      openWithDraft,
     ],
   );
 
@@ -217,6 +245,7 @@ export function useProjectNewMapBuilderUi() {
       zoomMapIn: () => {},
       zoomMapOut: () => {},
       fitMapView: () => {},
+      openWithDraft: () => {},
     }
   );
 }

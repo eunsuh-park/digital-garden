@@ -3,14 +3,20 @@
  * DB: garden_zones, garden_tasks, garden_plants (직접 zone_id FK, 중간 테이블 없음)
  */
 
+import { parseDgMapFromDescription } from '@/shared/lib/dgMapZonePayload';
+
 export function mapZoneRow(row) {
+  const rawDescription = row.description != null ? String(row.description) : '';
+  const { description, dgMapShape } = parseDgMapFromDescription(rawDescription);
   return {
     id: row.id,
     name: row.name || '(이름 없음)',
     color_label: row.color_label || '',
     color_token: row.color_token || '#a8d5a2',
     svg_id: row.svg_id || '',
-    description: (row.description || '').trim(),
+    description: description.trim(),
+    dgMapShape,
+    isDgMapBuilt: dgMapShape != null,
     taskCount: 0,
     plantCount: 0,
   };

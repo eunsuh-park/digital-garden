@@ -146,6 +146,35 @@
   justify-content: space-between;
   gap: 12px;
   padding-left: 8px;
+  flex-wrap: wrap;
+}
+
+.project-step3-page__actions-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.project-step3-page__save-btn {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  background: var(--color-primary);
+  color: var(--color-surface);
+}
+
+.project-step3-page__save-btn:hover:not(:disabled) {
+  filter: brightness(0.95);
+}
+
+.project-step3-page__save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .project-step3-page__back-btn {

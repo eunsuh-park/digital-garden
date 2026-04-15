@@ -296,6 +296,77 @@ export default function GardenMap({ zones = [], getTasksByZone, getPlantsByZone,
     }));
   }, [zones]);
 
+  /** 맵 빌더 저장 구역: SVG에 동적 도형 주입(정적 id가 없을 때) */
+  useEffect(() => {
+    const host = svgHostRef.current;
+    if (!host || !svgReady) return;
+    const svg = host.querySelector('svg');
+    if (!svg) return;
+
+    const NS = 'http://www.w3.org/2000/svg';
+    const layerId = 'dg-built-map-layer';
+    let layer = svg.querySelector(`#${layerId}`);
+    if (!layer) {
+      layer = document.createElementNS(NS, 'g');
+      layer.setAttribute('id', layerId);
+      svg.appendChild(layer);
+    }
+    while (layer.firstChild) layer.removeChild(layer.firstChild);
+
+    resolvedZones.forEach((z) => {
+      if (!z.dgMapShape || !z.svg_id) return;
+      const shape = z.dgMapShape;
+      const fill = z.color_token || '#a8d5a2';
+      const id = z.svg_id;
+
+      if (shape.kind === 'rect' && shape.geom) {
+        const { x, y, w, h } = shape.geom;
+        const r = document.createElementNS(NS, 'rect');
+        r.setAttribute('id', id);
+        r.setAttribute('x', String(x));
+        r.setAttribute('y', String(y));
+        r.setAttribute('width', String(Math.max(0, w)));
+        r.setAttribute('height', String(Math.max(0, h)));
+        r.setAttribute('rx', '10');
+        r.setAttribute('ry', '10');
+        r.setAttribute('fill', fill);
+        layer.appendChild(r);
+        return;
+      }
+      if (shape.kind === 'ellipse' && shape.geom) {
+        const { cx, cy, rx, ry } = shape.geom;
+        const el = document.createElementNS(NS, 'ellipse');
+        el.setAttribute('id', id);
+        el.setAttribute('cx', String(cx));
+        el.setAttribute('cy', String(cy));
+        el.setAttribute('rx', String(Math.max(0, rx)));
+        el.setAttribute('ry', String(Math.max(0, ry)));
+        el.setAttribute('fill', fill);
+        layer.appendChild(el);
+        return;
+      }
+      if (
+        (shape.kind === 'polygon' || shape.kind === 'triangle') &&
+        shape.geom?.points?.length
+      ) {
+        const poly = document.createElementNS(NS, 'polygon');
+        poly.setAttribute('id', id);
+        poly.setAttribute(
+          'points',
+          shape.geom.points.map((p) => `${p[0]},${p[1]}`).join(' '),
+        );
+        poly.setAttribute('fill', fill);
+        layer.appendChild(poly);
+      }
+    });
+
+    return () => {
+      if (layer?.parentNode) {
+        while (layer.firstChild) layer.removeChild(layer.firstChild);
+      }
+    };
+  }, [resolvedZones, svgReady]);
+
   const getTargetEl = useCallback((svg, svgId) => {
     if (!svgId || !svg) return null;
     const direct = svg.querySelector(`#${svgId}`);

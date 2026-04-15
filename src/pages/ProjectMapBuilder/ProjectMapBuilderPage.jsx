@@ -5,6 +5,11 @@ import { useProjectNewMapBuilderUi } from '@/app/providers/ProjectNewMapBuilderU
 import { useToast } from '@/app/providers/ToastContext';
 import MapBuilderWorkspace from '@/widgets/map-builder/MapBuilderWorkspace';
 import ErrorState from '@/shared/ui/error-state/ErrorState';
+import {
+  loadProjectMapBuilderDraft,
+  readMapBuilderStageSize,
+  saveProjectMapBuilderDraft,
+} from '@/shared/lib/projectMapBuilderDraft';
 import '@/pages/ProjectNew/ProjectNewPage.css';
 import './ProjectMapBuilderPage.css';
 
@@ -14,15 +19,20 @@ import './ProjectMapBuilderPage.css';
 export default function ProjectMapBuilderPage() {
   const { projectId } = useParams();
   const navigate = useNavigate();
-  const { setMapBuilderOpen, mapPresentLayerIds, mapLayerTypes, mapUserShapes } =
+  const { openWithDraft, setMapBuilderOpen, mapPresentLayerIds, mapLayerTypes, mapUserShapes } =
     useProjectNewMapBuilderUi();
   const { showToast } = useToast();
   const { projects, loading, error } = useProjects();
 
   useEffect(() => {
-    setMapBuilderOpen(true);
+    const draft = loadProjectMapBuilderDraft(projectId);
+    if (draft) {
+      openWithDraft(draft);
+    } else {
+      setMapBuilderOpen(true);
+    }
     return () => setMapBuilderOpen(false);
-  }, [setMapBuilderOpen]);
+  }, [projectId, openWithDraft, setMapBuilderOpen]);
 
   const project = projects.find((p) => String(p.id) === String(projectId));
 
@@ -70,6 +80,13 @@ export default function ProjectMapBuilderPage() {
       showToast('도형 별로 유형을 확정해주세요');
       return;
     }
+    const stageSize = readMapBuilderStageSize();
+    saveProjectMapBuilderDraft(projectId, {
+      mapPresentLayerIds: [...mapPresentLayerIds],
+      mapLayerTypes: { ...mapLayerTypes },
+      mapUserShapes: JSON.parse(JSON.stringify(mapUserShapes)),
+      stageSize,
+    });
     navigate(`/project/${projectId}/step3`, { replace: false });
   }, [mapPresentLayerIds, mapLayerTypes, mapUserShapes, showToast, navigate, projectId]);
 

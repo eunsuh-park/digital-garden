@@ -9,6 +9,7 @@ import {
 } from 'react';
 import { isDevMockEnabled } from '@/lib/isDevMock';
 import { getDemoGardenSnapshot } from '@/shared/lib/gardenDemoSeed';
+import { loadMockGardenZones } from '@/shared/lib/mockGardenZonesStorage';
 import { loadGardenData } from '@/shared/api/gardenApi';
 import { useGardenProjectId } from '@/app/providers/useGardenProjectId';
 
@@ -48,7 +49,8 @@ export function ZonesProvider({ children }) {
             setPlants(snap.plants);
           } else {
             if (requestIdRef.current !== requestId) return;
-            setZones([]);
+            const mockZones = projectId ? loadMockGardenZones(projectId) : [];
+            setZones(mockZones);
             setTasks([]);
             setPlants([]);
           }

@@ -14,6 +14,10 @@ import {
 import { PROJECT_SPACE_SIZE_TAB_ITEMS } from '@/shared/lib/projectSpaceSize';
 import MapBuilderWorkspace from '@/widgets/map-builder/MapBuilderWorkspace';
 import { useProjectNewMapBuilderUi } from '@/app/providers/ProjectNewMapBuilderUiContext';
+import {
+  readMapBuilderStageSize,
+  saveProjectMapBuilderDraft,
+} from '@/shared/lib/projectMapBuilderDraft';
 import './ProjectNewPage.css';
 
 const STEPS = ['기본 정보', '맵·구역'];
@@ -92,6 +96,13 @@ export default function ProjectNewPage() {
       await reloadProjects();
       showToast('프로젝트가 생성되었습니다.');
       if (data?.id != null) {
+        const stageSize = readMapBuilderStageSize();
+        saveProjectMapBuilderDraft(data.id, {
+          mapPresentLayerIds: [...mapPresentLayerIds],
+          mapLayerTypes: { ...mapLayerTypes },
+          mapUserShapes: JSON.parse(JSON.stringify(mapUserShapes)),
+          stageSize,
+        });
         navigate(`/project/${data.id}/step3`, { replace: true });
       } else {
         navigate('/dashboard', { replace: true });

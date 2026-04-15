@@ -88,19 +88,21 @@ export async function loadGardenData(projectId) {
 
 // ── Zone CRUD ─────────────────────────────────────────────
 
-export async function createZone(projectId, { name, description, color }) {
+export async function createZone(projectId, { name, description, color, svg_id }) {
   const p = pid(projectId);
   if (p == null) throw new Error('프로젝트가 없습니다.');
   const color_label = (color || '').trim() || '초록';
-  const { error } = await supabase.from('garden_zones').insert({
+  const row = {
     project_id: p,
     name,
     description: description || '',
     color_label,
     color_token: colorTokenFromRaw(color_label),
-    svg_id: '',
-  });
+    svg_id: svg_id != null && String(svg_id).trim() !== '' ? String(svg_id).trim() : '',
+  };
+  const { data, error } = await supabase.from('garden_zones').insert(row).select('id').maybeSingle();
   rwError(error, '구역을 만들지 못했습니다.');
+  return data;
 }
 
 export async function updateZone(_projectId, zoneId, { name, description }) {
