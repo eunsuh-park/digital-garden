@@ -1,5 +1,5 @@
 /**
- * @typedef {'rect'|'ellipse'|'triangle'|'polygon'|'polyline'|'freepath'} MapUserShapeKind
+ * @typedef {'rect'|'ellipse'|'freepath'} MapUserShapeKind
  */
 
 /**
@@ -14,9 +14,6 @@
 export const USER_SHAPE_KIND_LABELS = {
   rect: '사각형',
   ellipse: '원',
-  triangle: '삼각형',
-  polygon: '다각형',
-  polyline: '선',
   freepath: '자유 그리기',
 };
 

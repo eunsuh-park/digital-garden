@@ -4,8 +4,6 @@ import addCircleFill from '@iconify-icons/mingcute/add-circle-fill';
 import addCircleLine from '@iconify-icons/mingcute/add-circle-line';
 import cursorFill from '@iconify-icons/mingcute/cursor-fill';
 import cursorLine from '@iconify-icons/mingcute/cursor-line';
-import hexagonFill from '@iconify-icons/mingcute/hexagon-fill';
-import hexagonLine from '@iconify-icons/mingcute/hexagon-line';
 import minusCircleFill from '@iconify-icons/mingcute/minus-circle-fill';
 import minusCircleLine from '@iconify-icons/mingcute/minus-circle-line';
 import moveFill from '@iconify-icons/mingcute/move-fill';
@@ -14,14 +12,10 @@ import penFill from '@iconify-icons/mingcute/pen-fill';
 import penLine from '@iconify-icons/mingcute/pen-line';
 import roundFill from '@iconify-icons/mingcute/round-fill';
 import roundLine from '@iconify-icons/mingcute/round-line';
-import rulerFill from '@iconify-icons/mingcute/ruler-fill';
-import rulerLine from '@iconify-icons/mingcute/ruler-line';
 import scanFill from '@iconify-icons/mingcute/scan-fill';
 import scanLine from '@iconify-icons/mingcute/scan-line';
 import squareFill from '@iconify-icons/mingcute/square-fill';
 import squareLine from '@iconify-icons/mingcute/square-line';
-import triangleFill from '@iconify-icons/mingcute/triangle-fill';
-import triangleLine from '@iconify-icons/mingcute/triangle-line';
 import { useProjectNewMapBuilderUi } from '@/app/providers/ProjectNewMapBuilderUiContext';
 import './MapBuilderToolDock.css';
 
@@ -95,27 +89,6 @@ export default function MapBuilderToolDock() {
               iconLine={roundLine}
               iconFill={roundFill}
               onClick={() => setMapBuilderTool('ellipse')}
-            />
-            <ToolButton
-              title="삼각형 (클릭 3점)"
-              active={mapBuilderTool === 'triangle'}
-              iconLine={triangleLine}
-              iconFill={triangleFill}
-              onClick={() => setMapBuilderTool('triangle')}
-            />
-            <ToolButton
-              title="다각형 (클릭 후 Enter)"
-              active={mapBuilderTool === 'polygon'}
-              iconLine={hexagonLine}
-              iconFill={hexagonFill}
-              onClick={() => setMapBuilderTool('polygon')}
-            />
-            <ToolButton
-              title="선 (클릭 후 Enter)"
-              active={mapBuilderTool === 'polyline'}
-              iconLine={rulerLine}
-              iconFill={rulerFill}
-              onClick={() => setMapBuilderTool('polyline')}
             />
             <ToolButton
               title="자유 그리기"

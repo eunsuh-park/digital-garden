@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useProjectNewMapBuilderUi } from '@/app/providers/ProjectNewMapBuilderUiContext';
+import { useToast } from '@/app/providers/ToastContext';
 import {
   distanceSq,
   getShapeBounds,
@@ -25,9 +26,6 @@ function cursorForTool(tool) {
       return 'grab';
     case 'rect':
     case 'ellipse':
-    case 'triangle':
-    case 'polygon':
-    case 'polyline':
     case 'pen':
       return 'crosshair';
     default:
@@ -78,28 +76,13 @@ function renderCommittedShape(shape, selected, onSelect) {
         />
       );
     }
-    case 'triangle':
-    case 'polygon': {
+    case 'freepath': {
       const pts = shape.geom.points;
       return (
         <polygon
           key={shape.id}
           points={pointsToSvg(pts)}
           fill={FILL}
-          stroke={stroke}
-          strokeWidth={sw}
-          {...common}
-        />
-      );
-    }
-    case 'polyline':
-    case 'freepath': {
-      const pts = shape.geom.points;
-      return (
-        <polyline
-          key={shape.id}
-          points={pointsToSvg(pts)}
-          fill="none"
           stroke={stroke}
           strokeWidth={Math.max(3, sw)}
           strokeLinejoin="round"
@@ -163,12 +146,16 @@ function resizeShapeGeom(shape, startBounds, nextBounds) {
     };
   }
 
-  const points = (shape.geom.points || []).map(([x, y]) => {
-    const nx = (x - startBounds.minX) / sw;
-    const ny = (y - startBounds.minY) / sh;
-    return [nextBounds.minX + nx * nw, nextBounds.minY + ny * nh];
-  });
-  return { ...shape, geom: { ...shape.geom, points } };
+  if (shape.kind === 'freepath') {
+    const points = (shape.geom.points || []).map(([x, y]) => {
+      const nx = (x - startBounds.minX) / sw;
+      const ny = (y - startBounds.minY) / sh;
+      return [nextBounds.minX + nx * nw, nextBounds.minY + ny * nh];
+    });
+    return { ...shape, geom: { ...shape.geom, points } };
+  }
+
+  return shape;
 }
 
 function rotateShapeGeom(shape, rad, bounds) {
@@ -176,23 +163,108 @@ function rotateShapeGeom(shape, rad, bounds) {
   const cx = (bounds.minX + bounds.maxX) / 2;
   const cy = (bounds.minY + bounds.maxY) / 2;
 
-  if (shape.kind === 'ellipse') {
+  if (shape.kind !== 'freepath') {
     return shape;
-  }
-
-  if (shape.kind === 'rect') {
-    const { x, y, w, h } = shape.geom;
-    const corners = [
-      [x, y],
-      [x + w, y],
-      [x + w, y + h],
-      [x, y + h],
-    ].map(([px, py]) => rotatePoint(px, py, cx, cy, rad));
-    return { ...shape, kind: 'polygon', geom: { points: corners } };
   }
 
   const points = (shape.geom.points || []).map(([x, y]) => rotatePoint(x, y, cx, cy, rad));
   return { ...shape, geom: { ...shape.geom, points } };
+}
+
+function shapeToPolygon(shape) {
+  if (!shape?.geom) return null;
+  if (shape.kind === 'rect') {
+    const { x, y, w, h } = shape.geom;
+    return [
+      [x, y],
+      [x + w, y],
+      [x + w, y + h],
+      [x, y + h],
+    ];
+  }
+  if (shape.kind === 'ellipse') {
+    const { cx, cy, rx, ry } = shape.geom;
+    const pts = [];
+    const steps = 24;
+    for (let i = 0; i < steps; i += 1) {
+      const t = (Math.PI * 2 * i) / steps;
+      pts.push([cx + Math.cos(t) * rx, cy + Math.sin(t) * ry]);
+    }
+    return pts;
+  }
+  if (shape.kind === 'freepath') {
+    const pts = (shape.geom.points || []).map(([x, y]) => [x, y]);
+    if (pts.length < 3) return null;
+    const first = pts[0];
+    const last = pts[pts.length - 1];
+    if (first[0] !== last[0] || first[1] !== last[1]) pts.push([first[0], first[1]]);
+    return pts;
+  }
+  return null;
+}
+
+function boundsOfPolygon(points) {
+  if (!points?.length) return null;
+  const xs = points.map((p) => p[0]);
+  const ys = points.map((p) => p[1]);
+  return {
+    minX: Math.min(...xs),
+    minY: Math.min(...ys),
+    maxX: Math.max(...xs),
+    maxY: Math.max(...ys),
+  };
+}
+
+function ccw(a, b, c) {
+  return (c[1] - a[1]) * (b[0] - a[0]) > (b[1] - a[1]) * (c[0] - a[0]);
+}
+
+function segmentsIntersect(a, b, c, d) {
+  return ccw(a, c, d) !== ccw(b, c, d) && ccw(a, b, c) !== ccw(a, b, d);
+}
+
+function pointInPolygon(point, poly) {
+  let inside = false;
+  const x = point[0];
+  const y = point[1];
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i, i += 1) {
+    const xi = poly[i][0];
+    const yi = poly[i][1];
+    const xj = poly[j][0];
+    const yj = poly[j][1];
+    const intersect = yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi + 1e-9) + xi;
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+function polygonArea(poly) {
+  let acc = 0;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i, i += 1) {
+    acc += poly[j][0] * poly[i][1] - poly[i][0] * poly[j][1];
+  }
+  return Math.abs(acc) / 2;
+}
+
+function polygonsOverlap(polyA, polyB) {
+  if (!polyA || !polyB || polyA.length < 3 || polyB.length < 3) return false;
+  if (polygonArea(polyA) < 1e-3 || polygonArea(polyB) < 1e-3) return false;
+  const a = boundsOfPolygon(polyA);
+  const b = boundsOfPolygon(polyB);
+  if (!a || !b) return false;
+  if (a.maxX <= b.minX || b.maxX <= a.minX || a.maxY <= b.minY || b.maxY <= a.minY) {
+    return false;
+  }
+  for (let i = 0; i < polyA.length; i += 1) {
+    const a1 = polyA[i];
+    const a2 = polyA[(i + 1) % polyA.length];
+    for (let j = 0; j < polyB.length; j += 1) {
+      const b1 = polyB[j];
+      const b2 = polyB[(j + 1) % polyB.length];
+      if (segmentsIntersect(a1, a2, b1, b2)) return true;
+    }
+  }
+  return pointInPolygon(polyA[0], polyB) || pointInPolygon(polyB[0], polyA);
 }
 
 function resizeBoundsFromHandle(startBounds, handle, nextX, nextY) {
@@ -224,26 +296,23 @@ export default function MapBuilderUserDrawLayer({ stageRef, view }) {
   const {
     mapBuilderTool,
     mapUserShapes,
+    mapPresentLayerIds,
     mapLayerLocked,
     addMapUserShape,
     updateMapUserShape,
+    removeMapUserShape,
     selectedMapLayerId,
     setSelectedMapLayerId,
     setMapLayerDetailOpenId,
     expandMapSidePanel,
   } = useProjectNewMapBuilderUi();
+  const { showToast } = useToast();
 
   const [draft, setDraft] = useState(null);
   const dragRef = useRef(null);
   const transformRef = useRef(null);
-  const polyAccumRef = useRef([]);
-  const lineAccumRef = useRef([]);
-  const triAccumRef = useRef([]);
 
   const resetAccum = useCallback(() => {
-    polyAccumRef.current = [];
-    lineAccumRef.current = [];
-    triAccumRef.current = [];
     setDraft(null);
     dragRef.current = null;
   }, []);
@@ -262,46 +331,24 @@ export default function MapBuilderUserDrawLayer({ stageRef, view }) {
     [expandMapSidePanel, setMapLayerDetailOpenId, setSelectedMapLayerId],
   );
 
-  const finalizePolygon = useCallback(() => {
-    const pts = polyAccumRef.current;
-    if (pts.length >= 3) {
-      addMapUserShape({
-        id: newUserShapeId(),
-        kind: 'polygon',
-        geom: { points: pts.map((p) => [...p]) },
-      });
-    }
-    polyAccumRef.current = [];
-    setDraft(null);
-  }, [addMapUserShape]);
-
-  const finalizePolyline = useCallback(() => {
-    const pts = lineAccumRef.current;
-    if (pts.length >= 2) {
-      addMapUserShape({
-        id: newUserShapeId(),
-        kind: 'polyline',
-        geom: { points: pts.map((p) => [...p]) },
-      });
-    }
-    lineAccumRef.current = [];
-    setDraft(null);
-  }, [addMapUserShape]);
-
   useEffect(() => {
     function onKey(e) {
+      const tag = String(e.target?.tagName || '').toLowerCase();
+      const isTyping = tag === 'input' || tag === 'textarea' || tag === 'select';
+      if (isTyping) return;
       if (e.key === 'Escape') {
         resetAccum();
         return;
       }
-      if (e.key === 'Enter') {
-        if (mapBuilderTool === 'polygon') finalizePolygon();
-        if (mapBuilderTool === 'polyline') finalizePolyline();
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedMapLayerId) {
+        const target = mapUserShapes.find((shape) => shape.id === selectedMapLayerId);
+        if (!target) return;
+        removeMapUserShape(target.id);
       }
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [finalizePolygon, finalizePolyline, mapBuilderTool, resetAccum]);
+  }, [mapUserShapes, removeMapUserShape, resetAccum, selectedMapLayerId]);
 
   const selectedShape =
     selectedMapLayerId && mapBuilderTool === 'select'
@@ -396,7 +443,7 @@ export default function MapBuilderUserDrawLayer({ stageRef, view }) {
     }
   }, []);
 
-  const drawCaptureTools = ['rect', 'ellipse', 'triangle', 'polygon', 'polyline', 'pen'];
+  const drawCaptureTools = ['rect', 'ellipse', 'pen'];
   const needsCapture = drawCaptureTools.includes(mapBuilderTool);
 
   function onCapturePointerDown(e) {
@@ -425,42 +472,6 @@ export default function MapBuilderUserDrawLayer({ stageRef, view }) {
       return;
     }
 
-    if (tool === 'triangle') {
-      const next = [...triAccumRef.current, [x, y]];
-      triAccumRef.current = next;
-      if (next.length >= 3) {
-        addMapUserShape({
-          id: newUserShapeId(),
-          kind: 'triangle',
-          geom: { points: next.slice(0, 3).map((p) => [...p]) },
-        });
-        triAccumRef.current = [];
-        setDraft(null);
-      } else {
-        setDraft({ kind: 'triangle', points: next.map((p) => [...p]) });
-      }
-      e.stopPropagation();
-      return;
-    }
-
-    if (tool === 'polygon') {
-      polyAccumRef.current = [...polyAccumRef.current, [x, y]];
-      setDraft({
-        kind: 'polygon',
-        points: polyAccumRef.current.map((p) => [...p]),
-      });
-      e.stopPropagation();
-      return;
-    }
-
-    if (tool === 'polyline') {
-      lineAccumRef.current = [...lineAccumRef.current, [x, y]];
-      setDraft({
-        kind: 'polyline',
-        points: lineAccumRef.current.map((p) => [...p]),
-      });
-      e.stopPropagation();
-    }
   }
 
   function onCapturePointerMove(e) {
@@ -518,12 +529,34 @@ export default function MapBuilderUserDrawLayer({ stageRef, view }) {
       });
     } else if (d.kind === 'pen') {
       setDraft((prev) => {
-        if (prev?.kind === 'pen' && prev.points.length >= 2) {
-          addMapUserShape({
+        if (prev?.kind === 'pen' && prev.points.length >= 3) {
+          const candidate = {
             id: newUserShapeId(),
             kind: 'freepath',
             geom: { points: prev.points.map((p) => [...p]) },
+          };
+          const candidatePoly = shapeToPolygon(candidate);
+          const stage = stageRef.current;
+          const builtInShapes =
+            stage && Number.isFinite(stage.offsetWidth) && Number.isFinite(stage.offsetHeight)
+              ? mapPresentLayerIds
+                  .filter((id) => id !== 'base')
+                  .map((id) => {
+                    const b = getLayerHitBoundsPx(stage.offsetWidth, stage.offsetHeight, id);
+                    if (!b) return null;
+                    return { id, kind: 'rect', geom: { x: b.x, y: b.y, w: b.w, h: b.h } };
+                  })
+                  .filter(Boolean)
+              : [];
+          const hasOverlap = [...mapUserShapes, ...builtInShapes].some((shape) => {
+            const poly = shapeToPolygon(shape);
+            return polygonsOverlap(candidatePoly, poly);
           });
+          if (hasOverlap) {
+            showToast('자유 그리기 영역은 기존 영역과 겹칠 수 없어요.');
+          } else {
+            addMapUserShape(candidate);
+          }
         }
         return null;
       });
@@ -575,68 +608,12 @@ export default function MapBuilderUserDrawLayer({ stageRef, view }) {
       );
     }
 
-    if (draft.kind === 'triangle') {
+    if (draft.kind === 'pen') {
       if (!draft.points?.length) return null;
-      if (draft.points.length < 3) {
-        return (
-          <polyline
-            points={pointsToSvg(draft.points)}
-            fill="none"
-            stroke={STROKE}
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            pointerEvents="none"
-            {...dash}
-          />
-        );
-      }
-      return (
-        <polygon
-          points={pointsToSvg(draft.points)}
-          fill="rgba(108,77,178,0.15)"
-          stroke={STROKE}
-          strokeWidth={2}
-          pointerEvents="none"
-          {...dash}
-        />
-      );
-    }
-
-    if (draft.kind === 'polygon') {
-      if (!draft.points?.length) return null;
-      if (draft.points.length < 3) {
-        return (
-          <polyline
-            points={pointsToSvg(draft.points)}
-            fill="none"
-            stroke={STROKE}
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            pointerEvents="none"
-            {...dash}
-          />
-        );
-      }
       return (
         <polygon
           points={pointsToSvg(draft.points)}
           fill="rgba(108,77,178,0.12)"
-          stroke={STROKE}
-          strokeWidth={2}
-          pointerEvents="none"
-          {...dash}
-        />
-      );
-    }
-
-    if (draft.kind === 'polyline' || draft.kind === 'pen') {
-      if (!draft.points?.length) return null;
-      return (
-        <polyline
-          points={pointsToSvg(draft.points)}
-          fill="none"
           stroke={STROKE}
           strokeWidth={3}
           strokeLinejoin="round"
@@ -730,8 +707,8 @@ export default function MapBuilderUserDrawLayer({ stageRef, view }) {
                 stroke="#2f6a2a"
                 strokeWidth={2}
                 style={{
-                  cursor: selectedShape.kind === 'ellipse' ? 'not-allowed' : 'crosshair',
-                  pointerEvents: selectedShape.kind === 'ellipse' ? 'none' : 'auto',
+                  cursor: selectedShape.kind === 'freepath' ? 'crosshair' : 'not-allowed',
+                  pointerEvents: selectedShape.kind === 'freepath' ? 'auto' : 'none',
                 }}
                 onPointerDown={(e) => beginTransform('rotate', e)}
                 onPointerMove={updateTransform}

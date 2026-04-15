@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Icon } from '@iconify/react';
 import delete2Fill from '@iconify-icons/mingcute/delete-2-fill';
-import eye2Line from '@iconify-icons/mingcute/eye-2-line';
-import eyeCloseLine from '@iconify-icons/mingcute/eye-close-line';
 import lockLine from '@iconify-icons/mingcute/lock-line';
 import unlockLine from '@iconify-icons/mingcute/unlock-line';
 import { useProjectNewMapBuilderUi } from '@/app/providers/ProjectNewMapBuilderUiContext';
@@ -26,7 +24,15 @@ function mergeLayerLocked(layer, mapLayerLocked) {
   return { ...layer, locked };
 }
 
-function LayerDetailPane({ layer, userShape, onUserShapePatch, onDeleteLayer, layerType, onTypeChange }) {
+function LayerDetailPane({
+  layer,
+  userShape,
+  onUserShapePatch,
+  onDeleteLayer,
+  layerType,
+  onTypeChange,
+  onConfirm,
+}) {
   if (!layer) return null;
   const isUser = !!layer.isUserShape && userShape;
   return (
@@ -105,16 +111,10 @@ function LayerDetailPane({ layer, userShape, onUserShapePatch, onDeleteLayer, la
         </label>
         <select
           id={`mb-split-type-${layer.id}`}
-          className={[
-            'map-builder-inspector__type-select',
-            !layerType ? 'map-builder-inspector__type-select--unset' : '',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-          value={layerType ?? ''}
-          onChange={(e) => onTypeChange(e.target.value || null)}
+          className="map-builder-inspector__type-select"
+          value={layerType ?? 'zone'}
+          onChange={(e) => onTypeChange(e.target.value || 'zone')}
         >
-          <option value="">유형 선택…</option>
           {SHAPE_TYPES.map((t) => (
             <option key={t} value={t}>
               {SHAPE_TYPE_LABELS[t]}
@@ -135,7 +135,7 @@ function LayerDetailPane({ layer, userShape, onUserShapePatch, onDeleteLayer, la
         ) : (
           <span className="map-builder-inspector__danger-placeholder" aria-hidden />
         )}
-        <button type="button" className="map-builder-inspector__save">
+        <button type="button" className="map-builder-inspector__save" onClick={onConfirm}>
           확인
         </button>
       </div>
@@ -205,6 +205,11 @@ export default function MapBuilderInspector() {
     setSelectedMapLayerId(layerId);
   }
 
+  const closeLayerDetail = useCallback(() => {
+    setMapLayerDetailOpenId(null);
+    setSelectedMapLayerId(null);
+  }, [setMapLayerDetailOpenId, setSelectedMapLayerId]);
+
   const selectedLayer = useMemo(() => {
     if (!selectedMapLayerId) return null;
     if (selectedMapLayerId === 'base') return null;
@@ -250,13 +255,6 @@ export default function MapBuilderInspector() {
                       aria-pressed={selected}
                       onClick={() => onNarrowStripClick(layer.id)}
                     >
-                      <span className="map-builder-inspector__strip-ico" aria-hidden>
-                        <Icon
-                          icon={merged.hidden ? eyeCloseLine : eye2Line}
-                          width={18}
-                          height={18}
-                        />
-                      </span>
                       <span className="map-builder-inspector__strip-text">
                         <span className="map-builder-inspector__strip-name">{layer.name}</span>
                         <span className="map-builder-inspector__strip-type">
@@ -291,6 +289,7 @@ export default function MapBuilderInspector() {
                 onDeleteLayer={confirmAndRemoveLayer}
                 layerType={mapLayerTypes[selectedLayer.id] ?? null}
                 onTypeChange={(type) => setMapLayerType(selectedLayer.id, type)}
+                onConfirm={closeLayerDetail}
               />
             </div>
           ) : (
@@ -328,9 +327,6 @@ export default function MapBuilderInspector() {
                     .join(' ')}
                 >
                   <div className="map-builder-inspector__layer-top">
-                    <span className="map-builder-inspector__layer-ico" aria-hidden>
-                      <Icon icon={merged.hidden ? eyeCloseLine : eye2Line} width={18} height={18} />
-                    </span>
                     <button
                       type="button"
                       className="map-builder-inspector__layer-toggle"
@@ -453,17 +449,11 @@ export default function MapBuilderInspector() {
                         </label>
                         <select
                           id={`mb-type-${layer.id}`}
-                          className={[
-                            'map-builder-inspector__type-select',
-                            !layerType ? 'map-builder-inspector__type-select--unset' : '',
-                          ]
-                            .filter(Boolean)
-                            .join(' ')}
-                          value={layerType ?? ''}
+                          className="map-builder-inspector__type-select"
+                          value={layerType ?? 'zone'}
                           onClick={(e) => e.stopPropagation()}
-                          onChange={(e) => setMapLayerType(layer.id, e.target.value || null)}
+                          onChange={(e) => setMapLayerType(layer.id, e.target.value || 'zone')}
                         >
-                          <option value="">유형 선택…</option>
                           {SHAPE_TYPES.map((t) => (
                             <option key={t} value={t}>
                               {SHAPE_TYPE_LABELS[t]}
@@ -484,7 +474,11 @@ export default function MapBuilderInspector() {
                         ) : (
                           <span className="map-builder-inspector__danger-placeholder" aria-hidden />
                         )}
-                        <button type="button" className="map-builder-inspector__save">
+                        <button
+                          type="button"
+                          className="map-builder-inspector__save"
+                          onClick={closeLayerDetail}
+                        >
                           확인
                         </button>
                       </div>

@@ -2,15 +2,12 @@
 export const MAP_BUILDER_LAYER_ORDER = ['base', 'house', 'shed', 'terrace', 'lawn'];
 
 /** 도형 유형 목록 */
-export const SHAPE_TYPES = ['ground', 'grass', 'zone', 'path', 'circulation', 'building'];
+export const SHAPE_TYPES = ['zone', 'path', 'building'];
 
 /** 도형 유형 한국어 레이블 */
 export const SHAPE_TYPE_LABELS = {
-  ground: '땅',
-  grass: '잔디',
   zone: '구역',
   path: '길',
-  circulation: '동선',
   building: '건축물',
 };
 
@@ -83,8 +80,8 @@ export const MAP_BUILDER_INITIAL_PRESENT_IDS = ['base', 'house', 'shed'];
 /** 초기 3요소 기본 도형 유형 (맵 빌더 오픈 시 적용) */
 export const MAP_BUILDER_DEFAULT_LAYER_TYPES = {
   base: 'zone',
-  house: 'building',
-  shed: 'building',
+  house: 'zone',
+  shed: 'zone',
 };
 
 export function initialMapLayerTypes() {

@@ -1,10 +1,9 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Icon } from '@iconify/react';
 import arrowDownLine from '@iconify-icons/mingcute/arrow-down-line';
 import arrowUpLine from '@iconify-icons/mingcute/arrow-up-line';
 import copy2Line from '@iconify-icons/mingcute/copy-2-line';
 import delete2Line from '@iconify-icons/mingcute/delete-2-line';
-import eyeCloseLine from '@iconify-icons/mingcute/eye-close-line';
 import flipHorizontalLine from '@iconify-icons/mingcute/flip-horizontal-line';
 import flipVerticalLine from '@iconify-icons/mingcute/flip-vertical-line';
 import fullscreen2Line from '@iconify-icons/mingcute/fullscreen-2-line';
@@ -13,7 +12,6 @@ import targetLine from '@iconify-icons/mingcute/target-line';
 import unlockLine from '@iconify-icons/mingcute/unlock-line';
 import { useProjectNewMapBuilderUi } from '@/app/providers/ProjectNewMapBuilderUiContext';
 import {
-  fitBoundsInView,
   getLayerHitBoundsPx,
   MAP_BUILDER_ZOOM_MAX,
   MAP_BUILDER_ZOOM_MIN,
@@ -21,6 +19,8 @@ import {
   zoomWithWheel,
 } from '@/shared/lib/mapBuilderLayerBounds';
 import { getMapBuilderLayer, mapBuilderRemoveConfirmMessage } from '@/shared/lib/mapBuilderLayers';
+import { getShapeBounds } from '@/shared/lib/mapBuilderDrawMath';
+import { newUserShapeId } from '@/shared/lib/mapBuilderUserShapes';
 import { getShapeInspectorName } from '@/shared/lib/mapBuilderUserShapes';
 import MapBuilderUserDrawLayer from './MapBuilderUserDrawLayer';
 import './MapBuilderCanvas.css';
@@ -30,6 +30,7 @@ const REGION_HIT_DEFS = [
   { id: 'shed', label: '창고 영역 선택', className: 'map-builder-canvas__hit--shed' },
   { id: 'lawn', label: '잔디밭 영역 선택', className: 'map-builder-canvas__hit--lawn' },
 ];
+const OBJECT_FIT_RATIO = 0.7;
 
 function MapLayerSelectionChrome({
   variant,
@@ -67,15 +68,6 @@ function MapLayerSelectionChrome({
             }}
           >
             <Icon icon={locked ? lockLine : unlockLine} width={18} height={18} />
-          </button>
-          <button
-            type="button"
-            className="map-builder-canvas__selection-tool"
-            title="숨김"
-            aria-label="숨김"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Icon icon={eyeCloseLine} width={18} height={18} />
           </button>
           {deletable ? (
             <button
@@ -150,6 +142,8 @@ export default function MapBuilderCanvas() {
     toggleMapLayerLock,
     mapBuilderTool,
     mapUserShapes,
+    addMapUserShape,
+    updateMapUserShape,
     bringForwardMapLayer,
     sendBackwardMapLayer,
     registerMapCanvasControls,
@@ -163,6 +157,7 @@ export default function MapBuilderCanvas() {
   const panDragRef = useRef(null);
 
   const [view, setView] = useState({ tx: 0, ty: 0, scale: 1 });
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const selectedRef = useRef(selectedMapLayerId);
   selectedRef.current = selectedMapLayerId;
 
@@ -172,6 +167,10 @@ export default function MapBuilderCanvas() {
 
   const selectedLayer = getMapBuilderLayer(selectedMapLayerId);
   const selectedUserShape = mapUserShapes.find((s) => s.id === selectedMapLayerId);
+  const selectedUserShapeBounds = useMemo(
+    () => (selectedUserShape ? getShapeBounds(selectedUserShape.kind, selectedUserShape.geom) : null),
+    [selectedUserShape],
+  );
   const selectedUserShapeIndex = selectedUserShape
     ? mapUserShapes.findIndex((s) => s.id === selectedUserShape.id)
     : -1;
@@ -185,6 +184,22 @@ export default function MapBuilderCanvas() {
       : '선택됨';
 
   const isPresent = useCallback((id) => mapPresentLayerIds.includes(id), [mapPresentLayerIds]);
+
+  const fitTargetToFixedRatio = useCallback((viewW, viewH, bounds) => {
+    if (!bounds) return null;
+    const targetScale = Math.min(
+      (viewW * OBJECT_FIT_RATIO) / Math.max(1, bounds.w),
+      (viewH * OBJECT_FIT_RATIO) / Math.max(1, bounds.h),
+    );
+    const scale = Math.max(MAP_BUILDER_ZOOM_MIN, Math.min(MAP_BUILDER_ZOOM_MAX, targetScale));
+    const cx = bounds.x + bounds.w / 2;
+    const cy = bounds.y + bounds.h / 2;
+    return {
+      scale,
+      tx: viewW / 2 - cx * scale,
+      ty: viewH / 2 - cy * scale,
+    };
+  }, []);
 
   const requestRemoveLayer = useCallback(
     (layerId) => {
@@ -208,15 +223,29 @@ export default function MapBuilderCanvas() {
     const vh = vr.height;
     if (!Number.isFinite(vw) || !Number.isFinite(vh) || vw < 8 || vh < 8) return;
 
-    if (!selectedMapLayerId || !mapPresentLayerIds.includes(selectedMapLayerId)) {
+    if (!selectedMapLayerId || selectedMapLayerId === 'base') {
       setView(centerStageInView(vw, vh, sw, sh, 1));
       return;
     }
-    const b = getLayerHitBoundsPx(sw, sh, selectedMapLayerId);
-    if (!b) return;
-    const next = fitBoundsInView(vw, vh, b.x, b.y, b.w, b.h);
-    setView(next);
-  }, [selectedMapLayerId, mapPresentLayerIds]);
+    if (selectedUserShapeBounds) {
+      const next = fitTargetToFixedRatio(vw, vh, {
+        x: selectedUserShapeBounds.minX,
+        y: selectedUserShapeBounds.minY,
+        w: selectedUserShapeBounds.maxX - selectedUserShapeBounds.minX,
+        h: selectedUserShapeBounds.maxY - selectedUserShapeBounds.minY,
+      });
+      if (next) setView(next);
+      return;
+    }
+    if (mapPresentLayerIds.includes(selectedMapLayerId)) {
+      const b = getLayerHitBoundsPx(sw, sh, selectedMapLayerId);
+      if (!b) return;
+      const next = fitTargetToFixedRatio(vw, vh, b);
+      if (next) setView(next);
+      return;
+    }
+    setView(centerStageInView(vw, vh, sw, sh, 1));
+  }, [fitTargetToFixedRatio, mapPresentLayerIds, selectedMapLayerId, selectedUserShapeBounds]);
 
   const zoomByFactor = useCallback(
     (factor) => {
@@ -269,12 +298,86 @@ export default function MapBuilderCanvas() {
 
   const selectFromCanvas = useCallback(
     (layerId) => {
+      if (!layerId || layerId === 'base') return;
       setSelectedMapLayerId(layerId);
       setMapLayerDetailOpenId(layerId);
       expandMapSidePanel();
     },
     [expandMapSidePanel, setMapLayerDetailOpenId, setSelectedMapLayerId],
   );
+
+  const flipSelectedUserShape = useCallback(
+    (axis) => {
+      if (!selectedUserShape || !selectedUserShapeBounds) return;
+      const cx = (selectedUserShapeBounds.minX + selectedUserShapeBounds.maxX) / 2;
+      const cy = (selectedUserShapeBounds.minY + selectedUserShapeBounds.maxY) / 2;
+      const shape = selectedUserShape;
+      if (shape.kind === 'rect') {
+        const next =
+          axis === 'x'
+            ? { ...shape.geom, x: 2 * cx - (shape.geom.x + shape.geom.w) }
+            : { ...shape.geom, y: 2 * cy - (shape.geom.y + shape.geom.h) };
+        updateMapUserShape(shape.id, { geom: next });
+        return;
+      }
+      if (shape.kind === 'ellipse') {
+        const next =
+          axis === 'x'
+            ? { ...shape.geom, cx: 2 * cx - shape.geom.cx }
+            : { ...shape.geom, cy: 2 * cy - shape.geom.cy };
+        updateMapUserShape(shape.id, { geom: next });
+        return;
+      }
+      const points = (shape.geom.points || []).map(([x, y]) =>
+        axis === 'x' ? [2 * cx - x, y] : [x, 2 * cy - y],
+      );
+      updateMapUserShape(shape.id, { geom: { ...shape.geom, points } });
+    },
+    [selectedUserShape, selectedUserShapeBounds, updateMapUserShape],
+  );
+
+  const duplicateSelectedUserShape = useCallback(() => {
+    if (!selectedUserShape) return;
+    const duplicated = {
+      ...JSON.parse(JSON.stringify(selectedUserShape)),
+      id: newUserShapeId(),
+      label: undefined,
+    };
+    if (duplicated.kind === 'rect') {
+      duplicated.geom.x += 16;
+      duplicated.geom.y += 16;
+    } else if (duplicated.kind === 'ellipse') {
+      duplicated.geom.cx += 16;
+      duplicated.geom.cy += 16;
+    } else if (duplicated.geom?.points) {
+      duplicated.geom.points = duplicated.geom.points.map(([x, y]) => [x + 16, y + 16]);
+    }
+    addMapUserShape(duplicated);
+    setSelectedMapLayerId(duplicated.id);
+    setMapLayerDetailOpenId(duplicated.id);
+  }, [addMapUserShape, selectedUserShape, setMapLayerDetailOpenId, setSelectedMapLayerId]);
+
+  const toggleFullscreen = useCallback(() => {
+    const target = viewBoxRef.current;
+    if (!target || typeof document === 'undefined') return;
+    if (!document.fullscreenElement) {
+      target.requestFullscreen?.().catch(() => {});
+      return;
+    }
+    document.exitFullscreen?.().catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return undefined;
+    const onFullscreenChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    onFullscreenChange();
+    return () => {
+      document.removeEventListener('fullscreenchange', onFullscreenChange);
+    };
+  }, []);
 
   const selectionVariant =
     selectedMapLayerId === 'base' || selectedMapLayerId === 'house' || selectedMapLayerId === 'shed'
@@ -495,24 +598,7 @@ export default function MapBuilderCanvas() {
               <div className="map-builder-canvas__road map-builder-canvas__road--diag" />
             </div>
 
-            {isPresent('base') ? (
-              <button
-                type="button"
-                className={[
-                  'map-builder-canvas__lot-border',
-                  'map-builder-canvas__hit',
-                  selectedMapLayerId === 'base' ? 'map-builder-canvas__lot-border--focused' : '',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-                aria-label="기본 구역 선택"
-                aria-pressed={selectedMapLayerId === 'base'}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  selectFromCanvas('base');
-                }}
-              />
-            ) : null}
+            {isPresent('base') ? <div className="map-builder-canvas__lot-border" aria-hidden /> : null}
 
             {isPresent('house') ? (
               <>
@@ -583,7 +669,11 @@ export default function MapBuilderCanvas() {
                     className="map-builder-canvas__chip map-builder-canvas__chip--icon"
                     title="세로 뒤집기"
                     aria-label="세로 뒤집기"
-                    onClick={(e) => e.stopPropagation()}
+                    disabled={!selectedUserShape}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      flipSelectedUserShape('y');
+                    }}
                   >
                     <Icon icon={flipVerticalLine} width={18} height={18} />
                   </button>
@@ -592,7 +682,11 @@ export default function MapBuilderCanvas() {
                     className="map-builder-canvas__chip map-builder-canvas__chip--icon"
                     title="가로 뒤집기"
                     aria-label="가로 뒤집기"
-                    onClick={(e) => e.stopPropagation()}
+                    disabled={!selectedUserShape}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      flipSelectedUserShape('x');
+                    }}
                   >
                     <Icon icon={flipHorizontalLine} width={18} height={18} />
                   </button>
@@ -604,7 +698,11 @@ export default function MapBuilderCanvas() {
                     className="map-builder-canvas__chip map-builder-canvas__chip--icon"
                     title="복제"
                     aria-label="복제"
-                    onClick={(e) => e.stopPropagation()}
+                    disabled={!selectedUserShape}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      duplicateSelectedUserShape();
+                    }}
                   >
                     <Icon icon={copy2Line} width={18} height={18} />
                   </button>
@@ -646,9 +744,12 @@ export default function MapBuilderCanvas() {
         <button
           type="button"
           className="map-builder-canvas__fab"
-          title="전체 화면"
+          title={isFullscreen ? '전체 화면 종료' : '전체 화면'}
           aria-label="전체 화면"
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleFullscreen();
+          }}
         >
           <Icon icon={fullscreen2Line} width={20} height={20} />
         </button>

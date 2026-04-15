@@ -55,7 +55,7 @@
   margin: 0;
   padding: 10px 10px 10px 12px;
   display: grid;
-  grid-template-columns: 22px 1fr;
+  grid-template-columns: 1fr;
   gap: 8px;
   align-items: center;
   border: none;
@@ -218,7 +218,7 @@
 
 .map-builder-inspector__layer-top {
   display: grid;
-  grid-template-columns: 22px minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   gap: 8px 10px;
   align-items: center;
   padding: 10px 12px;

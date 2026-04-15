@@ -29,8 +29,19 @@ export default function ProjectNewPage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { reload: reloadProjects } = useProjects();
-  const { setMapBuilderOpen, mapPresentLayerIds, mapLayerTypes, mapUserShapes } =
-    useProjectNewMapBuilderUi();
+  const {
+    setMapBuilderOpen,
+    mapPresentLayerIds,
+    mapLayerTypes,
+    mapUserShapes,
+    mapZoneNameIndex,
+    mapSaveState,
+    markMapSaved,
+    undoMapAction,
+    redoMapAction,
+    canUndo,
+    canRedo,
+  } = useProjectNewMapBuilderUi();
 
   const [step, setStep] = useState(0);
   const [name, setName] = useState('');
@@ -71,11 +82,12 @@ export default function ProjectNewPage() {
   async function handleCreate() {
     if (!step1Valid || saving) return;
 
-    const hasNullType =
-      mapPresentLayerIds.some((id) => !mapLayerTypes[id]) ||
-      mapUserShapes.some((s) => !mapLayerTypes[s.id]);
-    if (hasNullType) {
-      showToast('도형 별로 유형을 확정해주세요');
+    const zoneCount = [
+      ...mapPresentLayerIds.filter((id) => mapLayerTypes[id] === 'zone'),
+      ...mapUserShapes.filter((s) => mapLayerTypes[s.id] === 'zone').map((s) => s.id),
+    ].length;
+    if (zoneCount < 1) {
+      showToast('최소 1개의 "구역" 유형 레이어가 있어야 저장할 수 있어요.');
       return;
     }
 
@@ -101,8 +113,10 @@ export default function ProjectNewPage() {
           mapPresentLayerIds: [...mapPresentLayerIds],
           mapLayerTypes: { ...mapLayerTypes },
           mapUserShapes: JSON.parse(JSON.stringify(mapUserShapes)),
+          nextZoneNameIndex: mapZoneNameIndex,
           stageSize,
         });
+        markMapSaved();
         navigate(`/project/${data.id}/step3`, { replace: true });
       } else {
         navigate('/dashboard', { replace: true });
@@ -119,6 +133,11 @@ export default function ProjectNewPage() {
           projectTitle={name.trim() || '새 프로젝트'}
           onBack={() => setStep(0)}
           onSaveAndContinue={handleCreate}
+          onUndo={undoMapAction}
+          onRedo={redoMapAction}
+          canUndo={canUndo}
+          canRedo={canRedo}
+          saveStatus={saving ? 'saving' : mapSaveState}
           saving={saving}
           saveDisabled={!step1Valid}
         />

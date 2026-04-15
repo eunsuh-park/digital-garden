@@ -8,6 +8,11 @@ export default function MapBuilderWorkspace({
   projectTitle,
   onBack,
   onSaveAndContinue,
+  onUndo,
+  onRedo,
+  canUndo,
+  canRedo,
+  saveStatus,
   saving,
   saveDisabled,
   primaryActionLabel,
@@ -19,6 +24,11 @@ export default function MapBuilderWorkspace({
           projectTitle={projectTitle}
           onBack={onBack}
           onSaveAndContinue={onSaveAndContinue}
+          onUndo={onUndo}
+          onRedo={onRedo}
+          canUndo={canUndo}
+          canRedo={canRedo}
+          saveStatus={saveStatus}
           saving={saving}
           saveDisabled={saveDisabled}
           primaryActionLabel={primaryActionLabel}
