@@ -64,6 +64,12 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
 
   const addMapUserShape = useCallback((shape) => {
     setMapUserShapes((prev) => [...prev, shape]);
+    if (shape?.id) {
+      setMapLayerTypes((prev) => ({
+        ...prev,
+        [shape.id]: prev[shape.id] || 'zone',
+      }));
+    }
   }, []);
 
   const removeMapUserShape = useCallback((shapeId) => {

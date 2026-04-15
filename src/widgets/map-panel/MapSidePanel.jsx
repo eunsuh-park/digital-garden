@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import up from '@iconify-icons/mingcute/arrow-up-line';
 import down from '@iconify-icons/mingcute/arrow-down-line';
@@ -115,6 +115,7 @@ function parseProjectMapPath(pathname) {
 
 export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const { mapBuilderOpen } = useProjectNewMapBuilderUi();
   const mapPath = useMemo(() => parseProjectMapPath(pathname), [pathname]);
   const isProjectOpen =
@@ -274,9 +275,12 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
                   type="button"
                   className={`map-side-panel__add-btn ${mapBuilderMode ? 'map-side-panel__add-btn--active' : ''}`}
                   onClick={() => {
-                    const next = setMapBuilderMode(!mapBuilderMode);
+                    const next = setMapBuilderMode(true);
                     setMapBuilderModeState(next);
-                    showToast(next ? '맵 빌더 모드로 전환했습니다.' : '기본 탐색 모드로 돌아왔습니다.');
+                    if (projectBase) {
+                      navigate(`${projectBase}/map-builder`, { replace: false });
+                    }
+                    showToast('맵 빌더 모드로 전환했습니다.');
                   }}
                 >
                   {mapBuilderMode ? '맵 빌더 모드 사용 중' : '맵 빌더 모드로 전환'}

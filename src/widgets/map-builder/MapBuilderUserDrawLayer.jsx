@@ -10,6 +10,7 @@ import {
   viewBoxClientToMapSpace,
 } from '@/shared/lib/mapBuilderDrawMath';
 import { newUserShapeId } from '@/shared/lib/mapBuilderUserShapes';
+import { getLayerHitBoundsPx } from '@/shared/lib/mapBuilderLayerBounds';
 
 const STROKE = '#6c4db2';
 const STROKE_SEL = '#4e7424';
@@ -315,6 +316,20 @@ export default function MapBuilderUserDrawLayer({ stageRef, view }) {
     return viewBoxClientToMapSpace(st, e.clientX, e.clientY, view.tx, view.ty, view.scale);
   }, [stageRef, view.scale, view.tx, view.ty]);
 
+  const clampToBase = useCallback(
+    (x, y) => {
+      const st = stageRef.current;
+      if (!st) return { x, y };
+      const bounds = getLayerHitBoundsPx(st.offsetWidth, st.offsetHeight, 'base');
+      if (!bounds) return { x, y };
+      return {
+        x: Math.min(bounds.x + bounds.w, Math.max(bounds.x, x)),
+        y: Math.min(bounds.y + bounds.h, Math.max(bounds.y, y)),
+      };
+    },
+    [stageRef],
+  );
+
   const beginTransform = useCallback(
     (mode, e, options = {}) => {
       if (!selectedShape || selectedLocked) return;
@@ -388,7 +403,8 @@ export default function MapBuilderUserDrawLayer({ stageRef, view }) {
     if (e.button !== 0) return;
     const st = stageRef.current;
     if (!st) return;
-    const { x, y } = mapPointer(e);
+    const raw = mapPointer(e);
+    const { x, y } = clampToBase(raw.x, raw.y);
     const tool = mapBuilderTool;
 
     if (tool === 'rect' || tool === 'ellipse') {
@@ -452,7 +468,8 @@ export default function MapBuilderUserDrawLayer({ stageRef, view }) {
     if (!d) return;
     const st = stageRef.current;
     if (!st) return;
-    const { x, y } = mapPointer(e);
+    const raw = mapPointer(e);
+    const { x, y } = clampToBase(raw.x, raw.y);
 
     if (d.kind === 'rect' || d.kind === 'ellipse') {
       setDraft((prev) =>

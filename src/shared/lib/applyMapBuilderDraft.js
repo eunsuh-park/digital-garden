@@ -95,9 +95,14 @@ function unionBoundsFromItems(items) {
 }
 
 function mapPt(x, y, bounds) {
+  const sx = GARDEN_W / bounds.w;
+  const sy = GARDEN_H / bounds.h;
+  const s = Math.min(sx, sy);
+  const ox = (GARDEN_W - bounds.w * s) / 2;
+  const oy = (GARDEN_H - bounds.h * s) / 2;
   return {
-    x: ((x - bounds.minX) / bounds.w) * GARDEN_W,
-    y: ((y - bounds.minY) / bounds.h) * GARDEN_H,
+    x: (x - bounds.minX) * s + ox,
+    y: (y - bounds.minY) * s + oy,
   };
 }
 
@@ -105,17 +110,18 @@ function mapPt(x, y, bounds) {
 function mapShapeToGarden(kind, geom, bounds) {
   const sx = GARDEN_W / bounds.w;
   const sy = GARDEN_H / bounds.h;
+  const s = Math.min(sx, sy);
 
   switch (kind) {
     case 'rect': {
       const p = mapPt(geom.x, geom.y, bounds);
-      return { kind: 'rect', geom: { x: p.x, y: p.y, w: geom.w * sx, h: geom.h * sy } };
+      return { kind: 'rect', geom: { x: p.x, y: p.y, w: geom.w * s, h: geom.h * s } };
     }
     case 'ellipse': {
       const c = mapPt(geom.cx, geom.cy, bounds);
       return {
         kind: 'ellipse',
-        geom: { cx: c.x, cy: c.y, rx: geom.rx * sx, ry: geom.ry * sy },
+        geom: { cx: c.x, cy: c.y, rx: geom.rx * s, ry: geom.ry * s },
       };
     }
     case 'triangle':
@@ -228,7 +234,13 @@ function prepareMapBuilderDraftApply(projectId) {
     throw new Error('맵에 “구역” 유형으로 지정된 도형이 없어요. 맵 빌더에서 유형을 확인해 주세요.');
   }
 
-  const bounds = unionBoundsFromItems(items);
+  const stage = draft.stageSize || { w: 1000, h: 700 };
+  const sw = Math.max(1, stage.w);
+  const sh = Math.max(1, stage.h);
+  const baseBounds = getLayerHitBoundsPx(sw, sh, 'base');
+  const bounds = baseBounds
+    ? { minX: baseBounds.x, minY: baseBounds.y, w: baseBounds.w, h: baseBounds.h }
+    : unionBoundsFromItems(items);
   if (!bounds) {
     throw new Error('맵 도형 좌표를 계산하지 못했습니다.');
   }
