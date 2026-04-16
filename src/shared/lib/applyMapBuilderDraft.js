@@ -13,13 +13,13 @@ import {
   saveMockGardenZones,
 } from '@/shared/lib/mockGardenZonesStorage';
 import {
-  clearProjectMapBuilderDraft,
   loadProjectMapBuilderDraft,
 } from '@/shared/lib/projectMapBuilderDraft';
 
 const GARDEN_W = 1920;
 const GARDEN_H = 1080;
-const PRESET_ZONE_LAYER_IDS = ['house', 'shed', 'terrace', 'lawn'];
+const PRESET_RENDER_LAYER_IDS = ['house', 'shed'];
+const MAP_DRAW_TYPES = new Set(['zone', 'path', 'building']);
 
 function newSvgDomId() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -156,34 +156,75 @@ function zoneLabelForItem(key, mapUserShapes) {
   return shape ? getShapeInspectorName(shape) : '구역';
 }
 
+function normalizeLayerType(type) {
+  if (MAP_DRAW_TYPES.has(type)) return type;
+  return 'zone';
+}
+
+function colorByType(type) {
+  const t = normalizeLayerType(type);
+  if (t === 'building') {
+    return { label: '회색', token: '#9a9a9a' };
+  }
+  if (t === 'path') {
+    return { label: '흰색', token: '#ffffff' };
+  }
+  return { label: '초록', token: '#2ecc71' };
+}
+
+function colorForItem(item) {
+  if (item?.key === 'base') {
+    return { label: '연두', token: '#c3dfb1' };
+  }
+  return colorByType(item?.layerType);
+}
+
 /**
- * 드래프트에서 구역 후보만 모읍니다 (도형 유형이 zone 인 것).
- * @returns {{ key: string, name: string, kind: string, geom: object }[]}
+ * 드래프트에서 맵에 표시할 도형 후보를 모읍니다.
+ * - 기본 건축물: 집/창고
+ * - 사용자 도형: zone 유형만
+ * @returns {{ key: string, name: string, kind: string, geom: object, layerType: 'zone'|'path'|'building' }[]}
  */
 export function collectZoneItemsFromDraft(draft) {
   const mapPresentLayerIds = draft.mapPresentLayerIds || [];
   const mapLayerTypes = draft.mapLayerTypes || {};
   const mapUserShapes = draft.mapUserShapes || [];
   const stage = draft.stageSize || { w: 1000, h: 700 };
+  const mapSpaceSize = typeof draft.mapSpaceSize === 'string' ? draft.mapSpaceSize : 'medium';
   const sw = Math.max(1, stage.w);
   const sh = Math.max(1, stage.h);
 
   const out = [];
-  const presetIds = mapPresentLayerIds.filter((id) => PRESET_ZONE_LAYER_IDS.includes(id));
+  if (mapPresentLayerIds.includes('base')) {
+    const bounds = getLayerHitBoundsPx(sw, sh, 'base', { spaceSize: mapSpaceSize });
+    if (bounds) {
+      out.push({
+        key: 'base',
+        name: zoneLabelForItem('base', mapUserShapes),
+        kind: 'rect',
+        geom: { x: bounds.x, y: bounds.y, w: bounds.w, h: bounds.h },
+        layerType: 'zone',
+      });
+    }
+  }
+
+  const presetIds = mapPresentLayerIds.filter((id) => PRESET_RENDER_LAYER_IDS.includes(id));
   for (const layerId of presetIds) {
-    if (mapLayerTypes[layerId] !== 'zone') continue;
-    const bounds = getLayerHitBoundsPx(sw, sh, layerId);
+    const layerType = normalizeLayerType(mapLayerTypes[layerId] ?? 'building');
+    const bounds = getLayerHitBoundsPx(sw, sh, layerId, { spaceSize: mapSpaceSize });
     if (!bounds) continue;
     out.push({
       key: layerId,
       name: zoneLabelForItem(layerId, mapUserShapes),
       kind: 'rect',
       geom: { x: bounds.x, y: bounds.y, w: bounds.w, h: bounds.h },
+      layerType,
     });
   }
 
   for (const s of mapUserShapes) {
-    if (mapLayerTypes[s.id] !== 'zone') continue;
+    if (!MAP_DRAW_TYPES.has(mapLayerTypes[s.id])) continue;
+    const layerType = normalizeLayerType(mapLayerTypes[s.id]);
     const k = s.kind;
     const g = s.geom;
     if (!g) continue;
@@ -203,6 +244,7 @@ export function collectZoneItemsFromDraft(draft) {
         name: zoneLabelForItem(s.id, mapUserShapes),
         kind: 'rect',
         geom: { x: minX, y: minY, w: maxX - minX, h: maxY - minY },
+        layerType,
       });
       continue;
     }
@@ -213,6 +255,7 @@ export function collectZoneItemsFromDraft(draft) {
         name: zoneLabelForItem(s.id, mapUserShapes),
         kind: k,
         geom: JSON.parse(JSON.stringify(g)),
+        layerType,
       });
     }
   }
@@ -231,13 +274,14 @@ function prepareMapBuilderDraftApply(projectId) {
 
   const items = collectZoneItemsFromDraft(draft);
   if (!items.length) {
-    throw new Error('맵에 “구역” 유형으로 지정된 도형이 없어요. 맵 빌더에서 유형을 확인해 주세요.');
+    throw new Error('저장할 맵 도형이 없어요. 집/창고 또는 구역 도형을 확인해 주세요.');
   }
 
   const stage = draft.stageSize || { w: 1000, h: 700 };
+  const mapSpaceSize = typeof draft.mapSpaceSize === 'string' ? draft.mapSpaceSize : 'medium';
   const sw = Math.max(1, stage.w);
   const sh = Math.max(1, stage.h);
-  const baseBounds = getLayerHitBoundsPx(sw, sh, 'base');
+  const baseBounds = getLayerHitBoundsPx(sw, sh, 'base', { spaceSize: mapSpaceSize });
   const bounds = baseBounds
     ? { minX: baseBounds.x, minY: baseBounds.y, w: baseBounds.w, h: baseBounds.h }
     : unionBoundsFromItems(items);
@@ -257,14 +301,15 @@ export function applyMapBuilderDraftToMockStorage(projectId) {
   const { items, bounds } = prepareMapBuilderDraftApply(projectId);
   const existing = loadMockGardenZones(projectId);
   const kept = existing.filter((z) => !z.isDgMapBuilt);
-  const colorLabel = '초록';
-  const colorToken = colorTokenFromRaw(colorLabel);
 
   const newRows = [];
   for (const it of items) {
     const mapped = mapShapeToGarden(it.kind, it.geom, bounds);
     if (!mapped) continue;
-    const svgId = newSvgDomId();
+    const mappedColor = colorForItem(it);
+    const colorLabel = mappedColor.label;
+    const colorToken = mappedColor.token || colorTokenFromRaw(colorLabel);
+    const svgId = it.key === 'base' ? 'dg_base_zone' : newSvgDomId();
     newRows.push({
       id:
         typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
@@ -283,11 +328,10 @@ export function applyMapBuilderDraftToMockStorage(projectId) {
   }
 
   if (!newRows.length) {
-    throw new Error('저장할 구역이 없습니다.');
+    throw new Error('저장할 맵 도형이 없습니다.');
   }
 
   saveMockGardenZones(projectId, [...kept, ...newRows]);
-  clearProjectMapBuilderDraft(projectId);
   return { created: newRows.length };
 }
 
@@ -309,17 +353,17 @@ export async function applyMapBuilderDraftToGarden(projectId) {
   for (const it of items) {
     const mapped = mapShapeToGarden(it.kind, it.geom, bounds);
     if (!mapped) continue;
-    const svgId = newSvgDomId();
+    const mappedColor = colorForItem(it);
+    const svgId = it.key === 'base' ? 'dg_base_zone' : newSvgDomId();
     const desc = encodeDgMapDescription('', mapped);
     await createZone(projectId, {
       name: it.name,
       description: desc,
-      color: '초록',
+      color: mappedColor.label,
       svg_id: svgId,
     });
     created += 1;
   }
 
-  clearProjectMapBuilderDraft(projectId);
   return { created };
 }

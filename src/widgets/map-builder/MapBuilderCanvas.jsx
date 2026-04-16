@@ -140,6 +140,7 @@ export default function MapBuilderCanvas() {
     mapPresentLayerIds,
     mapLayerLocked,
     mapLayerTypes,
+    mapSpaceSize,
     removeMapPresentLayer,
     toggleMapLayerLock,
     mapBuilderTool,
@@ -166,6 +167,15 @@ export default function MapBuilderCanvas() {
   viewRef.current = view;
 
   const invZoomUi = 1 / Math.max(view.scale, MAP_BUILDER_ZOOM_MIN);
+  const stageWidth = stageRef.current?.offsetWidth || 0;
+  const stageHeight = stageRef.current?.offsetHeight || 0;
+  const baseBounds = useMemo(
+    () =>
+      getLayerHitBoundsPx(stageWidth, stageHeight, 'base', {
+        spaceSize: mapSpaceSize,
+      }),
+    [mapSpaceSize, stageHeight, stageWidth],
+  );
 
   const selectedLayer = getMapBuilderLayer(selectedMapLayerId);
   const selectedUserShape = mapUserShapes.find((s) => s.id === selectedMapLayerId);
@@ -244,14 +254,14 @@ export default function MapBuilderCanvas() {
       return;
     }
     if (mapPresentLayerIds.includes(selectedMapLayerId)) {
-      const b = getLayerHitBoundsPx(sw, sh, selectedMapLayerId);
+      const b = getLayerHitBoundsPx(sw, sh, selectedMapLayerId, { spaceSize: mapSpaceSize });
       if (!b) return;
       const next = fitTargetToFixedRatio(vw, vh, b);
       if (next) setView(next);
       return;
     }
     setView(centerStageInView(vw, vh, sw, sh, 1));
-  }, [fitTargetToFixedRatio, mapPresentLayerIds, selectedMapLayerId, selectedUserShapeBounds]);
+  }, [fitTargetToFixedRatio, mapPresentLayerIds, mapSpaceSize, selectedMapLayerId, selectedUserShapeBounds]);
 
   const zoomByFactor = useCallback(
     (factor) => {
@@ -434,7 +444,7 @@ export default function MapBuilderCanvas() {
     const vh = vr.height;
 
     if (selectedMapLayerId && mapPresentLayerIds.includes(selectedMapLayerId)) {
-      const b = getLayerHitBoundsPx(sw, sh, selectedMapLayerId);
+      const b = getLayerHitBoundsPx(sw, sh, selectedMapLayerId, { spaceSize: mapSpaceSize });
       if (b) {
         const { tx, ty, scale } = viewRef.current;
         const cx = b.x + b.w / 2;
@@ -445,7 +455,7 @@ export default function MapBuilderCanvas() {
     const lp = lastPointerRef.current;
     if (lp.x != null && lp.y != null) return { x: lp.x, y: lp.y };
     return { x: vw / 2, y: vh / 2 };
-  }, [selectedMapLayerId, mapPresentLayerIds]);
+  }, [selectedMapLayerId, mapPresentLayerIds, mapSpaceSize]);
 
   useEffect(() => {
     const vb = viewBoxRef.current;
@@ -619,13 +629,22 @@ export default function MapBuilderCanvas() {
                 '--mb-inv-zoom': invZoomUi,
               }}
             >
-            <div className="map-builder-canvas__roads" aria-hidden>
-              <div className="map-builder-canvas__road map-builder-canvas__road--north" />
-              <div className="map-builder-canvas__road map-builder-canvas__road--west" />
-              <div className="map-builder-canvas__road map-builder-canvas__road--diag" />
-            </div>
-
-            {isPresent('base') ? <div className="map-builder-canvas__lot-border" aria-hidden /> : null}
+            {isPresent('base') ? (
+              <div
+                className="map-builder-canvas__lot-border"
+                aria-hidden
+                style={
+                  baseBounds
+                    ? {
+                        left: `${baseBounds.x}px`,
+                        top: `${baseBounds.y}px`,
+                        width: `${baseBounds.w}px`,
+                        height: `${baseBounds.h}px`,
+                      }
+                    : undefined
+                }
+              />
+            ) : null}
 
             {isPresent('house') ? (
               <div className={['map-builder-canvas__region', layerTypeClass('house')].join(' ')}>
@@ -643,6 +662,10 @@ export default function MapBuilderCanvas() {
                     .join(' ')}
                   aria-label="집 선택"
                   aria-pressed={selectedMapLayerId === 'house'}
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    selectFromCanvas('house');
+                  }}
                   onClick={(e) => {
                     e.stopPropagation();
                     selectFromCanvas('house');
@@ -666,6 +689,10 @@ export default function MapBuilderCanvas() {
                   .join(' ')}
                 aria-label={label}
                 aria-pressed={selectedMapLayerId === id}
+                onPointerDown={(e) => {
+                  e.stopPropagation();
+                  selectFromCanvas(id);
+                }}
                 onClick={(e) => {
                   e.stopPropagation();
                   selectFromCanvas(id);

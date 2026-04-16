@@ -11,7 +11,7 @@ import {
   saveProjectWizardDraft,
   clearProjectWizardDraft,
 } from '@/shared/lib/projectWizardDraft';
-import { PROJECT_SPACE_SIZE_TAB_ITEMS } from '@/shared/lib/projectSpaceSize';
+import { PROJECT_SPACE_SIZE_MAP_BUILDER_TAB_ITEMS } from '@/shared/lib/projectSpaceSize';
 import MapBuilderWorkspace from '@/widgets/map-builder/MapBuilderWorkspace';
 import { useProjectNewMapBuilderUi } from '@/app/providers/ProjectNewMapBuilderUiContext';
 import {
@@ -35,6 +35,7 @@ export default function ProjectNewPage() {
     mapLayerTypes,
     mapUserShapes,
     mapZoneNameIndex,
+    setMapSpaceSize,
     mapSaveState,
     markMapSaved,
     undoMapAction,
@@ -45,7 +46,7 @@ export default function ProjectNewPage() {
 
   const [step, setStep] = useState(0);
   const [name, setName] = useState('');
-  const [space, setSpace] = useState('');
+  const [space, setSpace] = useState('medium');
   const [spaceDescription, setSpaceDescription] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -53,7 +54,7 @@ export default function ProjectNewPage() {
     const d = loadProjectWizardDraft();
     if (d) {
       setName(d.name);
-      setSpace(d.space);
+      setSpace(d.space === 'narrow' || !d.space ? 'medium' : d.space);
       setSpaceDescription(d.spaceDescription);
     }
   }, []);
@@ -61,6 +62,10 @@ export default function ProjectNewPage() {
   useEffect(() => {
     saveProjectWizardDraft({ name, space, spaceDescription });
   }, [name, space, spaceDescription]);
+
+  useEffect(() => {
+    setMapSpaceSize(space || 'medium');
+  }, [setMapSpaceSize, space]);
 
   useEffect(() => {
     setMapBuilderOpen(step === 1);
@@ -96,7 +101,7 @@ export default function ProjectNewPage() {
       const trimmedDesc = spaceDescription.trim();
       const { data, error } = await createProject({
         name: name.trim(),
-        space_size: space,
+        space_size: space || 'medium',
         space_description: trimmedDesc || null,
       });
       if (error) {
@@ -113,6 +118,7 @@ export default function ProjectNewPage() {
           mapPresentLayerIds: [...mapPresentLayerIds],
           mapLayerTypes: { ...mapLayerTypes },
           mapUserShapes: JSON.parse(JSON.stringify(mapUserShapes)),
+          mapSpaceSize: space || 'medium',
           nextZoneNameIndex: mapZoneNameIndex,
           stageSize,
         });
@@ -185,7 +191,7 @@ export default function ProjectNewPage() {
                 공간 넓이<span className="project-new-page__required">*</span>
               </span>
               <Select
-                options={PROJECT_SPACE_SIZE_TAB_ITEMS}
+                options={PROJECT_SPACE_SIZE_MAP_BUILDER_TAB_ITEMS}
                 value={space}
                 onChange={setSpace}
                 size="m"

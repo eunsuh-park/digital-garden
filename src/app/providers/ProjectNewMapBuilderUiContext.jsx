@@ -44,6 +44,33 @@ function inferNextZoneNameIndex(userShapes) {
   return maxIndex + 1;
 }
 
+function normalizeLayerType(type) {
+  if (type === 'building' || type === 'path' || type === 'zone') return type;
+  return 'zone';
+}
+
+/**
+ * 레이어 이동 규칙:
+ * - 유형 우선순위: 건축물 > 길 > 구역
+ * - 유형 간 위치 이동 금지 (같은 유형끼리만 인접 swap 허용)
+ */
+function moveIdWithinSameType(ids, layerId, direction, typeMap) {
+  const index = ids.indexOf(layerId);
+  if (index < 0) return { moved: false, ids };
+  const nextIndex = direction === 'forward' ? index + 1 : index - 1;
+  if (nextIndex < 0 || nextIndex >= ids.length) return { moved: false, ids };
+
+  const currentType = normalizeLayerType(typeMap[layerId]);
+  const neighborType = normalizeLayerType(typeMap[ids[nextIndex]]);
+  if (currentType !== neighborType) {
+    return { moved: false, ids };
+  }
+
+  const next = [...ids];
+  [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
+  return { moved: true, ids: next };
+}
+
 export function ProjectNewMapBuilderUiProvider({ children }) {
   const [mapBuilderOpen, setMapBuilderOpen] = useState(false);
   const [selectedMapLayerId, setSelectedMapLayerId] = useState(null);
@@ -53,6 +80,7 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
   const [mapLayerTypes, setMapLayerTypes] = useState(() => initialMapLayerTypes());
   const [mapBuilderTool, setMapBuilderTool] = useState(/** @type {MapBuilderToolId} */ ('select'));
   const [mapUserShapes, setMapUserShapes] = useState([]);
+  const [mapSpaceSize, setMapSpaceSize] = useState('medium');
   const [mapZoneNameIndex, setMapZoneNameIndex] = useState(1);
   const [mapSaveState, setMapSaveState] = useState('saved');
   const [, setHistoryVersion] = useState(0);
@@ -190,41 +218,57 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
 
   const bringForwardMapLayer = useCallback((layerId) => {
     if (!layerId) return;
+    const current = mapStateRef.current;
+    if (!current) return;
+    let moved = false;
+
+    const userIds = current.mapUserShapes.map((s) => s.id);
+    const userMove = moveIdWithinSameType(userIds, layerId, 'forward', current.mapLayerTypes);
+    const presentMove = moveIdWithinSameType(
+      current.mapPresentLayerIds,
+      layerId,
+      'forward',
+      current.mapLayerTypes,
+    );
+    moved = userMove.moved || presentMove.moved;
+    if (!moved) return;
+
     pushUndoSnapshot();
-    setMapUserShapes((prev) => {
-      const i = prev.findIndex((s) => s.id === layerId);
-      if (i < 0 || i >= prev.length - 1) return prev;
-      const next = [...prev];
-      [next[i], next[i + 1]] = [next[i + 1], next[i]];
-      return next;
-    });
-    setMapPresentLayerIds((prev) => {
-      const i = prev.indexOf(layerId);
-      if (i < 0 || i >= prev.length - 1) return prev;
-      const next = [...prev];
-      [next[i], next[i + 1]] = [next[i + 1], next[i]];
-      return next;
-    });
+    if (userMove.moved) {
+      const orderMap = new Map(userMove.ids.map((id, idx) => [id, idx]));
+      setMapUserShapes((prev) => [...prev].sort((a, b) => orderMap.get(a.id) - orderMap.get(b.id)));
+    }
+    if (presentMove.moved) {
+      setMapPresentLayerIds(presentMove.ids);
+    }
     markMapDirty();
   }, [markMapDirty, pushUndoSnapshot]);
 
   const sendBackwardMapLayer = useCallback((layerId) => {
     if (!layerId) return;
+    const current = mapStateRef.current;
+    if (!current) return;
+    let moved = false;
+
+    const userIds = current.mapUserShapes.map((s) => s.id);
+    const userMove = moveIdWithinSameType(userIds, layerId, 'backward', current.mapLayerTypes);
+    const presentMove = moveIdWithinSameType(
+      current.mapPresentLayerIds,
+      layerId,
+      'backward',
+      current.mapLayerTypes,
+    );
+    moved = userMove.moved || presentMove.moved;
+    if (!moved) return;
+
     pushUndoSnapshot();
-    setMapUserShapes((prev) => {
-      const i = prev.findIndex((s) => s.id === layerId);
-      if (i <= 0) return prev;
-      const next = [...prev];
-      [next[i], next[i - 1]] = [next[i - 1], next[i]];
-      return next;
-    });
-    setMapPresentLayerIds((prev) => {
-      const i = prev.indexOf(layerId);
-      if (i <= 0) return prev;
-      const next = [...prev];
-      [next[i], next[i - 1]] = [next[i - 1], next[i]];
-      return next;
-    });
+    if (userMove.moved) {
+      const orderMap = new Map(userMove.ids.map((id, idx) => [id, idx]));
+      setMapUserShapes((prev) => [...prev].sort((a, b) => orderMap.get(a.id) - orderMap.get(b.id)));
+    }
+    if (presentMove.moved) {
+      setMapPresentLayerIds(presentMove.ids);
+    }
     markMapDirty();
   }, [markMapDirty, pushUndoSnapshot]);
 
@@ -294,6 +338,7 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
             ? { ...draft.mapLayerTypes }
             : initialMapLayerTypes();
         const userShapes = Array.isArray(draft.mapUserShapes) ? deepClone(draft.mapUserShapes) : [];
+        const nextMapSpaceSize = typeof draft.mapSpaceSize === 'string' ? draft.mapSpaceSize : 'medium';
         const nextZoneNameIndex = Math.max(
           1,
           Number(draft.nextZoneNameIndex) || inferNextZoneNameIndex(userShapes),
@@ -303,6 +348,7 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
         setMapLayerLocked(initialLockedMap());
         setMapLayerTypes(layerTypes);
         setMapUserShapes(userShapes);
+        setMapSpaceSize(nextMapSpaceSize);
         setMapZoneNameIndex(nextZoneNameIndex);
         pendingDraftRef.current = null;
       } else {
@@ -310,6 +356,7 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
         setMapLayerLocked(initialLockedMap());
         setMapLayerTypes(initialMapLayerTypes());
         setMapUserShapes([]);
+        setMapSpaceSize('medium');
         setMapZoneNameIndex(1);
       }
       setMapBuilderTool('select');
@@ -373,6 +420,8 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
       mapBuilderTool,
       setMapBuilderTool,
       mapUserShapes,
+      mapSpaceSize,
+      setMapSpaceSize,
       addMapUserShape,
       updateMapUserShape,
       bringForwardMapLayer,
@@ -408,6 +457,7 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
       setMapLayerType,
       mapBuilderTool,
       mapUserShapes,
+      mapSpaceSize,
       addMapUserShape,
       updateMapUserShape,
       bringForwardMapLayer,
@@ -459,6 +509,8 @@ export function useProjectNewMapBuilderUi() {
       mapBuilderTool: 'select',
       setMapBuilderTool: () => {},
       mapUserShapes: [],
+      mapSpaceSize: 'medium',
+      setMapSpaceSize: () => {},
       addMapUserShape: () => {},
       updateMapUserShape: () => {},
       bringForwardMapLayer: () => {},

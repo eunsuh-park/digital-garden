@@ -295,6 +295,10 @@ export default function GardenMap({ zones = [], getTasksByZone, getPlantsByZone,
       resolved_svg_id: z.svg_id || '',
     }));
   }, [zones]);
+  const hasBuiltMapShapes = useMemo(
+    () => resolvedZones.some((z) => Boolean(z.dgMapShape)),
+    [resolvedZones],
+  );
 
   /** 맵 빌더 저장 구역: SVG에 동적 도형 주입(정적 id가 없을 때) */
   useEffect(() => {
@@ -312,6 +316,39 @@ export default function GardenMap({ zones = [], getTasksByZone, getPlantsByZone,
       svg.appendChild(layer);
     }
     while (layer.firstChild) layer.removeChild(layer.firstChild);
+
+    const appendDefaultBuildingShapes = () => {
+      // 맵 빌더의 기본 "집/창고"를 랜딩 지도에도 고정으로 표시한다.
+      const house = document.createElementNS(NS, 'rect');
+      house.setAttribute('id', 'dg-default-house');
+      house.setAttribute('x', '840');
+      house.setAttribute('y', '430');
+      house.setAttribute('width', '240');
+      house.setAttribute('height', '220');
+      house.setAttribute('rx', '26');
+      house.setAttribute('ry', '26');
+      house.setAttribute('fill', '#9a9a9a');
+      house.setAttribute('opacity', '0.9');
+      house.setAttribute('pointer-events', 'none');
+      layer.appendChild(house);
+
+      const shed = document.createElementNS(NS, 'rect');
+      shed.setAttribute('id', 'dg-default-shed');
+      shed.setAttribute('x', '1210');
+      shed.setAttribute('y', '620');
+      shed.setAttribute('width', '170');
+      shed.setAttribute('height', '120');
+      shed.setAttribute('rx', '18');
+      shed.setAttribute('ry', '18');
+      shed.setAttribute('fill', '#8d8d8d');
+      shed.setAttribute('opacity', '0.9');
+      shed.setAttribute('pointer-events', 'none');
+      layer.appendChild(shed);
+    };
+
+    if (hasBuiltMapShapes) {
+      appendDefaultBuildingShapes();
+    }
 
     resolvedZones.forEach((z) => {
       if (!z.dgMapShape || !z.svg_id) return;
@@ -365,7 +402,40 @@ export default function GardenMap({ zones = [], getTasksByZone, getPlantsByZone,
         while (layer.firstChild) layer.removeChild(layer.firstChild);
       }
     };
-  }, [resolvedZones, svgReady]);
+  }, [hasBuiltMapShapes, resolvedZones, svgReady]);
+
+  /**
+   * 맵 빌더 저장 도형이 있으면 데모 구역 도형만 숨긴다.
+   * 집/창고(건물) 레이어는 유지한다.
+   */
+  useEffect(() => {
+    const host = svgHostRef.current;
+    if (!host || !svgReady || !hasBuiltMapShapes) return;
+    const svg = host.querySelector('svg');
+    if (!svg) return;
+
+    const hiddenNodes = [];
+    const hideIds = new Set([
+      'front_yard',
+      'back_yard',
+      'vegetable_patch',
+      'greenhouse',
+      'mailbox_area',
+      'greenhouse_area',
+      'vinylhouse',
+    ]);
+    for (const node of Array.from(svg.querySelectorAll('[id]'))) {
+      if (!hideIds.has(node.id)) continue;
+      hiddenNodes.push(node);
+      node.style.display = 'none';
+    }
+
+    return () => {
+      hiddenNodes.forEach((node) => {
+        node.style.display = '';
+      });
+    };
+  }, [hasBuiltMapShapes, svgReady]);
 
   const getTargetEl = useCallback((svg, svgId) => {
     if (!svgId || !svg) return null;
@@ -408,8 +478,9 @@ export default function GardenMap({ zones = [], getTasksByZone, getPlantsByZone,
       const svgId = resolveSvgId(z.resolved_svg_id);
       const el = getTargetEl(svg, svgId);
       if (!el) return;
+      const isBaseLayer = z.svg_id === 'dg_base_zone';
 
-      el.style.cursor = 'pointer';
+      el.style.cursor = isBaseLayer ? 'default' : 'pointer';
       el.style.opacity = '1';
       el.style.fillOpacity = '1';
       el.style.strokeLinejoin = 'round';
@@ -418,14 +489,19 @@ export default function GardenMap({ zones = [], getTasksByZone, getPlantsByZone,
         el.setAttribute('rx', '10');
         el.setAttribute('ry', '10');
       }
+      if (isBaseLayer) {
+        el.removeAttribute('role');
+        el.removeAttribute('tabindex');
+        el.setAttribute('aria-hidden', 'true');
+        el.style.pointerEvents = 'none';
+        return;
+      }
       el.setAttribute('role', 'button');
       el.setAttribute('tabindex', '0');
-      el.setAttribute(
-        'aria-label',
-        `${z.name} 구역, 할 일 ${z.taskCount ?? 0}건`
-      );
+      el.setAttribute('aria-label', `${z.name} 구역, 할 일 ${z.taskCount ?? 0}건`);
 
       const onClick = (e) => handleZoneClick(e, z.id);
+      const onPointerDown = (e) => handleZoneClick(e, z.id);
       const onEnter = (e) => handleZoneHover(e, z.id, true);
       const onLeave = (e) => handleZoneHover(e, z.id, false);
       const onKeyDown = (e) => {
@@ -436,12 +512,14 @@ export default function GardenMap({ zones = [], getTasksByZone, getPlantsByZone,
       };
 
       el.addEventListener('click', onClick);
+      el.addEventListener('pointerdown', onPointerDown);
       el.addEventListener('mouseenter', onEnter);
       el.addEventListener('mouseleave', onLeave);
       el.addEventListener('keydown', onKeyDown);
 
       cleanups.push(() => {
         el.removeEventListener('click', onClick);
+        el.removeEventListener('pointerdown', onPointerDown);
         el.removeEventListener('mouseenter', onEnter);
         el.removeEventListener('mouseleave', onLeave);
         el.removeEventListener('keydown', onKeyDown);
@@ -469,9 +547,10 @@ export default function GardenMap({ zones = [], getTasksByZone, getPlantsByZone,
       const isActive = activeZoneId === z.id;
       const isHover = hoverZoneId === z.id;
       const isFocused = focusedIdSet.has(z.id);
+      const isBaseLayer = z.svg_id === 'dg_base_zone';
       el.style.opacity = hasFocusedTarget && !isFocused ? '0.72' : '1';
       el.style.fillOpacity = '1';
-      el.style.pointerEvents = 'auto';
+      el.style.pointerEvents = isBaseLayer ? 'none' : 'auto';
       if (z.color_token) {
         el.style.fill = z.color_token;
       }
@@ -528,11 +607,17 @@ export default function GardenMap({ zones = [], getTasksByZone, getPlantsByZone,
   }, [resolvedZones, getTargetEl]);
 
   useEffect(() => {
-    if (!focusedZoneIds.length) return;
     const host = svgHostRef.current;
     const svg = host?.querySelector?.('svg');
     const orig = svgOriginalViewBoxRef.current;
     if (!svg || !orig) return;
+    if (!focusedZoneIds.length) {
+      // 아무 요소도 선택되지 않았으면 맵 전체 보기로 복귀
+      svgViewBoxRef.current = { ...orig };
+      svg.setAttribute('viewBox', `${orig.x} ${orig.y} ${orig.w} ${orig.h}`);
+      setZoom(1);
+      return;
+    }
 
     const focusedZones = resolvedZones.filter((z) => focusedZoneIds.includes(z.id));
     const boxes = focusedZones

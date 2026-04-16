@@ -196,9 +196,12 @@
 
 .map-builder-canvas__lot-border {
   position: absolute;
-  inset: 52px 80px 56px 80px;
+  left: 80px;
+  top: 52px;
+  width: calc(100% - 160px);
+  height: calc(100% - 108px);
   border-radius: 52px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(195, 223, 177, 0.32);
   outline: 2px dashed rgba(122, 132, 96, 0.32);
   outline-offset: -10px;
 }

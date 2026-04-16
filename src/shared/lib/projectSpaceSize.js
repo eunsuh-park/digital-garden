@@ -17,6 +17,16 @@ export const PROJECT_SPACE_SIZE_TAB_ITEMS = PROJECT_SPACE_SIZE_VALUES.map((value
   label: PROJECT_SPACE_SIZE_LABEL_KO[value],
 }));
 
+/** 맵 빌더에서 허용할 공간 옵션(실내 정원 제외) */
+export const PROJECT_SPACE_SIZE_MAP_BUILDER_VALUES = ['medium', 'wide', 'very_wide'];
+
+export const PROJECT_SPACE_SIZE_MAP_BUILDER_TAB_ITEMS = PROJECT_SPACE_SIZE_MAP_BUILDER_VALUES.map(
+  (value) => ({
+    value,
+    label: PROJECT_SPACE_SIZE_LABEL_KO[value],
+  }),
+);
+
 /** 마이그레이션 전 s/m/l 값도 표시 가능 */
 export function formatProjectSpaceSizeLabel(spaceSize) {
   if (spaceSize == null || spaceSize === '') return '—';

@@ -26,6 +26,7 @@ export default function ProjectMapBuilderPage() {
     mapPresentLayerIds,
     mapLayerTypes,
     mapUserShapes,
+    setMapSpaceSize,
     mapZoneNameIndex,
     mapSaveState,
     markMapSaved,
@@ -36,6 +37,11 @@ export default function ProjectMapBuilderPage() {
   } = useProjectNewMapBuilderUi();
   const { showToast } = useToast();
   const { projects, loading, error } = useProjects();
+  const project = projects.find((p) => String(p.id) === String(projectId));
+  const zoneCount = [
+    ...mapPresentLayerIds.filter((id) => mapLayerTypes[id] === 'zone'),
+    ...mapUserShapes.filter((s) => mapLayerTypes[s.id] === 'zone').map((s) => s.id),
+  ].length;
 
   useEffect(() => {
     const draft = loadProjectMapBuilderDraft(projectId);
@@ -56,11 +62,15 @@ export default function ProjectMapBuilderPage() {
       mapPresentLayerIds: [...mapPresentLayerIds],
       mapLayerTypes: { ...mapLayerTypes },
       mapUserShapes: JSON.parse(JSON.stringify(mapUserShapes)),
+      mapSpaceSize: project?.space_size === 'narrow' ? 'medium' : project?.space_size || 'medium',
       nextZoneNameIndex: mapZoneNameIndex,
     });
-  }, [mapLayerTypes, mapPresentLayerIds, mapSaveState, mapUserShapes, mapZoneNameIndex, projectId]);
+  }, [mapLayerTypes, mapPresentLayerIds, mapSaveState, mapUserShapes, mapZoneNameIndex, project?.space_size, projectId]);
 
-  const project = projects.find((p) => String(p.id) === String(projectId));
+  useEffect(() => {
+    if (!project) return;
+    setMapSpaceSize(project.space_size === 'narrow' ? 'medium' : project.space_size || 'medium');
+  }, [project, setMapSpaceSize]);
 
   if (loading && !project) {
     return (
@@ -99,10 +109,6 @@ export default function ProjectMapBuilderPage() {
   }
 
   const handleSaveAndContinue = useCallback(() => {
-    const zoneCount = [
-      ...mapPresentLayerIds.filter((id) => mapLayerTypes[id] === 'zone'),
-      ...mapUserShapes.filter((s) => mapLayerTypes[s.id] === 'zone').map((s) => s.id),
-    ].length;
     if (zoneCount < 1) {
       showToast('최소 1개의 "구역" 유형 레이어가 있어야 저장할 수 있어요.');
       return;
@@ -112,6 +118,7 @@ export default function ProjectMapBuilderPage() {
       mapPresentLayerIds: [...mapPresentLayerIds],
       mapLayerTypes: { ...mapLayerTypes },
       mapUserShapes: JSON.parse(JSON.stringify(mapUserShapes)),
+      mapSpaceSize: project?.space_size === 'narrow' ? 'medium' : project?.space_size || 'medium',
       nextZoneNameIndex: mapZoneNameIndex,
       stageSize,
     });
@@ -126,6 +133,7 @@ export default function ProjectMapBuilderPage() {
     mapZoneNameIndex,
     markMapSaved,
     navigate,
+    project?.space_size,
   ]);
 
   return (
@@ -140,7 +148,7 @@ export default function ProjectMapBuilderPage() {
         canRedo={canRedo}
         saveStatus={mapSaveState}
         saving={false}
-        saveDisabled={false}
+        saveDisabled={zoneCount < 1}
         primaryActionLabel="저장하고 다음 단계"
       />
     </div>

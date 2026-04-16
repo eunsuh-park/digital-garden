@@ -9,7 +9,6 @@ import { useZones } from '@/app/providers/ZonesContext';
 import { useMapPanelDetail } from '@/app/providers/MapPanelDetailContext';
 import { useToast } from '@/app/providers/ToastContext';
 import { useProjectNewMapBuilderUi } from '@/app/providers/ProjectNewMapBuilderUiContext';
-import { groupZonesByColor, labelForColorGroup } from '@/shared/lib/zonesGroup';
 import {
   getMapBuilderMode,
   setMapBuilderMode,
@@ -31,18 +30,10 @@ import './MapSidePanel.css';
 function ZoneTabContent() {
   const { zones, loading, error } = useZones();
   const { openZoneDetail } = useMapPanelDetail();
-  const [expandedColors, setExpandedColors] = useState(() => new Set());
-
-  const groups = useMemo(() => groupZonesByColor(zones), [zones]);
-
-  const toggleColor = (color) => {
-    setExpandedColors((prev) => {
-      const next = new Set(prev);
-      if (next.has(color)) next.delete(color);
-      else next.add(color);
-      return next;
-    });
-  };
+  const visibleZones = useMemo(
+    () => zones.filter((z) => z.svg_id !== 'dg_base_zone' && z.name !== '기본 구역'),
+    [zones],
+  );
 
   if (loading) {
     return <p className="map-side-panel__hint">구역을 불러오는 중…</p>;
@@ -52,57 +43,26 @@ function ZoneTabContent() {
     return <p className="map-side-panel__hint map-side-panel__hint--error">{error}</p>;
   }
 
-  if (!zones.length) {
+  if (!visibleZones.length) {
     return <p className="map-side-panel__hint">등록된 구역이 없습니다.</p>;
   }
 
   return (
     <ul className="map-side-panel__list" role="list">
-      {groups.map(({ color, items }) => {
-        const label = labelForColorGroup(items);
-        const count = items.length;
-        const expanded = expandedColors.has(color);
-
-        return (
-          <li key={color} className="map-side-panel__list-item">
-            <button
-              type="button"
-              className="map-side-panel__row"
-              onClick={() => toggleColor(color)}
-              aria-expanded={expanded}
-            >
-              <span className="map-side-panel__dot" style={{ background: color }} aria-hidden />
-              <span className="map-side-panel__row-label">{label}</span>
-              <span className="map-side-panel__row-count">{count}</span>
-              <Icon
-                icon={expanded ? up : down}
-                width={16}
-                height={16}
-                className="map-side-panel__row-chevron"
-                aria-hidden
-              />
-            </button>
-            {expanded && (
-              <ul className="map-side-panel__sublist">
-                {items.map((z) => (
-                  <li key={z.id} className="map-side-panel__subitem">
-                    <button
-                      type="button"
-                      className="map-side-panel__subitem-btn"
-                      onClick={() => openZoneDetail(z)}
-                    >
-                      <span className="map-side-panel__subitem-name">{z.name}</span>
-                      {z.color_label ? (
-                        <span className="map-side-panel__subitem-meta">{z.color_label}</span>
-                      ) : null}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </li>
-        );
-      })}
+      {visibleZones.map((z) => (
+        <li key={z.id} className="map-side-panel__subitem">
+          <button
+            type="button"
+            className="map-side-panel__subitem-btn"
+            onClick={() => openZoneDetail(z)}
+          >
+            <span className="map-side-panel__subitem-name">{z.name}</span>
+            {z.color_label ? (
+              <span className="map-side-panel__subitem-meta">{z.color_label}</span>
+            ) : null}
+          </button>
+        </li>
+      ))}
     </ul>
   );
 }
@@ -150,7 +110,7 @@ export default function MapSidePanel({ collapsed, onToggleCollapsed }) {
     [tasks]
   );
 
-  const zoneTotal = loading ? '…' : String(zones.length);
+  const zoneTotal = loading ? '…' : String(zones.filter((z) => z.svg_id !== 'dg_base_zone' && z.name !== '기본 구역').length);
   const tasksCountLabel = loading ? '…' : String(pendingTasksCount);
   const plantsCountLabel = loading ? '…' : String(plants.length);
 

@@ -1,16 +1,42 @@
+function normalizeSpaceSize(spaceSize) {
+  if (spaceSize === 'very_wide') return 'very_wide';
+  if (spaceSize === 'wide') return 'wide';
+  if (spaceSize === 'medium') return 'medium';
+  if (spaceSize === 'narrow') return 'narrow';
+  return 'medium';
+}
+
+function baseScaleBySpaceSize(spaceSize) {
+  const key = normalizeSpaceSize(spaceSize);
+  if (key === 'narrow') return 1;
+  if (key === 'wide') return 1.5;
+  if (key === 'very_wide') return 2.25;
+  return 1;
+}
+
 /**
  * 스테이지 로컬(px) 기준 레이어 히트 영역 — CSS(MapBuilderCanvas)와 동일 비율 유지
  * @param {number} sw
  * @param {number} sh
  * @param {string} layerId
+ * @param {{ spaceSize?: string }=} options
  * @returns {{ x: number, y: number, w: number, h: number } | null}
  */
-export function getLayerHitBoundsPx(sw, sh, layerId) {
+export function getLayerHitBoundsPx(sw, sh, layerId, options = {}) {
   if (!layerId || !Number.isFinite(sw) || !Number.isFinite(sh) || sw <= 0 || sh <= 0) return null;
 
   switch (layerId) {
-    case 'base':
-      return { x: 80, y: 52, w: sw - 160, h: sh - 108 };
+    case 'base': {
+      const marginX = 80;
+      const marginTop = 52;
+      const marginBottom = 56;
+      const baseW = sw - marginX * 2;
+      const baseH = sh - (marginTop + marginBottom);
+      const scale = baseScaleBySpaceSize(options.spaceSize);
+      const w = Math.max(1, Math.min(sw - 24, baseW * scale));
+      const h = Math.max(1, Math.min(sh - 24, baseH * scale));
+      return { x: (sw - w) / 2, y: (sh - h) / 2, w, h };
+    }
     case 'house': {
       const w = 296;
       const h = 266;

@@ -323,6 +323,7 @@ export default function MapBuilderUserDrawLayer({ stageRef, view }) {
     mapPresentLayerIds,
     mapLayerLocked,
     mapLayerTypes,
+    mapSpaceSize,
     addMapUserShape,
     updateMapUserShape,
     removeMapUserShape,
@@ -335,8 +336,13 @@ export default function MapBuilderUserDrawLayer({ stageRef, view }) {
   const { showToast } = useToast();
 
   const [draft, setDraft] = useState(null);
+  const draftRef = useRef(null);
   const dragRef = useRef(null);
   const transformRef = useRef(null);
+
+  useEffect(() => {
+    draftRef.current = draft;
+  }, [draft]);
 
   const resetAccum = useCallback(() => {
     setDraft(null);
@@ -394,14 +400,16 @@ export default function MapBuilderUserDrawLayer({ stageRef, view }) {
     (x, y) => {
       const st = stageRef.current;
       if (!st) return { x, y };
-      const bounds = getLayerHitBoundsPx(st.offsetWidth, st.offsetHeight, 'base');
+      const bounds = getLayerHitBoundsPx(st.offsetWidth, st.offsetHeight, 'base', {
+        spaceSize: mapSpaceSize,
+      });
       if (!bounds) return { x, y };
       return {
         x: Math.min(bounds.x + bounds.w, Math.max(bounds.x, x)),
         y: Math.min(bounds.y + bounds.h, Math.max(bounds.y, y)),
       };
     },
-    [stageRef],
+    [mapSpaceSize, stageRef],
   );
 
   const beginTransform = useCallback(
@@ -530,14 +538,15 @@ export default function MapBuilderUserDrawLayer({ stageRef, view }) {
     const d = dragRef.current;
     if (!d) return;
     dragRef.current = null;
+    const finalizedDraft = draftRef.current;
+    setDraft(null);
 
     if (d.kind === 'rect' || d.kind === 'ellipse') {
-      setDraft((prev) => {
-        if (!prev || (prev.kind !== 'rect' && prev.kind !== 'ellipse')) return null;
-        const r = normalizeRect(prev.x0, prev.y0, prev.x1, prev.y1);
+      if (finalizedDraft && (finalizedDraft.kind === 'rect' || finalizedDraft.kind === 'ellipse')) {
+        const r = normalizeRect(finalizedDraft.x0, finalizedDraft.y0, finalizedDraft.x1, finalizedDraft.y1);
         if (rectMinSize(r, 4)) {
           const id = newUserShapeId();
-          if (prev.kind === 'rect') {
+          if (finalizedDraft.kind === 'rect') {
             addMapUserShape({ id, kind: 'rect', geom: r });
           } else {
             addMapUserShape({
@@ -552,41 +561,39 @@ export default function MapBuilderUserDrawLayer({ stageRef, view }) {
             });
           }
         }
-        return null;
-      });
+      }
     } else if (d.kind === 'pen') {
-      setDraft((prev) => {
-        if (prev?.kind === 'pen' && prev.points.length >= 3) {
-          const candidate = {
-            id: newUserShapeId(),
-            kind: 'freepath',
-            geom: { points: prev.points.map((p) => [...p]) },
-          };
-          const candidatePoly = shapeToPolygon(candidate);
-          const stage = stageRef.current;
-          const builtInShapes =
-            stage && Number.isFinite(stage.offsetWidth) && Number.isFinite(stage.offsetHeight)
-              ? mapPresentLayerIds
-                  .filter((id) => id !== 'base')
-                  .map((id) => {
-                    const b = getLayerHitBoundsPx(stage.offsetWidth, stage.offsetHeight, id);
-                    if (!b) return null;
-                    return { id, kind: 'rect', geom: { x: b.x, y: b.y, w: b.w, h: b.h } };
-                  })
-                  .filter(Boolean)
-              : [];
-          const hasOverlap = [...mapUserShapes, ...builtInShapes].some((shape) => {
-            const poly = shapeToPolygon(shape);
-            return polygonsOverlap(candidatePoly, poly);
-          });
-          if (hasOverlap) {
-            showToast('자유 그리기 영역은 기존 영역과 겹칠 수 없어요.');
-          } else {
-            addMapUserShape(candidate);
-          }
+      if (finalizedDraft?.kind === 'pen' && finalizedDraft.points.length >= 3) {
+        const candidate = {
+          id: newUserShapeId(),
+          kind: 'freepath',
+          geom: { points: finalizedDraft.points.map((p) => [...p]) },
+        };
+        const candidatePoly = shapeToPolygon(candidate);
+        const stage = stageRef.current;
+        const builtInShapes =
+          stage && Number.isFinite(stage.offsetWidth) && Number.isFinite(stage.offsetHeight)
+            ? mapPresentLayerIds
+                .filter((id) => id !== 'base')
+                .map((id) => {
+                  const b = getLayerHitBoundsPx(stage.offsetWidth, stage.offsetHeight, id, {
+                    spaceSize: mapSpaceSize,
+                  });
+                  if (!b) return null;
+                  return { id, kind: 'rect', geom: { x: b.x, y: b.y, w: b.w, h: b.h } };
+                })
+                .filter(Boolean)
+            : [];
+        const hasOverlap = [...mapUserShapes, ...builtInShapes].some((shape) => {
+          const poly = shapeToPolygon(shape);
+          return polygonsOverlap(candidatePoly, poly);
+        });
+        if (hasOverlap) {
+          showToast('자유 그리기 영역은 기존 영역과 겹칠 수 없어요.');
+        } else {
+          addMapUserShape(candidate);
         }
-        return null;
-      });
+      }
     }
 
     try {
