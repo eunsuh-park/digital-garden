@@ -5,19 +5,19 @@ import TextField from '@/shared/ui/text-field/TextField';
 import Select from '@/shared/ui/select/Select';
 import { useToast } from '@/app/providers/ToastContext';
 import { useProjects } from '@/app/providers/ProjectsContext';
-import { createProject } from '@/shared/lib/createProject';
 import {
+  createProject,
   loadProjectWizardDraft,
   saveProjectWizardDraft,
   clearProjectWizardDraft,
-} from '@/shared/lib/projectWizardDraft';
-import { PROJECT_SPACE_SIZE_MAP_BUILDER_TAB_ITEMS } from '@/shared/lib/projectSpaceSize';
-import MapBuilderWorkspace from '@/widgets/map-builder/MapBuilderWorkspace';
+  PROJECT_SPACE_SIZE_MAP_BUILDER_TAB_ITEMS,
+} from '@/pages/ProjectNew/lib/project';
+import MapBuilderWorkspace from '@/pages/ProjectMapBuilder/MapBuilderWorkspace';
 import { useProjectNewMapBuilderUi } from '@/app/providers/ProjectNewMapBuilderUiContext';
 import {
   readMapBuilderStageSize,
   saveProjectMapBuilderDraft,
-} from '@/shared/lib/projectMapBuilderDraft';
+} from '@/pages/ProjectMapBuilder/lib/projectMapBuilderDraft';
 import './ProjectNewPage.css';
 
 const STEPS = ['기본 정보', '맵·구역'];
@@ -88,7 +88,7 @@ export default function ProjectNewPage() {
     if (!step1Valid || saving) return;
 
     const zoneCount = [
-      ...mapPresentLayerIds.filter((id) => mapLayerTypes[id] === 'zone'),
+      ...mapPresentLayerIds.filter((id) => id !== 'base' && mapLayerTypes[id] === 'zone'),
       ...mapUserShapes.filter((s) => mapLayerTypes[s.id] === 'zone').map((s) => s.id),
     ].length;
     if (zoneCount < 1) {

@@ -12,11 +12,11 @@ import {
   ProjectNewMapBuilderUiProvider,
   useProjectNewMapBuilderUi,
 } from '@/app/providers/ProjectNewMapBuilderUiContext';
-import NavigationRail from './NavigationRail';
-import MapSidePanel from '@/widgets/map-panel/MapSidePanel';
-import AppBar from './AppBar';
-import NavDrawer from './NavDrawer';
-import SettingsModal from './SettingsModal';
+import NavigationRail from '@/widgets/NavigationRail/NavigationRail';
+import MapSidePanel from '@/widgets/MapSidePanel/MapSidePanel';
+import AppBar from '@/widgets/AppBar/AppBar';
+import NavDrawer from '@/widgets/NavDrawer/NavDrawer';
+import SettingsModal from '@/widgets/SettingsModal/SettingsModal';
 import './AppShell.css';
 
 function AppShellChrome() {

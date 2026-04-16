@@ -7,8 +7,8 @@ import ErrorState from '@/shared/ui/error-state/ErrorState';
 import {
   applyMapBuilderDraftToGarden,
   applyMapBuilderDraftToMockStorage,
-} from '@/shared/lib/applyMapBuilderDraft';
-import { loadProjectMapBuilderDraft } from '@/shared/lib/projectMapBuilderDraft';
+} from '@/pages/ProjectMapBuilder/lib/applyMapBuilderDraft';
+import { loadProjectMapBuilderDraft } from '@/pages/ProjectMapBuilder/lib/projectMapBuilderDraft';
 import './ProjectStep3Page.css';
 
 const STEPS = ['기본 정보', '맵·구역', '식물 추가'];

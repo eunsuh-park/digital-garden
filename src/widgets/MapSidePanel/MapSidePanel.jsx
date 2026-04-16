@@ -13,7 +13,7 @@ import {
   getMapBuilderMode,
   setMapBuilderMode,
   subscribeMapBuilderMode,
-} from '@/shared/lib/mapBuilderMode';
+} from '@/pages/ProjectMapBuilder/lib/mapBuilderMode';
 import TaskListView from '@/features/task-list/TaskListView';
 import PlantListView from '@/features/plant-list/PlantListView';
 import {
@@ -24,7 +24,7 @@ import {
   MapPanelTaskCreate,
   MapPanelTaskDetail,
 } from './MapPanelDetailViews';
-import MapBuilderInspector from '@/widgets/map-builder/MapBuilderInspector';
+import MapBuilderInspector from '@/pages/ProjectMapBuilder/MapBuilderInspector';
 import './MapSidePanel.css';
 
 function ZoneTabContent() {

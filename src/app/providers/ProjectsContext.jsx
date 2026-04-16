@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { loadProjects } from '@/shared/lib/loadProjects';
+import { loadProjects } from '@/pages/ProjectNew/lib/project';
 
 const ProjectsContext = createContext(null);
 

@@ -12,7 +12,7 @@ export function saveProjectMapBuilderDraft(projectId, payload) {
   if (projectId == null || projectId === '') return;
   try {
     const data = { v: 1, savedAt: Date.now(), ...payload };
-    sessionStorage.setItem(projectMapBuilderDraftKey(projectId), JSON.stringify(data));
+    localStorage.setItem(projectMapBuilderDraftKey(projectId), JSON.stringify(data));
   } catch {
     /* quota / private mode */
   }
@@ -21,7 +21,7 @@ export function saveProjectMapBuilderDraft(projectId, payload) {
 export function loadProjectMapBuilderDraft(projectId) {
   if (projectId == null || projectId === '') return null;
   try {
-    const raw = sessionStorage.getItem(projectMapBuilderDraftKey(projectId));
+    const raw = localStorage.getItem(projectMapBuilderDraftKey(projectId));
     if (!raw) return null;
     const data = JSON.parse(raw);
     if (!data || data.v !== 1) return null;
@@ -34,7 +34,7 @@ export function loadProjectMapBuilderDraft(projectId) {
 export function clearProjectMapBuilderDraft(projectId) {
   if (projectId == null || projectId === '') return;
   try {
-    sessionStorage.removeItem(projectMapBuilderDraftKey(projectId));
+    localStorage.removeItem(projectMapBuilderDraftKey(projectId));
   } catch {
     /* ignore */
   }

@@ -317,39 +317,6 @@ export default function GardenMap({ zones = [], getTasksByZone, getPlantsByZone,
     }
     while (layer.firstChild) layer.removeChild(layer.firstChild);
 
-    const appendDefaultBuildingShapes = () => {
-      // 맵 빌더의 기본 "집/창고"를 랜딩 지도에도 고정으로 표시한다.
-      const house = document.createElementNS(NS, 'rect');
-      house.setAttribute('id', 'dg-default-house');
-      house.setAttribute('x', '840');
-      house.setAttribute('y', '430');
-      house.setAttribute('width', '240');
-      house.setAttribute('height', '220');
-      house.setAttribute('rx', '26');
-      house.setAttribute('ry', '26');
-      house.setAttribute('fill', '#9a9a9a');
-      house.setAttribute('opacity', '0.9');
-      house.setAttribute('pointer-events', 'none');
-      layer.appendChild(house);
-
-      const shed = document.createElementNS(NS, 'rect');
-      shed.setAttribute('id', 'dg-default-shed');
-      shed.setAttribute('x', '1210');
-      shed.setAttribute('y', '620');
-      shed.setAttribute('width', '170');
-      shed.setAttribute('height', '120');
-      shed.setAttribute('rx', '18');
-      shed.setAttribute('ry', '18');
-      shed.setAttribute('fill', '#8d8d8d');
-      shed.setAttribute('opacity', '0.9');
-      shed.setAttribute('pointer-events', 'none');
-      layer.appendChild(shed);
-    };
-
-    if (hasBuiltMapShapes) {
-      appendDefaultBuildingShapes();
-    }
-
     resolvedZones.forEach((z) => {
       if (!z.dgMapShape || !z.svg_id) return;
       const shape = z.dgMapShape;

@@ -11,7 +11,7 @@ import {
   initialMapLayerTypes,
   MAP_BUILDER_INITIAL_PRESENT_IDS,
   SHAPE_TYPES,
-} from '@/shared/lib/mapBuilderLayers';
+} from '@/pages/ProjectMapBuilder/lib/mapBuilderLayers';
 
 /** @typedef {'select'|'pan'|'rect'|'ellipse'|'pen'} MapBuilderToolId */
 

@@ -5,16 +5,16 @@ import {
 } from '@/shared/api/gardenApi';
 import { colorTokenFromRaw } from '@/entities/zone/lib/notion-schema';
 import { encodeDgMapDescription } from '@/shared/lib/dgMapZonePayload';
-import { getMapBuilderLayer } from '@/shared/lib/mapBuilderLayers';
-import { getLayerHitBoundsPx } from '@/shared/lib/mapBuilderLayerBounds';
-import { getShapeInspectorName } from '@/shared/lib/mapBuilderUserShapes';
+import { getMapBuilderLayer } from '@/pages/ProjectMapBuilder/lib/mapBuilderLayers';
+import { getLayerHitBoundsPx } from '@/pages/ProjectMapBuilder/lib/mapBuilderLayerBounds';
+import { getShapeInspectorName } from '@/pages/ProjectMapBuilder/lib/mapBuilderUserShapes';
 import {
   loadMockGardenZones,
   saveMockGardenZones,
 } from '@/shared/lib/mockGardenZonesStorage';
 import {
   loadProjectMapBuilderDraft,
-} from '@/shared/lib/projectMapBuilderDraft';
+} from '@/pages/ProjectMapBuilder/lib/projectMapBuilderDraft';
 
 const GARDEN_W = 1920;
 const GARDEN_H = 1080;

@@ -3,14 +3,14 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useProjects } from '@/app/providers/ProjectsContext';
 import { useProjectNewMapBuilderUi } from '@/app/providers/ProjectNewMapBuilderUiContext';
 import { useToast } from '@/app/providers/ToastContext';
-import MapBuilderWorkspace from '@/widgets/map-builder/MapBuilderWorkspace';
+import MapBuilderWorkspace from './MapBuilderWorkspace';
 import ErrorState from '@/shared/ui/error-state/ErrorState';
 import {
   loadProjectMapBuilderDraft,
   readMapBuilderStageSize,
   saveProjectMapBuilderDraft,
-} from '@/shared/lib/projectMapBuilderDraft';
-import { setMapBuilderMode } from '@/shared/lib/mapBuilderMode';
+} from '@/pages/ProjectMapBuilder/lib/projectMapBuilderDraft';
+import { setMapBuilderMode } from '@/pages/ProjectMapBuilder/lib/mapBuilderMode';
 import '@/pages/ProjectNew/ProjectNewPage.css';
 import './ProjectMapBuilderPage.css';
 
@@ -39,7 +39,7 @@ export default function ProjectMapBuilderPage() {
   const { projects, loading, error } = useProjects();
   const project = projects.find((p) => String(p.id) === String(projectId));
   const zoneCount = [
-    ...mapPresentLayerIds.filter((id) => mapLayerTypes[id] === 'zone'),
+    ...mapPresentLayerIds.filter((id) => id !== 'base' && mapLayerTypes[id] === 'zone'),
     ...mapUserShapes.filter((s) => mapLayerTypes[s.id] === 'zone').map((s) => s.id),
   ].length;
 
@@ -64,6 +64,7 @@ export default function ProjectMapBuilderPage() {
       mapUserShapes: JSON.parse(JSON.stringify(mapUserShapes)),
       mapSpaceSize: project?.space_size === 'narrow' ? 'medium' : project?.space_size || 'medium',
       nextZoneNameIndex: mapZoneNameIndex,
+      stageSize: readMapBuilderStageSize(),
     });
   }, [mapLayerTypes, mapPresentLayerIds, mapSaveState, mapUserShapes, mapZoneNameIndex, project?.space_size, projectId]);
 

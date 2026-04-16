@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import AppShell from '@/widgets/app-shell/AppShell';
+import AppShell from '@/widgets/AppShell/AppShell';
 import ErrorState from '@/shared/ui/error-state/ErrorState';
 import LandingPage from '@/pages/Landing/LandingPage';
 import LoginPage from '@/pages/Login/LoginPage';
