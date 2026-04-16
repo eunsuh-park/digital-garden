@@ -23,7 +23,7 @@ function getZoneById(zones, id) {
 }
 
 export default function LandingPage() {
-  const { invalidProject, projectId, ready: gpReady, isDemoProject } = useGardenProjectId();
+  const { invalidProject, projectId, ready: gpReady } = useGardenProjectId();
   const { zones, tasks, plants, loading, error, isReadOnlyGarden } = useZones();
 
   const showMapBuilderCta =
@@ -84,14 +84,6 @@ export default function LandingPage() {
             맵 빌딩 마저하기
           </Link>
         </div>
-      </div>
-    );
-  }
-
-  if (!isDemoProject) {
-    return (
-      <div className="landing-page landing-page--centered">
-        <p>데모 프로젝트에서만 기본 정원 배경 맵을 표시합니다.</p>
       </div>
     );
   }
