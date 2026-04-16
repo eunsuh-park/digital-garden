@@ -22,7 +22,7 @@ import './AppShell.css';
 function AppShellChrome() {
   const navigate = useNavigate();
   const { logout } = useAuth();
-  const { mapBuilderOpen, registerExpandMapSidePanel } = useProjectNewMapBuilderUi();
+  const { mapBuilderOpen, registerExpandMapSidePanel, registerCollapseMapSidePanel } = useProjectNewMapBuilderUi();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [sectionNavCollapsed, setSectionNavCollapsed] = useState(true);
@@ -57,6 +57,13 @@ function AppShellChrome() {
     });
     return () => registerExpandMapSidePanel(null);
   }, [registerExpandMapSidePanel]);
+
+  useEffect(() => {
+    registerCollapseMapSidePanel(() => {
+      setSectionNavCollapsed(true);
+    });
+    return () => registerCollapseMapSidePanel(null);
+  }, [registerCollapseMapSidePanel]);
 
   function handleLogout() {
     logout();

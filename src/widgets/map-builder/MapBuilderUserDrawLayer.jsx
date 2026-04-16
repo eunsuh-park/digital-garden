@@ -13,12 +13,34 @@ import {
 import { newUserShapeId } from '@/shared/lib/mapBuilderUserShapes';
 import { getLayerHitBoundsPx } from '@/shared/lib/mapBuilderLayerBounds';
 
-const STROKE = '#6c4db2';
-const STROKE_SEL = '#4e7424';
-const FILL = 'rgba(108, 77, 178, 0.22)';
+const TYPE_COLORS = {
+  building: {
+    fill: 'rgba(150, 150, 150, 0.3)',
+    stroke: '#868686',
+    selectedStroke: '#5f5f5f',
+  },
+  path: {
+    fill: 'rgba(255, 255, 255, 0.65)',
+    stroke: '#b2b2b2',
+    selectedStroke: '#8d8d8d',
+  },
+  zone: {
+    fill: 'rgba(110, 175, 90, 0.25)',
+    stroke: '#4e7424',
+    selectedStroke: '#2f5f20',
+  },
+};
 const MIN_TRANSFORM_SIZE = 6;
 const ROTATE_HANDLE_OFFSET = 28;
 const HANDLE_R = 6;
+
+function getTypeColors(type, selected = false) {
+  const palette = TYPE_COLORS[type] ?? TYPE_COLORS.zone;
+  return {
+    fill: palette.fill,
+    stroke: selected ? palette.selectedStroke : palette.stroke,
+  };
+}
 
 function cursorForTool(tool) {
   switch (tool) {
@@ -33,10 +55,10 @@ function cursorForTool(tool) {
   }
 }
 
-function renderCommittedShape(shape, selected, onSelect) {
+function renderCommittedShape(shape, selected, onSelect, layerType) {
   const isSel = selected === shape.id;
   const sw = isSel ? 3 : 2;
-  const stroke = isSel ? STROKE_SEL : STROKE;
+  const colors = getTypeColors(layerType, isSel);
 
   const common = {
     onPointerDown: (e) => onSelect(shape, e),
@@ -53,8 +75,10 @@ function renderCommittedShape(shape, selected, onSelect) {
           y={y}
           width={w}
           height={h}
-          fill={FILL}
-          stroke={stroke}
+          rx={14}
+          ry={14}
+          fill={colors.fill}
+          stroke={colors.stroke}
           strokeWidth={sw}
           {...common}
         />
@@ -69,8 +93,8 @@ function renderCommittedShape(shape, selected, onSelect) {
           cy={cy}
           rx={rx}
           ry={ry}
-          fill={FILL}
-          stroke={stroke}
+          fill={colors.fill}
+          stroke={colors.stroke}
           strokeWidth={sw}
           {...common}
         />
@@ -82,8 +106,8 @@ function renderCommittedShape(shape, selected, onSelect) {
         <polygon
           key={shape.id}
           points={pointsToSvg(pts)}
-          fill={FILL}
-          stroke={stroke}
+          fill={colors.fill}
+          stroke={colors.stroke}
           strokeWidth={Math.max(3, sw)}
           strokeLinejoin="round"
           strokeLinecap="round"
@@ -298,12 +322,14 @@ export default function MapBuilderUserDrawLayer({ stageRef, view }) {
     mapUserShapes,
     mapPresentLayerIds,
     mapLayerLocked,
+    mapLayerTypes,
     addMapUserShape,
     updateMapUserShape,
     removeMapUserShape,
     selectedMapLayerId,
     setSelectedMapLayerId,
     setMapLayerDetailOpenId,
+    setMapBuilderTool,
     expandMapSidePanel,
   } = useProjectNewMapBuilderUi();
   const { showToast } = useToast();
@@ -326,9 +352,10 @@ export default function MapBuilderUserDrawLayer({ stageRef, view }) {
       e.stopPropagation();
       setSelectedMapLayerId(shape.id);
       setMapLayerDetailOpenId(shape.id);
+      setMapBuilderTool('select');
       expandMapSidePanel();
     },
-    [expandMapSidePanel, setMapLayerDetailOpenId, setSelectedMapLayerId],
+    [expandMapSidePanel, setMapBuilderTool, setMapLayerDetailOpenId, setSelectedMapLayerId],
   );
 
   useEffect(() => {
@@ -572,6 +599,7 @@ export default function MapBuilderUserDrawLayer({ stageRef, view }) {
   function renderDraft() {
     if (!draft) return null;
     const dash = { strokeDasharray: '6 4', opacity: 0.9 };
+    const draftColors = getTypeColors('zone');
 
     if (draft.kind === 'rect') {
       const r = normalizeRect(draft.x0, draft.y0, draft.x1, draft.y1);
@@ -581,8 +609,10 @@ export default function MapBuilderUserDrawLayer({ stageRef, view }) {
           y={r.y}
           width={r.w}
           height={r.h}
-          fill="rgba(108,77,178,0.12)"
-          stroke={STROKE}
+          rx={14}
+          ry={14}
+          fill={draftColors.fill}
+          stroke={draftColors.stroke}
           strokeWidth={2}
           pointerEvents="none"
           {...dash}
@@ -599,8 +629,8 @@ export default function MapBuilderUserDrawLayer({ stageRef, view }) {
           cy={r.y + r.h / 2}
           rx={r.w / 2}
           ry={r.h / 2}
-          fill="rgba(108,77,178,0.12)"
-          stroke={STROKE}
+          fill={draftColors.fill}
+          stroke={draftColors.stroke}
           strokeWidth={2}
           pointerEvents="none"
           {...dash}
@@ -613,8 +643,8 @@ export default function MapBuilderUserDrawLayer({ stageRef, view }) {
       return (
         <polygon
           points={pointsToSvg(draft.points)}
-          fill="rgba(108,77,178,0.12)"
-          stroke={STROKE}
+          fill={draftColors.fill}
+          stroke={draftColors.stroke}
           strokeWidth={3}
           strokeLinejoin="round"
           strokeLinecap="round"
@@ -649,7 +679,9 @@ export default function MapBuilderUserDrawLayer({ stageRef, view }) {
         />
       ) : null}
 
-      {mapUserShapes.map((s) => renderCommittedShape(s, selectedMapLayerId, selectShape))}
+      {mapUserShapes.map((s) =>
+        renderCommittedShape(s, selectedMapLayerId, selectShape, mapLayerTypes[s.id]),
+      )}
 
       {selectedShape && selectedBounds ? (
         <g>

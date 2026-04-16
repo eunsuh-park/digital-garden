@@ -59,6 +59,7 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
   const prevMapBuilderOpenRef = useRef(false);
   const pendingDraftRef = useRef(null);
   const expandSidePanelRef = useRef(null);
+  const collapseSidePanelRef = useRef(null);
   const mapCanvasControlsRef = useRef(null);
   const undoStackRef = useRef([]);
   const redoStackRef = useRef([]);
@@ -111,6 +112,14 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
 
   const expandMapSidePanel = useCallback(() => {
     expandSidePanelRef.current?.();
+  }, []);
+
+  const registerCollapseMapSidePanel = useCallback((fn) => {
+    collapseSidePanelRef.current = fn;
+  }, []);
+
+  const collapseMapSidePanel = useCallback(() => {
+    collapseSidePanelRef.current?.();
   }, []);
 
   const removeMapPresentLayer = useCallback((layerId) => {
@@ -373,6 +382,8 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
       toggleMapLayerLock,
       expandMapSidePanel,
       registerExpandMapSidePanel,
+      collapseMapSidePanel,
+      registerCollapseMapSidePanel,
       registerMapCanvasControls,
       zoomMapIn,
       zoomMapOut,
@@ -406,6 +417,8 @@ export function ProjectNewMapBuilderUiProvider({ children }) {
       toggleMapLayerLock,
       expandMapSidePanel,
       registerExpandMapSidePanel,
+      collapseMapSidePanel,
+      registerCollapseMapSidePanel,
       registerMapCanvasControls,
       zoomMapIn,
       zoomMapOut,
@@ -455,6 +468,8 @@ export function useProjectNewMapBuilderUi() {
       toggleMapLayerLock: () => {},
       expandMapSidePanel: () => {},
       registerExpandMapSidePanel: () => {},
+      collapseMapSidePanel: () => {},
+      registerCollapseMapSidePanel: () => {},
       registerMapCanvasControls: () => () => {},
       zoomMapIn: () => {},
       zoomMapOut: () => {},

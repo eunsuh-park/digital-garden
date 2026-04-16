@@ -136,11 +136,14 @@ export default function MapBuilderCanvas() {
     setSelectedMapLayerId,
     setMapLayerDetailOpenId,
     expandMapSidePanel,
+    collapseMapSidePanel,
     mapPresentLayerIds,
     mapLayerLocked,
+    mapLayerTypes,
     removeMapPresentLayer,
     toggleMapLayerLock,
     mapBuilderTool,
+    setMapBuilderTool,
     mapUserShapes,
     addMapUserShape,
     updateMapUserShape,
@@ -155,11 +158,10 @@ export default function MapBuilderCanvas() {
   const lastPointerRef = useRef({ x: null, y: null });
   const pinchRef = useRef(null);
   const panDragRef = useRef(null);
+  const viewBoxSizeRef = useRef({ w: 0, h: 0 });
 
   const [view, setView] = useState({ tx: 0, ty: 0, scale: 1 });
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const selectedRef = useRef(selectedMapLayerId);
-  selectedRef.current = selectedMapLayerId;
 
   viewRef.current = view;
 
@@ -184,6 +186,10 @@ export default function MapBuilderCanvas() {
       : '선택됨';
 
   const isPresent = useCallback((id) => mapPresentLayerIds.includes(id), [mapPresentLayerIds]);
+  const layerTypeClass = useCallback(
+    (id) => `map-builder-canvas__region--${mapLayerTypes[id] ?? 'zone'}`,
+    [mapLayerTypes],
+  );
 
   const fitTargetToFixedRatio = useCallback((viewW, viewH, bounds) => {
     if (!bounds) return null;
@@ -284,26 +290,47 @@ export default function MapBuilderCanvas() {
     const vb = viewBoxRef.current;
     if (!vb || typeof ResizeObserver === 'undefined') return;
     const ro = new ResizeObserver(() => {
-      if (!selectedRef.current) return;
-      applyViewInViewBox();
+      const nextW = vb.clientWidth;
+      const nextH = vb.clientHeight;
+      if (!Number.isFinite(nextW) || !Number.isFinite(nextH) || nextW <= 0 || nextH <= 0) return;
+      const prev = viewBoxSizeRef.current;
+      if (!prev.w || !prev.h) {
+        viewBoxSizeRef.current = { w: nextW, h: nextH };
+        return;
+      }
+      if (prev.w === nextW && prev.h === nextH) return;
+      setView((current) => {
+        const worldCx = (prev.w / 2 - current.tx) / current.scale;
+        const worldCy = (prev.h / 2 - current.ty) / current.scale;
+        return {
+          ...current,
+          tx: nextW / 2 - worldCx * current.scale,
+          ty: nextH / 2 - worldCy * current.scale,
+        };
+      });
+      viewBoxSizeRef.current = { w: nextW, h: nextH };
     });
     ro.observe(vb);
+    viewBoxSizeRef.current = { w: vb.clientWidth, h: vb.clientHeight };
     return () => ro.disconnect();
-  }, [applyViewInViewBox]);
+  }, []);
 
   const clearCanvasSelection = useCallback(() => {
     setSelectedMapLayerId(null);
     setMapLayerDetailOpenId(null);
-  }, [setMapLayerDetailOpenId, setSelectedMapLayerId]);
+    setMapBuilderTool('select');
+    collapseMapSidePanel();
+  }, [collapseMapSidePanel, setMapBuilderTool, setMapLayerDetailOpenId, setSelectedMapLayerId]);
 
   const selectFromCanvas = useCallback(
     (layerId) => {
       if (!layerId || layerId === 'base') return;
       setSelectedMapLayerId(layerId);
       setMapLayerDetailOpenId(layerId);
+      setMapBuilderTool('select');
       expandMapSidePanel();
     },
-    [expandMapSidePanel, setMapLayerDetailOpenId, setSelectedMapLayerId],
+    [expandMapSidePanel, setMapBuilderTool, setMapLayerDetailOpenId, setSelectedMapLayerId],
   );
 
   const flipSelectedUserShape = useCallback(
@@ -601,7 +628,7 @@ export default function MapBuilderCanvas() {
             {isPresent('base') ? <div className="map-builder-canvas__lot-border" aria-hidden /> : null}
 
             {isPresent('house') ? (
-              <>
+              <div className={['map-builder-canvas__region', layerTypeClass('house')].join(' ')}>
                 <div className="map-builder-canvas__roof" aria-hidden />
                 <div className="map-builder-canvas__main-house" aria-hidden />
                 <div className="map-builder-canvas__path" aria-hidden />
@@ -621,14 +648,20 @@ export default function MapBuilderCanvas() {
                     selectFromCanvas('house');
                   }}
                 />
-              </>
+              </div>
             ) : null}
 
             {REGION_HIT_DEFS.filter(({ id }) => isPresent(id)).map(({ id, label, className }) => (
               <button
                 key={id}
                 type="button"
-                className={['map-builder-canvas__hit', className, selectedMapLayerId === id ? `${className}--focused` : '']
+                className={[
+                  'map-builder-canvas__hit',
+                  'map-builder-canvas__region-hit',
+                  className,
+                  layerTypeClass(id),
+                  selectedMapLayerId === id ? `${className}--focused` : '',
+                ]
                   .filter(Boolean)
                   .join(' ')}
                 aria-label={label}

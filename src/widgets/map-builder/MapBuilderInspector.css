@@ -302,6 +302,16 @@
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 18%, transparent);
 }
 
+.map-builder-inspector__mini-field:disabled,
+.map-builder-inspector__text-field:disabled,
+.map-builder-inspector__text-area:disabled,
+.map-builder-inspector__type-select:disabled {
+  opacity: 0.58;
+  cursor: not-allowed;
+  color: var(--color-text-muted);
+  background: color-mix(in srgb, var(--color-surface) 85%, #d9d9d9);
+}
+
 .map-builder-inspector__layer-ico {
   display: flex;
   align-items: center;
@@ -465,6 +475,12 @@
 
 .map-builder-inspector__danger-icon:hover {
   filter: brightness(1.06);
+}
+
+.map-builder-inspector__danger-icon:disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
+  filter: none;
 }
 
 .map-builder-inspector__danger-icon:focus-visible {

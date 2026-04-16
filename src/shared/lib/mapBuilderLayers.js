@@ -80,8 +80,8 @@ export const MAP_BUILDER_INITIAL_PRESENT_IDS = ['base', 'house', 'shed'];
 /** 초기 3요소 기본 도형 유형 (맵 빌더 오픈 시 적용) */
 export const MAP_BUILDER_DEFAULT_LAYER_TYPES = {
   base: 'zone',
-  house: 'zone',
-  shed: 'zone',
+  house: 'building',
+  shed: 'building',
 };
 
 export function initialMapLayerTypes() {

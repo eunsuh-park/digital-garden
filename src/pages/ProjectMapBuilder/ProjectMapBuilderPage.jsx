@@ -10,6 +10,7 @@ import {
   readMapBuilderStageSize,
   saveProjectMapBuilderDraft,
 } from '@/shared/lib/projectMapBuilderDraft';
+import { setMapBuilderMode } from '@/shared/lib/mapBuilderMode';
 import '@/pages/ProjectNew/ProjectNewPage.css';
 import './ProjectMapBuilderPage.css';
 
@@ -43,8 +44,21 @@ export default function ProjectMapBuilderPage() {
     } else {
       setMapBuilderOpen(true);
     }
-    return () => setMapBuilderOpen(false);
+    return () => {
+      setMapBuilderOpen(false);
+      setMapBuilderMode(false);
+    };
   }, [projectId, openWithDraft, setMapBuilderOpen]);
+
+  useEffect(() => {
+    if (!projectId || mapSaveState !== 'dirty') return;
+    saveProjectMapBuilderDraft(projectId, {
+      mapPresentLayerIds: [...mapPresentLayerIds],
+      mapLayerTypes: { ...mapLayerTypes },
+      mapUserShapes: JSON.parse(JSON.stringify(mapUserShapes)),
+      nextZoneNameIndex: mapZoneNameIndex,
+    });
+  }, [mapLayerTypes, mapPresentLayerIds, mapSaveState, mapUserShapes, mapZoneNameIndex, projectId]);
 
   const project = projects.find((p) => String(p.id) === String(projectId));
 

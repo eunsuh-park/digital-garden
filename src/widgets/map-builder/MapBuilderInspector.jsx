@@ -27,6 +27,7 @@ function mergeLayerLocked(layer, mapLayerLocked) {
 function LayerDetailPane({
   layer,
   userShape,
+  locked,
   onUserShapePatch,
   onDeleteLayer,
   layerType,
@@ -35,6 +36,7 @@ function LayerDetailPane({
 }) {
   if (!layer) return null;
   const isUser = !!layer.isUserShape && userShape;
+  const isLocked = Boolean(locked);
   return (
     <div className="map-builder-inspector__layer-panel map-builder-inspector__layer-panel--full">
       <div className="map-builder-inspector__inline-field-row map-builder-inspector__inline-field-row--wrap">
@@ -47,6 +49,7 @@ function LayerDetailPane({
           className="map-builder-inspector__mini-field map-builder-inspector__mini-field--grow"
           defaultValue={layer.size}
           readOnly={isUser}
+          disabled={isLocked}
           title={isUser ? '그린 도형은 크기를 여기서 바꾸지 않습니다' : undefined}
         />
         <label className="map-builder-inspector__inline-label" htmlFor={`mb-split-rot-${layer.id}`}>
@@ -58,6 +61,7 @@ function LayerDetailPane({
           className="map-builder-inspector__mini-field map-builder-inspector__mini-field--grow"
           defaultValue={layer.rotation}
           readOnly={isUser}
+          disabled={isLocked}
           title={isUser ? '그린 도형은 회전을 여기서 바꾸지 않습니다' : undefined}
         />
       </div>
@@ -72,6 +76,7 @@ function LayerDetailPane({
             className="map-builder-inspector__text-field"
             value={userShape.label ?? ''}
             placeholder={userShapeDisplayName(userShape)}
+            disabled={isLocked}
             onChange={(e) => onUserShapePatch({ label: e.target.value })}
             autoComplete="off"
           />
@@ -93,6 +98,7 @@ function LayerDetailPane({
             value={userShape.description ?? ''}
             placeholder="설명을 입력할 수 있어요."
             rows={3}
+            disabled={isLocked}
             onChange={(e) => onUserShapePatch({ description: e.target.value })}
           />
         </div>
@@ -113,6 +119,7 @@ function LayerDetailPane({
           id={`mb-split-type-${layer.id}`}
           className="map-builder-inspector__type-select"
           value={layerType ?? 'zone'}
+          disabled={isLocked}
           onChange={(e) => onTypeChange(e.target.value || 'zone')}
         >
           {SHAPE_TYPES.map((t) => (
@@ -128,6 +135,7 @@ function LayerDetailPane({
             type="button"
             className="map-builder-inspector__danger-icon"
             aria-label="요소 삭제"
+            disabled={isLocked}
             onClick={() => onDeleteLayer(layer)}
           >
             <Icon icon={delete2Fill} width={20} height={20} aria-hidden />
@@ -223,6 +231,12 @@ export default function MapBuilderInspector() {
     () => mapUserShapes.find((s) => s.id === selectedMapLayerId) ?? null,
     [mapUserShapes, selectedMapLayerId],
   );
+  const selectedLayerLocked = useMemo(() => {
+    if (!selectedLayer) return false;
+    return mapLayerLocked[selectedLayer.id] !== undefined
+      ? mapLayerLocked[selectedLayer.id]
+      : !!selectedLayer.locked;
+  }, [mapLayerLocked, selectedLayer]);
 
   return (
     <div className="map-builder-inspector">
@@ -283,6 +297,7 @@ export default function MapBuilderInspector() {
               <LayerDetailPane
                 layer={selectedLayer}
                 userShape={selectedLayer.isUserShape ? selectedUserShape : null}
+                locked={selectedLayerLocked}
                 onUserShapePatch={(patch) => {
                   if (selectedUserShape) updateMapUserShape(selectedUserShape.id, patch);
                 }}
@@ -350,6 +365,7 @@ export default function MapBuilderInspector() {
                               className="map-builder-inspector__mini-field"
                               defaultValue={layer.size}
                               readOnly={!!layer.isUserShape}
+                              disabled={merged.locked}
                               title={layer.isUserShape ? '그린 도형은 크기를 여기서 바꾸지 않습니다' : undefined}
                             />
                             <label className="map-builder-inspector__inline-label" htmlFor={`mb-rot-${layer.id}`}>
@@ -361,6 +377,7 @@ export default function MapBuilderInspector() {
                               className="map-builder-inspector__mini-field"
                               defaultValue={layer.rotation}
                               readOnly={!!layer.isUserShape}
+                              disabled={merged.locked}
                               title={layer.isUserShape ? '그린 도형은 회전을 여기서 바꾸지 않습니다' : undefined}
                             />
                           </>
@@ -405,6 +422,7 @@ export default function MapBuilderInspector() {
                             className="map-builder-inspector__text-field"
                             value={rowUserShape.label ?? ''}
                             placeholder={userShapeDisplayName(rowUserShape)}
+                            disabled={merged.locked}
                             onChange={(e) => updateMapUserShape(layer.id, { label: e.target.value })}
                             onClick={(e) => e.stopPropagation()}
                             autoComplete="off"
@@ -430,6 +448,7 @@ export default function MapBuilderInspector() {
                             value={rowUserShape.description ?? ''}
                             placeholder="설명을 입력할 수 있어요."
                             rows={3}
+                            disabled={merged.locked}
                             onChange={(e) => updateMapUserShape(layer.id, { description: e.target.value })}
                             onClick={(e) => e.stopPropagation()}
                           />
@@ -451,6 +470,7 @@ export default function MapBuilderInspector() {
                           id={`mb-type-${layer.id}`}
                           className="map-builder-inspector__type-select"
                           value={layerType ?? 'zone'}
+                          disabled={merged.locked}
                           onClick={(e) => e.stopPropagation()}
                           onChange={(e) => setMapLayerType(layer.id, e.target.value || 'zone')}
                         >
@@ -467,6 +487,7 @@ export default function MapBuilderInspector() {
                             type="button"
                             className="map-builder-inspector__danger-icon"
                             aria-label="요소 삭제"
+                            disabled={merged.locked}
                             onClick={() => confirmAndRemoveLayer(layer)}
                           >
                             <Icon icon={delete2Fill} width={20} height={20} aria-hidden />
