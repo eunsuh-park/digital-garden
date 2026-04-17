@@ -1,3 +1,8 @@
+/**
+ * MapBuilderToolDock component file.
+ * Shows the bottom builder tools for selection, drawing, zoom, and fit actions.
+ */
+
 import { useState } from 'react';
 import { Icon } from '@iconify/react';
 import addCircleFill from '@iconify-icons/mingcute/add-circle-fill';
@@ -17,7 +22,7 @@ import scanLine from '@iconify-icons/mingcute/scan-line';
 import squareFill from '@iconify-icons/mingcute/square-fill';
 import squareLine from '@iconify-icons/mingcute/square-line';
 import { useProjectNewMapBuilderUi } from '@/app/providers/ProjectNewMapBuilderUiContext';
-import './MapBuilderToolDock.css';
+import '../styles/MapBuilderToolDock.css';
 
 function ToolButton({ title, active, iconLine, iconFill, onClick }) {
   const [hovered, setHovered] = useState(false);

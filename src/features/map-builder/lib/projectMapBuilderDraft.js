@@ -1,3 +1,8 @@
+/**
+ * ProjectMapBuilder draft storage helpers.
+ * Used by ProjectMapBuilderPage, ProjectSetupPage, and ProjectStep3Page to persist builder state.
+ */
+
 const DRAFT_PREFIX = 'dg:mapBuilderDraft:v1:';
 
 export function projectMapBuilderDraftKey(projectId) {

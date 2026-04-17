@@ -1,7 +1,12 @@
+/**
+ * MapBuilderWorkspace component file.
+ * Composes the top bar, canvas, and tool dock for the builder layout.
+ */
+
 import MapBuilderTopBar from './MapBuilderTopBar';
 import MapBuilderCanvas from './MapBuilderCanvas';
 import MapBuilderToolDock from './MapBuilderToolDock';
-import './MapBuilderWorkspace.css';
+import '../styles/MapBuilderWorkspace.css';
 
 /** 새 프로젝트 맵 빌더 본문(레일·우측 패널 제외). */
 export default function MapBuilderWorkspace({

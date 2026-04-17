@@ -2,13 +2,13 @@ import { useCallback, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useProjects } from '@/app/providers/ProjectsContext';
 import { useToast } from '@/app/providers/ToastContext';
-import { isDevMockEnabled } from '@/lib/isDevMock';
+import { isDevMockEnabled } from '@/shared/lib/isDevMock';
 import ErrorState from '@/shared/ui/error-state/ErrorState';
 import {
   applyMapBuilderDraftToGarden,
   applyMapBuilderDraftToMockStorage,
-} from '@/pages/ProjectMapBuilder/lib/applyMapBuilderDraft';
-import { loadProjectMapBuilderDraft } from '@/pages/ProjectMapBuilder/lib/projectMapBuilderDraft';
+} from '@/features/map-builder/lib/applyMapBuilderDraft';
+import { loadProjectMapBuilderDraft } from '@/features/map-builder/lib/projectMapBuilderDraft';
 import './ProjectStep3Page.css';
 
 const STEPS = ['기본 정보', '맵·구역', '식물 추가'];

@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { isDevMockEnabled } from '@/lib/isDevMock';
+import { isDevMockEnabled } from '@/shared/lib/isDevMock';
 import { getDemoGardenSnapshot } from '@/shared/lib/gardenDemoSeed';
 import { loadMockGardenZones } from '@/shared/lib/mockGardenZonesStorage';
 import { loadGardenData } from '@/shared/api/gardenApi';

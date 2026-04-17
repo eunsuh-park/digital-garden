@@ -1,3 +1,8 @@
+/**
+ * Map builder mode sync helpers.
+ * Shared by ProjectMapBuilderPage and MapSidePanel to keep builder mode in sync.
+ */
+
 const STORAGE_KEY = 'digital-garden.map-builder-mode.v1';
 const CHANGE_EVENT = 'digital-garden:map-builder-mode-change';
 

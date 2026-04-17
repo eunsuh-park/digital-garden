@@ -1,3 +1,8 @@
+/**
+ * Map builder layer definitions.
+ * Shared by the canvas, inspector, and map builder UI context.
+ */
+
 /** 맵 빌더 레이어 메타 — 패널·캔버스 동기화용. 정렬: 기본 구역 → 집 → 창고 → (추가) */
 export const MAP_BUILDER_LAYER_ORDER = ['base', 'house', 'shed', 'terrace', 'lawn'];
 

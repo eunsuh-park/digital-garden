@@ -1,3 +1,8 @@
+/**
+ * MapBuilderCanvas component file.
+ * Hosts the main builder canvas, layer focus, zoom, and placement interactions.
+ */
+
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Icon } from '@iconify/react';
 import arrowDownLine from '@iconify-icons/mingcute/arrow-down-line';
@@ -17,13 +22,13 @@ import {
   MAP_BUILDER_ZOOM_MIN,
   maxScaleToFitLayerInView,
   zoomWithWheel,
-} from '@/pages/ProjectMapBuilder/lib/mapBuilderLayerBounds';
-import { getMapBuilderLayer, mapBuilderRemoveConfirmMessage } from '@/pages/ProjectMapBuilder/lib/mapBuilderLayers';
-import { getShapeBounds } from '@/pages/ProjectMapBuilder/lib/mapBuilderDrawMath';
-import { newUserShapeId } from '@/pages/ProjectMapBuilder/lib/mapBuilderUserShapes';
-import { getShapeInspectorName } from '@/pages/ProjectMapBuilder/lib/mapBuilderUserShapes';
+} from '@/features/map-builder/lib/mapBuilderLayerBounds';
+import { getMapBuilderLayer, mapBuilderRemoveConfirmMessage } from '@/features/map-builder/lib/mapBuilderLayers';
+import { getShapeBounds } from '@/features/map-builder/lib/mapBuilderDrawMath';
+import { newUserShapeId } from '@/features/map-builder/lib/mapBuilderUserShapes';
+import { getShapeInspectorName } from '@/features/map-builder/lib/mapBuilderUserShapes';
 import MapBuilderUserDrawLayer from './MapBuilderUserDrawLayer';
-import './MapBuilderCanvas.css';
+import '../styles/MapBuilderCanvas.css';
 
 const REGION_HIT_DEFS = [
   { id: 'terrace', label: '테라스 영역 선택', className: 'map-builder-canvas__hit--terrace' },

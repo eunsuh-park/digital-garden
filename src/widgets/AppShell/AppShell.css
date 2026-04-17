@@ -91,7 +91,7 @@
 
 /*
  * 맵 빌더 + 모바일·태블릿: 사이드 패널을 펼치면 상단 탑바·하단 도크를 화면 밖으로 슬라이드
- * (전환 규칙은 MapBuilderWorkspace.css / ProjectNewPage 일대 트리거와 맞춤)
+ * (전환 규칙은 MapBuilderWorkspace.css / ProjectSetupPage 일대 트리거와 맞춤)
  */
 .app-shell--map-builder-mobile-chrome-hidden .project-new-page--map-builder .map-builder-workspace__header {
   max-height: 0 !important;

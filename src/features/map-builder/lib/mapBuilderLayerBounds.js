@@ -1,3 +1,8 @@
+/**
+ * Map builder layer bounds and zoom helpers.
+ * Used by the canvas, draw layer, and draft apply logic.
+ */
+
 function normalizeSpaceSize(spaceSize) {
   if (spaceSize === 'very_wide') return 'very_wide';
   if (spaceSize === 'wide') return 'wide';

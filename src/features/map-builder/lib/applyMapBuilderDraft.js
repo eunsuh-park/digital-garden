@@ -1,3 +1,8 @@
+/**
+ * Map builder draft apply helpers.
+ * Converts builder draft data into garden zone payloads from ProjectStep3Page.
+ */
+
 import {
   createZone,
   deleteZone,
@@ -5,16 +10,16 @@ import {
 } from '@/shared/api/gardenApi';
 import { colorTokenFromRaw } from '@/entities/zone/lib/notion-schema';
 import { encodeDgMapDescription } from '@/shared/lib/dgMapZonePayload';
-import { getMapBuilderLayer } from '@/pages/ProjectMapBuilder/lib/mapBuilderLayers';
-import { getLayerHitBoundsPx } from '@/pages/ProjectMapBuilder/lib/mapBuilderLayerBounds';
-import { getShapeInspectorName } from '@/pages/ProjectMapBuilder/lib/mapBuilderUserShapes';
+import { getMapBuilderLayer } from '@/features/map-builder/lib/mapBuilderLayers';
+import { getLayerHitBoundsPx } from '@/features/map-builder/lib/mapBuilderLayerBounds';
+import { getShapeInspectorName } from '@/features/map-builder/lib/mapBuilderUserShapes';
 import {
   loadMockGardenZones,
   saveMockGardenZones,
 } from '@/shared/lib/mockGardenZonesStorage';
 import {
   loadProjectMapBuilderDraft,
-} from '@/pages/ProjectMapBuilder/lib/projectMapBuilderDraft';
+} from '@/features/map-builder/lib/projectMapBuilderDraft';
 
 const GARDEN_W = 1920;
 const GARDEN_H = 1080;

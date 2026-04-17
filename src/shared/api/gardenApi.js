@@ -3,7 +3,7 @@
  * DB: garden_zones, garden_tasks(zone_id FK), garden_plants(zone_id FK)
  * 관계는 단순 FK — 필터/소트는 프론트엔드에서 처리
  */
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/shared/lib/supabase';
 import { colorTokenFromRaw } from '@/entities/zone/lib/notion-schema';
 import {
   mapZoneRow,

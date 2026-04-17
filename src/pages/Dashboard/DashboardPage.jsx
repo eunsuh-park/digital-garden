@@ -3,7 +3,7 @@ import { Icon } from '@iconify/react';
 import addLine from '@iconify-icons/mingcute/add-line';
 import rightLine from '@iconify-icons/mingcute/right-line';
 import { useProjects } from '@/app/providers/ProjectsContext';
-import { formatProjectSpaceSizeLabel } from '@/pages/ProjectNew/lib/project';
+import { formatProjectSpaceSizeLabel } from '@/shared/lib/projectSpace';
 import './DashboardPage.css';
 
 export default function DashboardPage() {

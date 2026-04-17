@@ -1,21 +1,26 @@
+/**
+ * ProjectMapBuilder page entry file.
+ * Reopens the map builder workspace for an existing project route.
+ */
+
 import { useEffect, useCallback } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useProjects } from '@/app/providers/ProjectsContext';
 import { useProjectNewMapBuilderUi } from '@/app/providers/ProjectNewMapBuilderUiContext';
 import { useToast } from '@/app/providers/ToastContext';
-import MapBuilderWorkspace from './MapBuilderWorkspace';
+import MapBuilderWorkspace from '@/features/map-builder/components/MapBuilderWorkspace';
 import ErrorState from '@/shared/ui/error-state/ErrorState';
 import {
   loadProjectMapBuilderDraft,
   readMapBuilderStageSize,
   saveProjectMapBuilderDraft,
-} from '@/pages/ProjectMapBuilder/lib/projectMapBuilderDraft';
-import { setMapBuilderMode } from '@/pages/ProjectMapBuilder/lib/mapBuilderMode';
-import '@/pages/ProjectNew/ProjectNewPage.css';
-import './ProjectMapBuilderPage.css';
+} from '@/features/map-builder/lib/projectMapBuilderDraft';
+import { setMapBuilderMode } from '@/features/map-builder/lib/mapBuilderMode';
+import '@/pages/ProjectSetup/styles/ProjectSetupPage.css';
+import './styles/ProjectMapBuilderPage.css';
 
 /**
- * 기존 프로젝트: 맵 빌더만 다시 열기 (/project/:id/map-builder)
+ * ?? ????: ? ??? ?? ?? (/project/:id/map-builder)
  */
 export default function ProjectMapBuilderPage() {
   const { projectId } = useParams();
@@ -76,7 +81,7 @@ export default function ProjectMapBuilderPage() {
   if (loading && !project) {
     return (
       <div className="landing-page landing-page--loading">
-        <p>불러오는 중…</p>
+        <p>???? ??</p>
       </div>
     );
   }
@@ -94,12 +99,12 @@ export default function ProjectMapBuilderPage() {
       <div className="landing-page landing-page--centered">
         <ErrorState
           variant="404"
-          title="프로젝트를 찾을 수 없습니다"
-          message="목록에 없거나 삭제된 프로젝트일 수 있어요."
+          title="????? ?? ? ????"
+          message="??? ??? ??? ????? ? ???."
           showHomeLink
         />
         <Link to="/" className="project-map-builder-page__back-link">
-          대시보드로
+          ?????
         </Link>
       </div>
     );
@@ -111,7 +116,7 @@ export default function ProjectMapBuilderPage() {
 
   const handleSaveAndContinue = useCallback(() => {
     if (zoneCount < 1) {
-      showToast('최소 1개의 "구역" 유형 레이어가 있어야 저장할 수 있어요.');
+      showToast('?? 1?? "??" ?? ???? ??? ??? ? ???.');
       return;
     }
     const stageSize = readMapBuilderStageSize();
@@ -140,7 +145,7 @@ export default function ProjectMapBuilderPage() {
   return (
     <div className="project-new-page project-new-page--map-builder">
       <MapBuilderWorkspace
-        projectTitle={project?.name?.trim() || '프로젝트'}
+        projectTitle={project?.name?.trim() || '????'}
         onBack={goGarden}
         onSaveAndContinue={handleSaveAndContinue}
         onUndo={undoMapAction}
@@ -150,7 +155,7 @@ export default function ProjectMapBuilderPage() {
         saveStatus={mapSaveState}
         saving={false}
         saveDisabled={zoneCount < 1}
-        primaryActionLabel="저장하고 다음 단계"
+        primaryActionLabel="???? ?? ??"
       />
     </div>
   );

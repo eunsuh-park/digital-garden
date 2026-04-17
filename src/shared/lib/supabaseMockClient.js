@@ -57,7 +57,7 @@ function errUnknownTable(table) {
 
 function sortProjectsDesc(rows) {
   return [...rows].sort((a, b) =>
-    String(b.created_at || '').localeCompare(String(a.created_at || ''))
+    String(b.created_at || '').localeCompare(String(a.created_at || '')),
   );
 }
 

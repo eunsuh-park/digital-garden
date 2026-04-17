@@ -1,8 +1,13 @@
+/**
+ * MapBuilderTopBar component file.
+ * Renders back navigation, history actions, save status, and the primary action.
+ */
+
 import { Icon } from '@iconify/react';
 import arrowLeftLine from '@iconify-icons/mingcute/arrow-left-line';
 import forwardLine from '@iconify-icons/mingcute/forward-line';
 import historyAnticlockwiseLine from '@iconify-icons/mingcute/history-anticlockwise-line';
-import './MapBuilderTopBar.css';
+import '../styles/MapBuilderTopBar.css';
 
 export default function MapBuilderTopBar({
   projectTitle,

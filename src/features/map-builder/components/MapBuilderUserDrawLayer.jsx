@@ -1,3 +1,8 @@
+/**
+ * MapBuilderUserDrawLayer component file.
+ * Handles rendering and editing interactions for user-drawn shapes in the canvas.
+ */
+
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useProjectNewMapBuilderUi } from '@/app/providers/ProjectNewMapBuilderUiContext';
 import { useToast } from '@/app/providers/ToastContext';
@@ -9,9 +14,9 @@ import {
   rectMinSize,
   rotatePoint,
   viewBoxClientToMapSpace,
-} from '@/pages/ProjectMapBuilder/lib/mapBuilderDrawMath';
-import { newUserShapeId } from '@/pages/ProjectMapBuilder/lib/mapBuilderUserShapes';
-import { getLayerHitBoundsPx } from '@/pages/ProjectMapBuilder/lib/mapBuilderLayerBounds';
+} from '@/features/map-builder/lib/mapBuilderDrawMath';
+import { newUserShapeId } from '@/features/map-builder/lib/mapBuilderUserShapes';
+import { getLayerHitBoundsPx } from '@/features/map-builder/lib/mapBuilderLayerBounds';
 
 const TYPE_COLORS = {
   building: {

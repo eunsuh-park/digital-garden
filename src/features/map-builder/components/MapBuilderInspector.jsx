@@ -1,3 +1,8 @@
+/**
+ * MapBuilderInspector component file.
+ * Drives the right-side inspector inside MapSidePanel for selected map items.
+ */
+
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Icon } from '@iconify/react';
 import delete2Fill from '@iconify-icons/mingcute/delete-2-fill';
@@ -11,12 +16,12 @@ import {
   sortLayersByMapOrder,
   SHAPE_TYPES,
   SHAPE_TYPE_LABELS,
-} from '@/pages/ProjectMapBuilder/lib/mapBuilderLayers';
+} from '@/features/map-builder/lib/mapBuilderLayers';
 import {
   inspectorLayerFromUserShape,
   userShapeDisplayName,
-} from '@/pages/ProjectMapBuilder/lib/mapBuilderUserShapes';
-import './MapBuilderInspector.css';
+} from '@/features/map-builder/lib/mapBuilderUserShapes';
+import '../styles/MapBuilderInspector.css';
 
 function mergeLayerLocked(layer, mapLayerLocked) {
   if (!layer) return null;

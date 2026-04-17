@@ -1,4 +1,9 @@
 /**
+ * Map builder user shape helpers.
+ * Shared by the canvas, draw layer, inspector, and draft apply logic.
+ */
+
+/**
  * @typedef {'rect'|'ellipse'|'freepath'} MapUserShapeKind
  */
 

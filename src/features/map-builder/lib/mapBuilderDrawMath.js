@@ -1,3 +1,8 @@
+/**
+ * Map builder geometry helpers.
+ * Used by the canvas and draw layer for coordinate and shape math.
+ */
+
 /** 뷰(클라이언트) 좌표 → 스테이지 뷰포트 로컬 좌표(px, 변환 전) */
 export function clientPointToStage(stageEl, clientX, clientY) {
   if (!stageEl) return { x: 0, y: 0 };
